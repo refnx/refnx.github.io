@@ -1,0 +1,584 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.reduce.reduce &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.reduce.reduce</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">refnx.reduce.platypusnexus</span> <span class="kn">import</span> <span class="p">(</span><span class="n">PlatypusNexus</span><span class="p">,</span> <span class="n">number_datafile</span><span class="p">,</span>
+                                        <span class="n">Y_PIXEL_SPACING</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">refnx.util</span> <span class="kn">import</span> <span class="n">ErrorProp</span> <span class="k">as</span> <span class="n">EP</span>
+<span class="kn">import</span> <span class="nn">refnx.util.general</span> <span class="kn">as</span> <span class="nn">general</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">parabolic_motion</span> <span class="k">as</span> <span class="n">pm</span>
+<span class="kn">from</span> <span class="nn">refnx.dataset</span> <span class="kn">import</span> <span class="n">ReflectDataset</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+
+<div class="viewcode-block" id="ReducePlatypus"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.ReducePlatypus">[docs]</a><span class="k">class</span> <span class="nc">ReducePlatypus</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduces Platypus reflectometer data to give the specular reflectivity.</span>
+<span class="sd">    Offspecular data maps are also produced.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    direct : string, hdf5 file-handle or PlatypusNexus object</span>
+<span class="sd">        A string containing the path to the direct beam hdf5 file,</span>
+<span class="sd">        the hdf5 file itself, or a PlatypusNexus object.</span>
+<span class="sd">    reflect : string, hdf5 file-handle or PlatypusNexus object, optional</span>
+<span class="sd">        A string containing the path to the specularly reflected hdf5 file,</span>
+<span class="sd">        the hdf5 file itself, or a PlatypusNexus object.</span>
+<span class="sd">    data_folder : str, optional</span>
+<span class="sd">        Where is the raw data stored?</span>
+<span class="sd">    scale : float, optional</span>
+<span class="sd">        Divide all specular reflectivity values by this number.</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        If `True` then the reduced dataset is saved to the current</span>
+<span class="sd">        directory, with a name os.path.basename(reflect)</span>
+<span class="sd">    kwds : dict, optional</span>
+<span class="sd">        Options passed directly to `refnx.reduce.platypusnexus.process`,</span>
+<span class="sd">        for processing of individual spectra. Look at that method docstring</span>
+<span class="sd">        for specification of options.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If `reflect` was specified during construction a reduction will be</span>
+<span class="sd">    done. See ``reduce`` for attributes available from this object on</span>
+<span class="sd">    completion of reduction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direct</span><span class="p">,</span> <span class="n">reflect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_folder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
+                 <span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">curdir</span>
+        <span class="k">if</span> <span class="n">data_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direct</span><span class="p">,</span> <span class="n">PlatypusNexus</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span> <span class="o">=</span> <span class="n">direct</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">direct</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span> <span class="o">=</span> <span class="n">PlatypusNexus</span><span class="p">(</span><span class="n">direct</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reflect</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">reflect</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reflect</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">reflect</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReducePlatypus.reduce"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.ReducePlatypus.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reflect</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduction of a single dataset.</span>
+
+<span class="sd">        The reduction uses the direct beam specified during construction of</span>
+<span class="sd">        this object. This method reduces all the spectra present in the</span>
+<span class="sd">        reflected beam file (see platypusnexus.PlatypusNexus.process for</span>
+<span class="sd">        eventmode specification and other related options), but aggregates</span>
+<span class="sd">        all data in the direct beam spectrum.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        reflect : string, hdf5 file-handle or PlatypusNexus object</span>
+<span class="sd">            A string containing the path to the specularly reflected hdf5 file,</span>
+<span class="sd">            the hdf5 file itself, or a PlatypusNexus object.</span>
+<span class="sd">        scale : float, optional</span>
+<span class="sd">            Divide all the reflectivity values by this number.</span>
+<span class="sd">        save : bool, optional</span>
+<span class="sd">            If `True` then the reduced dataset is saved to the current</span>
+<span class="sd">            directory, with a name os.path.basename(reflect)</span>
+<span class="sd">        kwds : dict, optional</span>
+<span class="sd">            Options passed directly to `refnx.reduce.platypusnexus.process`,</span>
+<span class="sd">            for processing of individual spectra. Look at that method docstring</span>
+<span class="sd">            for specification of options.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        reduction : dict</span>
+<span class="sd">            Contains the following entries:</span>
+
+<span class="sd">            - &#39;x&#39; : np.ndarray</span>
+<span class="sd">                Q values, shape (N, T).</span>
+<span class="sd">            - &#39;x_sd&#39; : np.ndarray</span>
+<span class="sd">                Uncertainty in Q values (FWHM), shape (N, T).</span>
+<span class="sd">            - &#39;y&#39; : np.ndarray</span>
+<span class="sd">                Specular Reflectivity, shape (N, T)</span>
+<span class="sd">            - &#39;y_sd&#39; : np.ndarray</span>
+<span class="sd">                Uncertainty in specular reflectivity (SD), shape (N, T)</span>
+<span class="sd">            - &#39;m_ref&#39; : np.ndarray</span>
+<span class="sd">                Offspecular reflectivity map, shape (N, T, Y)</span>
+<span class="sd">            - &#39;m_refSD&#39; : np.ndarray</span>
+<span class="sd">                uncertainty in offspecular reflectivity, shape (N, T, Y)</span>
+<span class="sd">            - &#39;m_qz&#39; : np.ndarray</span>
+<span class="sd">                Qz for offspecular map, shape (N, T, Y)</span>
+<span class="sd">            - &#39;m_qy&#39; : np.ndarray</span>
+<span class="sd">                Qy for offspecular map, shape (N, T, Y)</span>
+<span class="sd">            - &#39;n_spectra&#39; : int</span>
+<span class="sd">                number of reflectivity spectra</span>
+<span class="sd">            - &#39;datafile_number&#39;: int</span>
+<span class="sd">                run number for the reflected beam</span>
+
+<span class="sd">        N corresponds to the number of spectra</span>
+<span class="sd">        T corresponds to the number of Q (wavelength) bins</span>
+<span class="sd">        Y corresponds to the number of y pixels on the detector.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        All the values returned from this method are also contained as instance</span>
+<span class="sd">        attributes for this object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;direct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># get the reflected beam spectrum</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reflect</span><span class="p">,</span> <span class="n">PlatypusNexus</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span> <span class="o">=</span> <span class="n">reflect</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reflect</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="n">reflect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span> <span class="o">=</span> <span class="n">PlatypusNexus</span><span class="p">(</span><span class="n">reflect</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+
+        <span class="c"># get the direct beam spectrum</span>
+        <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;direct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;integrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="s">&#39;eventmode&#39;</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;eventmode&#39;</span><span class="p">)</span>
+
+        <span class="c"># got to use the same wavelength bins as the reflected spectrum.</span>
+        <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;wavelength_bins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_lambda_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span> <span class="o">=</span> <span class="n">save</span>
+        <span class="n">reduction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_single_angle</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reduction</span>
+</div>
+<div class="viewcode-block" id="ReducePlatypus.data"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.ReducePlatypus.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The specular reflectivity</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scanpoint: int</span>
+<span class="sd">            Find a particular specular reflectivity image. scanpoints upto</span>
+<span class="sd">            `self.n_spectra - 1` can be specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (Q, R, dR, dQ): np.ndarray tuple</span>
+<span class="sd">            dR is standard deviation, dQ is FWHM</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xdata</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ydata_sd</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xdata_sd</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="ReducePlatypus.data2d"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.ReducePlatypus.data2d">[docs]</a>    <span class="k">def</span> <span class="nf">data2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The offspecular data</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scanpoint: int</span>
+<span class="sd">            Find a particular offspecular image. scanpoints upto </span>
+<span class="sd">            self.n_spectra - 1 can be specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (Qz, Qy, R, dR): np.ndarrays</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_qz</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">m_qy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">m_ref_sd</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="ReducePlatypus.scale"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.ReducePlatypus.scale">[docs]</a>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Divides the reflectivity values by this scale factor</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scale: float</span>
+<span class="sd">            Divides the reflectivity values by a constant amount</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span> <span class="o">/=</span> <span class="n">scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_ref_sd</span> <span class="o">/=</span> <span class="n">scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="o">/=</span> <span class="n">scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ydata_sd</span> <span class="o">/=</span> <span class="n">scale</span>
+</div>
+<div class="viewcode-block" id="ReducePlatypus.write_offspecular"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.ReducePlatypus.write_offspecular">[docs]</a>    <span class="k">def</span> <span class="nf">write_offspecular</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">__template_ref_xml</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="s">        &lt;REFroot xmlns=&quot;&quot;&gt;</span>
+<span class="s">        &lt;REFentry time=&quot;$time&quot;&gt;</span>
+<span class="s">        &lt;Title&gt;$title&lt;/Title&gt;</span>
+<span class="s">        &lt;User&gt;$user&lt;/User&gt;</span>
+<span class="s">        &lt;REFsample&gt;</span>
+<span class="s">        &lt;ID&gt;$sample&lt;/ID&gt;</span>
+<span class="s">        &lt;/REFsample&gt;</span>
+<span class="s">        &lt;REFdata axes=&quot;Qz:Qy&quot; rank=&quot;2&quot; type=&quot;POINT&quot; spin=&quot;UNPOLARISED&quot; dim=&quot;$_numpointsz:$_numpointsy&quot;&gt;</span>
+<span class="s">        &lt;Run filename=&quot;$_rnumber&quot; preset=&quot;&quot; size=&quot;&quot;&gt;</span>
+<span class="s">        &lt;/Run&gt;</span>
+<span class="s">        &lt;R uncertainty=&quot;dR&quot;&gt;$_r&lt;/R&gt;</span>
+<span class="s">        &lt;Qz uncertainty=&quot;dQz&quot; units=&quot;1/A&quot;&gt;$_qz&lt;/Qz&gt;</span>
+<span class="s">        &lt;dR type=&quot;SD&quot;&gt;$_dr&lt;/dR&gt;</span>
+<span class="s">        &lt;Qy type=&quot;_FWHM&quot; units=&quot;1/A&quot;&gt;$_qy&lt;/Qy&gt;</span>
+<span class="s">        &lt;/REFdata&gt;</span>
+<span class="s">        &lt;/REFentry&gt;</span>
+<span class="s">        &lt;/REFroot&gt;&quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%a, </span><span class="si">%d</span><span class="s"> %b %Y %H:%M:%S +0000&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">())</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_rnumber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">datafile_number</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_numpointsz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_numpointsy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="n">__template_ref_xml</span><span class="p">)</span>
+
+        <span class="c"># filename = &#39;off_PLP{:07d}_{:d}.xml&#39;.format(self._rnumber, index)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_qz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_qz</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_dr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_ref_sd</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;_qy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_qy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+
+        <span class="n">thefile</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;read&#39;</span><span class="p">):</span>
+            <span class="n">own_fh</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">own_fh</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">thefile</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_reduce_single_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduce a single angle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">n_spectra</span>
+        <span class="n">n_tpixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_topandtail</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">n_ypixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_topandtail</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c"># calculate omega and two_theta depending on the mode.</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">mode</span>
+
+        <span class="c"># we&#39;ll need the wavelengths to calculate Q.</span>
+        <span class="n">wavelengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_lambda</span>
+        <span class="n">m_twotheta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">n_tpixels</span><span class="p">,</span> <span class="n">n_ypixels</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;FOC&#39;</span><span class="p">,</span> <span class="s">&#39;POL&#39;</span><span class="p">,</span> <span class="s">&#39;POLANAL&#39;</span><span class="p">,</span> <span class="s">&#39;MT&#39;</span><span class="p">]:</span>
+            <span class="n">detector_z_difference</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detector_z</span> <span class="o">-</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">detector_z</span><span class="p">)</span>
+            <span class="n">beampos_z_difference</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_beampos</span>
+                                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">m_beampos</span><span class="p">)</span>
+
+            <span class="n">total_z_deflection</span> <span class="o">=</span> <span class="p">(</span><span class="n">detector_z_difference</span>
+                                  <span class="o">+</span> <span class="n">beampos_z_difference</span> <span class="o">*</span> <span class="n">Y_PIXEL_SPACING</span><span class="p">)</span>
+
+            <span class="c"># omega_nom.shape = (N, )</span>
+            <span class="n">omega_nom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">total_z_deflection</span>
+                                   <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detector_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Wavelength specific angle of incidence correction</span>
+<span class="sd">            This involves:</span>
+<span class="sd">            1) working out the trajectory of the neutrons through the</span>
+<span class="sd">            collimation system.</span>
+<span class="sd">            2) where those neutrons intersect the sample.</span>
+<span class="sd">            3) working out the elevation of the neutrons when they hit the</span>
+<span class="sd">            sample.</span>
+<span class="sd">            4) correcting the angle of incidence.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="n">speeds</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">wavelength_velocity</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
+            <span class="n">collimation_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">collimation_distance</span>
+            <span class="n">s2_sample_distance</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">sample_distance</span>
+                                  <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">slit2_distance</span><span class="p">)</span>
+
+            <span class="c"># work out the trajectories of the neutrons for them to pass</span>
+            <span class="c"># through the collimation system.</span>
+            <span class="n">trajectories</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">find_trajectory</span><span class="p">(</span><span class="n">collimation_distance</span> <span class="o">/</span> <span class="mf">1000.</span><span class="p">,</span>
+                                              <span class="mi">0</span><span class="p">,</span> <span class="n">speeds</span><span class="p">)</span>
+            
+            <span class="c"># work out where the beam hits the sample</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">parabola_line_intersection_point</span><span class="p">(</span><span class="n">s2_sample_distance</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span>
+                                                      <span class="mi">0</span><span class="p">,</span>
+                                                      <span class="n">trajectories</span><span class="p">,</span>
+                                                      <span class="n">speeds</span><span class="p">,</span>
+                                                      <span class="n">omega_nom</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+            <span class="n">intersect_x</span><span class="p">,</span> <span class="n">intersect_y</span><span class="p">,</span> <span class="n">x_prime</span><span class="p">,</span> <span class="n">elevation</span> <span class="o">=</span> <span class="n">res</span>
+
+            <span class="c"># correct the angle of incidence with a wavelength dependent</span>
+            <span class="c"># elevation.</span>
+            <span class="n">omega_corrected</span> <span class="o">=</span> <span class="n">omega_nom</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">-</span> <span class="n">elevation</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;SB&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;DB&#39;</span><span class="p">:</span>
+            <span class="n">omega</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">M_beampos</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detectorZ</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">omega</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">M_beampos</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">detectorZ</span>
+            <span class="n">omega</span> <span class="o">/=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detectorY</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+
+            <span class="n">m_twotheta</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_ypixels</span> <span class="o">*</span> <span class="mf">1.</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">Y_PIXEL_SPACING</span>
+            <span class="n">m_twotheta</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detectorZ</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">m_twotheta</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">M_beampos</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">detectorZ</span>
+            <span class="n">m_twotheta</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detectorY</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">omega</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+
+            <span class="n">m_twotheta</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">detectorY</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">m_twotheta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m_twotheta</span><span class="p">)</span>
+            <span class="n">m_twotheta</span> <span class="o">+=</span> <span class="n">omega</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        --Specular Reflectivity--</span>
+<span class="sd">        Use the (constant wavelength) spectra that have already been integrated</span>
+<span class="sd">        over 2theta (in processnexus) to calculate the specular reflectivity.</span>
+<span class="sd">        Beware: this is because m_topandtail has already been divided through</span>
+<span class="sd">        by monitor counts and error propagated (at the end of processnexus).</span>
+<span class="sd">        Thus, the 2theta pixels are correlated to some degree. If we use the 2D</span>
+<span class="sd">        plot to calculate reflectivity</span>
+<span class="sd">        (sum {Iref_{2theta, lambda}}/I_direct_{lambda}) then the error bars in</span>
+<span class="sd">        the reflectivity turn out much larger than they should be.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ydata</span><span class="p">,</span> <span class="n">ydata_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPdiv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_spec</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_spec_sd</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">m_spec</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">m_spec_sd</span><span class="p">)</span>
+
+        <span class="c"># calculate the 1D Qz values.</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">q</span><span class="p">(</span><span class="n">omega_corrected</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">)</span>
+        <span class="n">xdata_sd</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_lambda_fwhm</span>
+                    <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_lambda</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">xdata_sd</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">domega</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+                     <span class="o">/</span> <span class="n">omega_corrected</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">xdata_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xdata_sd</span><span class="p">)</span> <span class="o">*</span> <span class="n">xdata</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        ---Offspecular reflectivity---</span>
+<span class="sd">        normalise the counts in the reflected beam by the direct beam</span>
+<span class="sd">        spectrum this gives a reflectivity. Also propagate the errors,</span>
+<span class="sd">        leaving the fractional variance (dr/r)^2.</span>
+<span class="sd">        --Note-- that adjacent y-pixels (same wavelength) are correlated in this</span>
+<span class="sd">        treatment, so you can&#39;t just sum over them.</span>
+<span class="sd">        i.e. (c_0 / d) + ... + c_n / d) != (c_0 + ... + c_n) / d</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">m_ref</span><span class="p">,</span> <span class="n">m_ref_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPdiv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_topandtail</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">m_topandtail_sd</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">m_spec</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">m_spec_sd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+
+        <span class="c"># you may have had divide by zero&#39;s.</span>
+        <span class="n">m_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">m_ref</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">m_ref</span><span class="p">)</span>
+        <span class="n">m_ref_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">m_ref_sd</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">m_ref_sd</span><span class="p">)</span>
+
+        <span class="c"># calculate the Q values for the detector pixels.  Each pixel has</span>
+        <span class="c"># different 2theta and different wavelength, ASSUME that they have the</span>
+        <span class="c"># same angle of incidence</span>
+        <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">omega_corrected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                <span class="n">m_twotheta</span><span class="p">,</span>
+                                <span class="mi">0</span><span class="p">,</span>
+                                <span class="n">wavelengths</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+
+        <span class="n">reduction</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;xdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xdata</span> <span class="o">=</span> <span class="n">xdata</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;xdata_sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xdata_sd</span> <span class="o">=</span> <span class="n">xdata_sd</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;ydata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="o">=</span> <span class="n">ydata</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;ydata_sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata_sd</span> <span class="o">=</span> <span class="n">ydata_sd</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;m_ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span> <span class="o">=</span> <span class="n">m_ref</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;m_ref_sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref_sd</span> <span class="o">=</span> <span class="n">m_ref_sd</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;qz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_qz</span> <span class="o">=</span> <span class="n">qz</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;qy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_qy</span> <span class="o">=</span> <span class="n">qy</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;nspectra&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_spectra</span> <span class="o">=</span> <span class="n">n_spectra</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;datafile_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_number</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reflected_beam</span><span class="o">.</span><span class="n">datafile_number</span><span class="p">)</span>
+
+        <span class="n">fnames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">):</span>
+                <span class="n">data_tup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">scanpoint</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">ReflectDataset</span><span class="p">(</span><span class="n">data_tup</span><span class="p">)</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;PLP{0:07d}_{1}.dat&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datafile_number</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">fnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;PLP{0:07d}_{1}.xml&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datafile_number</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">save_xml</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="n">reduction</span><span class="p">[</span><span class="s">&#39;fname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fnames</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">reduction</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="reduce_stitch"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.reduce.reduce_stitch">[docs]</a><span class="k">def</span> <span class="nf">reduce_stitch</span><span class="p">(</span><span class="n">reflect_list</span><span class="p">,</span> <span class="n">direct_list</span><span class="p">,</span> <span class="n">norm_file_num</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">data_folder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduces a list of reflected beam run numbers and a list of corresponding</span>
+<span class="sd">    direct beam run numbers from the Platypus reflectometer. If there are</span>
+<span class="sd">    multiple reflectivity files they are spliced together.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reflect_list : list</span>
+<span class="sd">        Reflected beam run numbers, e.g. `[708, 709, 710]`</span>
+<span class="sd">        708 corresponds to the file PLP0000708.nx.hdf.</span>
+<span class="sd">    direct_list : list</span>
+<span class="sd">        Direct beam run numbers, e.g. `[711, 711, 711]`</span>
+<span class="sd">    norm_file_num : int, optional</span>
+<span class="sd">        The run number for the water flood field correction.</span>
+<span class="sd">    data_folder : str, optional</span>
+<span class="sd">        Where is the raw data stored?</span>
+<span class="sd">    trim_trailing : bool, optional</span>
+<span class="sd">        When datasets are spliced together do you want to remove points in the</span>
+<span class="sd">        overlap region from the preceding dataset?</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        If `True` then the spliced file is written to a file (in the working</span>
+<span class="sd">        directory) with a name like: `c_PLP0000708.dat`.</span>
+<span class="sd">    kwds : dict, optional</span>
+<span class="sd">        Options passed directly to `refnx.reduce.platypusnexus.process`,</span>
+<span class="sd">        for processing of individual spectra. Look at that method docstring</span>
+<span class="sd">        for specification of options.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    combined_dataset, reduced_filename : refnx.dataset.ReflectDataset, str</span>
+<span class="sd">        The combined dataset and the file name of the reduced data, if it was</span>
+<span class="sd">        saved. If it wasn&#39;t saved `reduced_filename` is `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;scale&#39;</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+
+    <span class="c"># now reduce all the files.</span>
+    <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reflect_list</span><span class="p">,</span> <span class="n">direct_list</span><span class="p">)</span>
+
+    <span class="n">combined_dataset</span> <span class="o">=</span> <span class="n">ReflectDataset</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data_folder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">data_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">norm_file_num</span><span class="p">:</span>
+        <span class="n">norm_datafile</span> <span class="o">=</span> <span class="n">number_datafile</span><span class="p">(</span><span class="n">norm_file_num</span><span class="p">)</span>
+        <span class="n">kwds</span><span class="p">[</span><span class="s">&#39;h5norm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_datafile</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zipped</span><span class="p">):</span>
+        <span class="n">reflect_datafile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_folder</span><span class="p">,</span>
+                                        <span class="n">number_datafile</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">direct_datafile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_folder</span><span class="p">,</span>
+                                       <span class="n">number_datafile</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">reduced</span> <span class="o">=</span> <span class="n">ReducePlatypus</span><span class="p">(</span><span class="n">direct_datafile</span><span class="p">,</span>
+                                 <span class="n">reflect</span><span class="o">=</span><span class="n">reflect_datafile</span><span class="p">,</span>
+                                 <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span>
+                                 <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="p">:</span>
+            <span class="n">reduced</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+
+        <span class="n">combined_dataset</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">reduced</span><span class="o">.</span><span class="n">data</span><span class="p">(),</span>
+                                  <span class="n">requires_splice</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                  <span class="n">trim_trailing</span><span class="o">=</span><span class="n">trim_trailing</span><span class="p">)</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;c_PLP{0:07d}.dat&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reflect_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">combined_dataset</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;c_PLP{0:07d}.xml&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reflect_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">combined_dataset</span><span class="o">.</span><span class="n">save_xml</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">combined_dataset</span><span class="p">,</span> <span class="n">fname</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%a, </span><span class="si">%d</span><span class="s"> %b %Y %H:%M:%S +0000&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">()))</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">reduce_stitch</span><span class="p">([</span><span class="mi">708</span><span class="p">,</span> <span class="mi">709</span><span class="p">,</span> <span class="mi">710</span><span class="p">],</span> <span class="p">[</span><span class="mi">711</span><span class="p">,</span> <span class="mi">711</span><span class="p">,</span> <span class="mi">711</span><span class="p">],</span> <span class="n">rebin_percent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">&#39;test1.dat&#39;</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%a, </span><span class="si">%d</span><span class="s"> %b %Y %H:%M:%S +0000&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">()))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

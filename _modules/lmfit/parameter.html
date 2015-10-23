@@ -1,0 +1,819 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lmfit.parameter &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for lmfit.parameter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parameter class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">arcsin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">inf</span><span class="p">,</span> <span class="n">nan</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ordereddict</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">uncertainties</span>
+
+<span class="kn">from</span> <span class="nn">.asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="kn">from</span> <span class="nn">.astutils</span> <span class="kn">import</span> <span class="n">get_ast_names</span><span class="p">,</span> <span class="n">valid_symbol_name</span>
+
+
+<span class="k">def</span> <span class="nf">check_ast_errors</span><span class="p">(</span><span class="n">expr_eval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;check for errors derived from asteval&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expr_eval</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">expr_eval</span><span class="o">.</span><span class="n">raise_exception</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dictionary of all the Parameters required to specify a fit model.</span>
+
+<span class="sd">    All keys must be strings, and valid Python symbol names, and all values</span>
+<span class="sd">    must be Parameters.</span>
+
+<span class="sd">    Custom methods:</span>
+<span class="sd">    ---------------</span>
+
+<span class="sd">    add()</span>
+<span class="sd">    add_many()</span>
+<span class="sd">    dumps() / dump()</span>
+<span class="sd">    loads() / load()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asteval</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Parameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span> <span class="o">=</span> <span class="n">asteval</span>
+
+        <span class="c"># a flag to temporarily pause updating constraints when lots of</span>
+        <span class="c"># parameters are being added. This is mainly used during the deepcopy</span>
+        <span class="c"># operation. Do not forget to switch back on.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dont_update_constraints</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">asteval</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="n">_pars</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+
+        <span class="c"># find the symbols that were added by users, not during construction</span>
+        <span class="n">sym_unique</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">user_defined_symbols</span><span class="p">()</span>
+        <span class="n">unique_symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">memo</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sym_unique</span><span class="p">}</span>
+        <span class="n">_pars</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">symtable</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unique_symbols</span><span class="p">)</span>
+
+        <span class="c"># we&#39;re just about to add a lot of Parameter objects to the newly</span>
+        <span class="n">parameter_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="n">par</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                  <span class="nb">min</span><span class="o">=</span><span class="n">par</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+                                  <span class="nb">max</span><span class="o">=</span><span class="n">par</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">vary</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">stderr</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">correl</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">correl</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">init_value</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">init_value</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">expr</span>
+                <span class="n">parameter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="n">_pars</span><span class="o">.</span><span class="n">add_many</span><span class="p">(</span><span class="o">*</span><span class="n">parameter_list</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_pars</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">par</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_symbol_name</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; is not a valid Parameters name&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; is not a Parameter&quot;</span> <span class="o">%</span> <span class="n">par</span><span class="p">)</span>
+        <span class="n">OrderedDict</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">par</span><span class="p">)</span>
+        <span class="n">par</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="n">par</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Required to pickle a Parameters instance. pickle does not know how</span>
+<span class="sd">        to deal with the asteval machinery.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="p">(),</span> <span class="n">items</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;state is list of parameters&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;add Parameters objects&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; is not a Parameters object&quot;</span> <span class="o">%</span> <span class="n">other</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">add_many</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add/assign Parameters objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; is not a Parameters object&quot;</span> <span class="o">%</span> <span class="n">other</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_many</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Required to pickle a Parameters instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># make a list of all the parameters</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+
+        <span class="c"># find the symbols from _asteval.symtable, that need to be remembered.</span>
+        <span class="n">sym_unique</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">user_defined_symbols</span><span class="p">()</span>
+        <span class="n">unique_symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                          <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sym_unique</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="p">(),</span> <span class="p">{</span><span class="s">&#39;unique_symbols&#39;</span><span class="p">:</span> <span class="n">unique_symbols</span><span class="p">,</span>
+                                    <span class="s">&#39;params&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unpickle a Parameters instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        state : list</span>
+<span class="sd">            state[0] is a dictionary containing symbols that need to be</span>
+<span class="sd">            injected into _asteval.symtable</span>
+<span class="sd">            state[1:] are the Parameter instances to be added</span>
+<span class="sd">         is list of parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># first add all the parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_many</span><span class="p">(</span><span class="o">*</span><span class="n">state</span><span class="p">[</span><span class="s">&#39;params&#39;</span><span class="p">])</span>
+
+        <span class="c"># now update the Interpreter symbol table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">symtable</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s">&#39;unique_symbols&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Parameters.update_constraints"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.update_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">update_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update all constrained parameters, checking that dependencies are</span>
+<span class="sd">        evaluated as needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_updated</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">def</span> <span class="nf">_update_param</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Update a parameter value, including setting bounds.</span>
+<span class="sd">            For a constrained parameter (one with an expr defined),</span>
+<span class="sd">            this first updates (recursively) all parameters on which</span>
+<span class="sd">            the parameter depends (using the &#39;deps&#39; field).</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c"># Has this param already been updated?</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_updated</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">par</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">par</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span>
+            <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">_expr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">par</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">_expr</span>
+            <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">_expr_deps</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">dep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">_update_param</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_asteval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">_updated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">_update_param</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Parameters.pretty_repr"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.pretty_repr">[docs]</a>    <span class="k">def</span> <span class="nf">pretty_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oneline</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">oneline</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Parameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Parameters({</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;    &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">, </span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;    })</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+</div>
+<div class="viewcode-block" id="Parameters.pretty_print"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.pretty_print">[docs]</a>    <span class="k">def</span> <span class="nf">pretty_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oneline</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pretty_repr</span><span class="p">(</span><span class="n">oneline</span><span class="o">=</span><span class="n">oneline</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Parameters.add"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function for adding a Parameter:</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        p = Parameters()</span>
+<span class="sd">        p.add(name, value=XX, ...)</span>
+
+<span class="sd">        is equivalent to:</span>
+<span class="sd">        p[name] = Parameter(name=name, value=XX, ....</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="n">vary</span><span class="p">,</span>
+                                         <span class="nb">min</span><span class="o">=</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">max</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Parameters.add_many"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.add_many">[docs]</a>    <span class="k">def</span> <span class="nf">add_many</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">parlist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function for adding a list of Parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parlist : sequence</span>
+<span class="sd">            A sequence of tuples, or a sequence of `Parameter` instances. If it</span>
+<span class="sd">            is a sequence of tuples, then each tuple must contain at least the</span>
+<span class="sd">            name. The order in each tuple is the following:</span>
+
+<span class="sd">                name, value, vary, min, max, expr</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        p = Parameters()</span>
+<span class="sd">        # add a sequence of tuples</span>
+<span class="sd">        p.add_many( (name1, val1, True, None, None, None),</span>
+<span class="sd">                    (name2, val2, True,  0.0, None, None),</span>
+<span class="sd">                    (name3, val3, False, None, None, None),</span>
+<span class="sd">                    (name4, val4))</span>
+
+<span class="sd">        # add a sequence of Parameter</span>
+<span class="sd">        f = Parameter(&#39;name5&#39;, val5)</span>
+<span class="sd">        g = Parameter(&#39;name6&#39;, val6)</span>
+<span class="sd">        p.add_many(f, g)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">para</span> <span class="ow">in</span> <span class="n">parlist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">para</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">para</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">para</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="o">*</span><span class="n">para</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Parameters.valuesdict"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.valuesdict">[docs]</a>    <span class="k">def</span> <span class="nf">valuesdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        An ordered dictionary of name:value pairs for each Parameter.</span>
+<span class="sd">        This is distinct from the Parameters itself, as it has values of</span>
+<span class="sd">        the Parameter values, not the full Parameter object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="Parameters.dumps"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.dumps">[docs]</a>    <span class="k">def</span> <span class="nf">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;represent Parameters as a JSON string.</span>
+
+<span class="sd">        all keyword arguments are passed to `json.dumps()`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json string representation of Parameters</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        dump(), loads(), load(), json.dumps()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Parameters.loads"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.loads">[docs]</a>    <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;load Parameters from a JSON string.</span>
+
+<span class="sd">        current Parameters will be cleared before loading.</span>
+
+<span class="sd">        all keyword arguments are passed to `json.loads()`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.   Parameters are updated as a side-effect</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        dump(), dumps(), load(), json.loads()</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">parstate</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+            <span class="n">_par</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">()</span>
+            <span class="n">_par</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">parstate</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">parstate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_par</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Parameters.dump"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;write JSON representation of Parameters to a file</span>
+<span class="sd">        or file-like object (must have a `write()` method).</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        fp         open file-like object with `write()` method.</span>
+
+<span class="sd">        all keyword arguments are passed to `dumps()`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        return value from `fp.write()`</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        dump(), load(), json.dump()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="o">**</span><span class="n">kws</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Parameters.load"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Parameters.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;load JSON representation of Parameters from a file</span>
+<span class="sd">        or file-like object (must have a `read()` method).</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        fp         open file-like object with `read()` method.</span>
+
+<span class="sd">        all keyword arguments are passed to `loads()`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.   Parameters are updated as a side-effect</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        dump(), loads(), json.load()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+
+</div></div>
+<span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Parameter is an object used to define a Fit Model.</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Parameter name.</span>
+<span class="sd">    value : float</span>
+<span class="sd">        The numerical value of the Parameter.</span>
+<span class="sd">    vary : bool</span>
+<span class="sd">        Whether the Parameter is fixed during a fit.</span>
+<span class="sd">    min : float</span>
+<span class="sd">        Lower bound for value (None = no lower bound).</span>
+<span class="sd">    max : float</span>
+<span class="sd">        Upper bound for value (None = no upper bound).</span>
+<span class="sd">    expr : str</span>
+<span class="sd">        An expression specifying constraints for the parameter.</span>
+<span class="sd">    stderr : float</span>
+<span class="sd">        The estimated standard error for the best-fit value.</span>
+<span class="sd">    correl : dict</span>
+<span class="sd">        Specifies correlation with the other fitted Parameter after a fit.</span>
+<span class="sd">        Of the form `{&#39;decay&#39;: 0.404, &#39;phase&#39;: -0.020, &#39;frequency&#39;: 0.102}`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str, optional</span>
+<span class="sd">            Name of the parameter.</span>
+<span class="sd">        value : float, optional</span>
+<span class="sd">            Numerical Parameter value.</span>
+<span class="sd">        vary : bool, optional</span>
+<span class="sd">            Whether the Parameter is fixed during a fit.</span>
+<span class="sd">        min : float, optional</span>
+<span class="sd">            Lower bound for value (None = no lower bound).</span>
+<span class="sd">        max : float, optional</span>
+<span class="sd">            Upper bound for value (None = no upper bound).</span>
+<span class="sd">        expr : str, optional</span>
+<span class="sd">            Mathematical expression used to constrain the value during the fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="n">vary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_deps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correl</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_internal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_bounds</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set or update Parameter attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : float, optional</span>
+<span class="sd">            Numerical Parameter value.</span>
+<span class="sd">        vary : bool, optional</span>
+<span class="sd">            Whether the Parameter is fixed during a fit.</span>
+<span class="sd">        min : float, optional</span>
+<span class="sd">            Lower bound for value. To remove a lower bound you must use -np.inf</span>
+<span class="sd">        max : float, optional</span>
+<span class="sd">            Upper bound for value. To remove an upper bound you must use np.inf</span>
+<span class="sd">        expr : str, optional</span>
+<span class="sd">            Mathematical expression used to constrain the value during the fit.</span>
+<span class="sd">            To remove a constraint you must supply an empty string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_expression</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="n">vary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="n">vary</span>
+        <span class="k">if</span> <span class="nb">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="k">if</span> <span class="nb">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">max</span>
+
+    <span class="k">def</span> <span class="nf">_init_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;make sure initial bounds are self-consistent&quot;&quot;&quot;</span>
+        <span class="c">#_val is None means - infinity.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_bounds</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get state for pickle&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vary</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">correl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set state for pickle&quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vary</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">correl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_deps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_bounds</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">sval</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vary</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sval</span> <span class="o">=</span> <span class="s">&quot;value=</span><span class="si">%s</span><span class="s"> (fixed)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sval</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sval</span> <span class="o">=</span> <span class="s">&quot;value=</span><span class="si">%s</span><span class="s"> +/- </span><span class="si">%.3g</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sval</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;bounds=[</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;expr=&#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;Parameter </span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setup_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up Minuit-style internal/external parameter transformation</span>
+<span class="sd">        of min/max bounds.</span>
+
+<span class="sd">        As a side-effect, this also defines the self.from_internal method</span>
+<span class="sd">        used to re-calculate self.value from the internal value, applying</span>
+<span class="sd">        the inverse Minuit-style transformation.  This method should be</span>
+<span class="sd">        called prior to passing a Parameter to the user-defined objective</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        This code borrows heavily from JJ Helmus&#39; leastsqbound.py</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The internal value for parameter from self.value (which holds</span>
+<span class="sd">        the external, user-expected value).   This internal value should</span>
+<span class="sd">        actually be used in a fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">inf</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_internal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">val</span>
+            <span class="n">_val</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">inf</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_internal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">val</span><span class="o">*</span><span class="n">val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">_val</span>  <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_internal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">val</span><span class="o">*</span><span class="n">val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">_val</span>  <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_internal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">+</span> <span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">_val</span>  <span class="o">=</span> <span class="n">arcsin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_val</span>
+
+    <span class="k">def</span> <span class="nf">scale_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        scaling factor for gradient the according to Minuit-style</span>
+<span class="sd">        transformation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">inf</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">inf</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">val</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">val</span><span class="o">*</span><span class="n">val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">val</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">val</span><span class="o">*</span><span class="n">val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cos</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+
+    <span class="k">def</span> <span class="nf">_getval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get value, with bounds applied&quot;&quot;&quot;</span>
+
+        <span class="c"># Note assignment to self._val has been changed to self.value</span>
+        <span class="c"># The self.value property setter makes sure that the</span>
+        <span class="c"># _expr_eval.symtable is kept updated.</span>
+        <span class="c"># If you just assign to self._val then</span>
+        <span class="c"># _expr_eval.symtable[self.name]</span>
+        <span class="c"># becomes stale if parameter.expr is not None.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val</span><span class="p">,</span> <span class="n">uncertainties</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">nan</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span><span class="o">.</span><span class="n">nominal_value</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vary</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_expr_eval&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_expr_ast&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span><span class="p">)</span>
+            <span class="n">check_ast_errors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="o">-</span><span class="n">inf</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">inf</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">/</span>
+                <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">),</span> <span class="mf">1.e-13</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1.e-13</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Parameter &#39;</span><span class="si">%s</span><span class="s">&#39; has min == max&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">nan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val</span>
+
+    <span class="k">def</span> <span class="nf">set_expr_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">):</span>
+        <span class="s">&quot;set expression evaluator instance&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="n">evaluator</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;The numerical value of the Parameter, with bounds applied&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="nd">@value.setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="s">&quot;Set the numerical Parameter value.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_val</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_expr_eval&#39;</span><span class="p">):</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">expr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The mathematical expression used to constrain the value during the fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span>
+
+    <span class="nd">@expr.setter</span>
+    <span class="k">def</span> <span class="nf">expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The mathematical expression used to constrain the value during the fit.</span>
+<span class="sd">        To remove a constraint you must supply an empty string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_expression</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__set_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_expr_eval&#39;</span><span class="p">):</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">check_ast_errors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expr_eval</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expr_deps</span> <span class="o">=</span> <span class="n">get_ast_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expr_ast</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;string&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;abs&quot;</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;neg&quot;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;positive&quot;</span>
+        <span class="k">return</span> <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;not zero&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__int__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;int&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__long__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;long&quot;</span>
+        <span class="k">return</span> <span class="nb">long</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__float__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;float&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__trunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">&quot;trunc&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span><span class="o">.</span><span class="n">__trunc__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;+&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;-&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">-</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;/&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">/</span> <span class="n">other</span>
+    <span class="n">__truediv__</span> <span class="o">=</span> <span class="n">__div__</span>
+
+    <span class="k">def</span> <span class="nf">__floordiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;//&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">//</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__divmod__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;divmod&quot;</span>
+        <span class="k">return</span> <span class="nb">divmod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">(),</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__mod__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;%&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">%</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;*&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">*</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;**&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">**</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;&gt;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;&gt;=&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;&lt;=&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;&lt;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;==&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;!=&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span> <span class="o">!=</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;+ (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__rdiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;/ (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+    <span class="n">__rtruediv__</span> <span class="o">=</span> <span class="n">__rdiv__</span>
+
+    <span class="k">def</span> <span class="nf">__rdivmod__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;divmod (right)&quot;</span>
+        <span class="k">return</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__rfloordiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;// (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__rmod__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;% (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;* (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__rpow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;** (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="s">&quot;- (right)&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getval</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">isParameter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="s">&quot;test for Parameter-ness&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="ow">or</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;Parameter&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

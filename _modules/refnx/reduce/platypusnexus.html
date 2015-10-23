@@ -1,0 +1,1437 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.reduce.platypusnexus &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.reduce.platypusnexus</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">peak_utils</span> <span class="k">as</span> <span class="n">ut</span>
+<span class="kn">import</span> <span class="nn">refnx.util.general</span> <span class="kn">as</span> <span class="nn">general</span>
+<span class="kn">import</span> <span class="nn">refnx.util.ErrorProp</span> <span class="kn">as</span> <span class="nn">EP</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">parabolic_motion</span> <span class="k">as</span> <span class="n">pm</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">event</span><span class="p">,</span> <span class="n">rebin</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">leastsq</span><span class="p">,</span> <span class="n">curve_fit</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">t</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">io</span>
+
+
+<span class="c"># detector y pixel spacing in mm per pixel</span>
+<span class="n">Y_PIXEL_SPACING</span> <span class="o">=</span> <span class="mf">1.177</span>
+
+<span class="n">disc_openings</span> <span class="o">=</span> <span class="p">(</span><span class="mf">60.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">25.</span><span class="p">,</span> <span class="mf">60.</span><span class="p">)</span>
+<span class="n">O_C1d</span><span class="p">,</span> <span class="n">O_C2d</span><span class="p">,</span> <span class="n">O_C3d</span><span class="p">,</span> <span class="n">O_C4d</span> <span class="o">=</span> <span class="n">disc_openings</span>
+<span class="n">O_C1</span><span class="p">,</span> <span class="n">O_C2</span><span class="p">,</span> <span class="n">O_C3</span><span class="p">,</span> <span class="n">O_C4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">disc_openings</span><span class="p">)</span>
+
+<span class="n">DISCRADIUS</span> <span class="o">=</span> <span class="mf">350.</span>
+<span class="n">EXTENT_MULT</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">PIXEL_OFFSET</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="Catalogue"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.Catalogue">[docs]</a><span class="k">class</span> <span class="nc">Catalogue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5data</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">h5data</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="o">.</span><span class="n">filename</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/end_time&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;sample_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/sample/name&#39;</span><span class="p">]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss1vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/first/vertical/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss2vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/second/vertical/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss3vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/third/vertical/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss4vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/fourth/vertical/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss1hg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/first/horizontal/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss2hg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/second/horizontal/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss3hg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/third/horizontal/gap&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss4hg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/fourth/horizontal/gap&#39;</span><span class="p">][:]</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/parameters/omega&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;twotheta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/parameters/twotheta&#39;</span><span class="p">][:]</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;detector&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/data/hmm&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;sth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/sample/sth&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;bm1_counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/monitor/bm1_counts&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;total_counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/detector/total_counts&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/detector/time&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/parameters/mode&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">event_directory_name</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+                <span class="s">&#39;entry1/instrument/detector/daq_dirname&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">d</span><span class="p">[</span><span class="s">&#39;daq_dirname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_directory_name</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># daq_dirname doesn&#39;t exist in this file</span>
+            <span class="n">d</span><span class="p">[</span><span class="s">&#39;daq_dirname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;t_bins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/data/time_of_flight&#39;</span><span class="p">][:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;x_bins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/data/x_bin&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;y_bins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/data/y_bin&#39;</span><span class="p">][:]</span>
+
+        <span class="n">master</span><span class="p">,</span> <span class="n">slave</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chopper_values</span><span class="p">(</span><span class="n">h5data</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;master&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">master</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;slave&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">slave</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frequency</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;phase&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">phase</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper2_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper2_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper3_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper3_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper4_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper4_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper1_phase_offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper1_phase_offset&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper2_phase_offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper2_phase_offset&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper3_phase_offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper3_phase_offset&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;chopper4_phase_offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/chopper4_phase_offset&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;guide1_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/guide1_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;guide2_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/guide2_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;sample_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/sample_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;slit2_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/slit2_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;slit3_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/parameters/slit3_distance&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;collimation_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;slit3_distance&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;slit2_distance&#39;</span><span class="p">]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/detector/longitudinal_translation&#39;</span><span class="p">][:]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span>
+            <span class="s">&#39;entry1/instrument/detector/vertical_translation&#39;</span><span class="p">][:]</span>
+        <span class="c"># TODO put HDF file y pixel spacing in here.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cat</span> <span class="o">=</span> <span class="n">d</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">datafile_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datafile_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_chopper_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtains chopper settings from NeXUS file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h5data : HDF5 NeXUS file</span>
+<span class="sd">            datafile,</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        master, slave, frequency, phase : float, float, float, float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chopper1_speed</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch1speed&#39;</span><span class="p">]</span>
+        <span class="n">chopper2_speed</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch2speed&#39;</span><span class="p">]</span>
+        <span class="n">chopper3_speed</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch3speed&#39;</span><span class="p">]</span>
+        <span class="n">chopper4_speed</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch4speed&#39;</span><span class="p">]</span>
+        <span class="n">ch2phase</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch2phase&#39;</span><span class="p">]</span>
+        <span class="n">ch3phase</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch3phase&#39;</span><span class="p">]</span>
+        <span class="n">ch4phase</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/disk_chopper/ch4phase&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;entry1/instrument/parameters/slave&#39;</span> <span class="ow">in</span> <span class="n">h5data</span> <span class="ow">and</span>
+                <span class="s">&#39;entry1/instrument/parameters/master&#39;</span> <span class="ow">in</span> <span class="n">h5data</span><span class="p">):</span>
+            <span class="n">master</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/parameters/master&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">slave</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/parameters/slave&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">master</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">chopper2_speed</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">slave</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">chopper3_speed</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">slave</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">slave</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="n">speeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">chopper1_speed</span><span class="p">,</span>
+                           <span class="n">chopper2_speed</span><span class="p">,</span>
+                           <span class="n">chopper3_speed</span><span class="p">,</span>
+                           <span class="n">chopper4_speed</span><span class="p">])</span>
+
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ch2phase</span><span class="p">),</span>
+                           <span class="n">ch2phase</span><span class="p">,</span>
+                           <span class="n">ch3phase</span><span class="p">,</span>
+                           <span class="n">ch4phase</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">master</span><span class="p">,</span> <span class="n">slave</span><span class="p">,</span> <span class="n">speeds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">60.</span><span class="p">,</span> <span class="n">phases</span><span class="p">[</span><span class="n">slave</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="number_datafile"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.number_datafile">[docs]</a><span class="k">def</span> <span class="nf">number_datafile</span><span class="p">(</span><span class="n">run_number</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From a run number figure out what the file name is.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;PLP{0:07d}.nx.hdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">run_number</span><span class="p">)))</span>
+
+</div>
+<div class="viewcode-block" id="datafile_number"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.datafile_number">[docs]</a><span class="k">def</span> <span class="nf">datafile_number</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From a filename figure out what the run number was</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;PLP([0-9]{7}).nx.hdf&quot;</span><span class="p">)</span>
+    <span class="n">_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">_fname</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="PlatypusNexus"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus">[docs]</a><span class="k">class</span> <span class="nc">PlatypusNexus</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Processes Platypus NeXus files to produce an intensity vs wavelength</span>
+<span class="sd">    spectrum</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    h5data : HDF5 NeXus file or str</span>
+<span class="sd">        An HDF5 NeXus file for Platypus, or a `str` containing the path</span>
+<span class="sd">        to one</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialises the PlatypusNexus object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">h5data</span><span class="p">)</span> <span class="o">==</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cat</span> <span class="o">=</span> <span class="n">Catalogue</span><span class="p">(</span><span class="n">h5data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5data</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cat</span> <span class="o">=</span> <span class="n">Catalogue</span><span class="p">(</span><span class="n">h5data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span>
+
+<div class="viewcode-block" id="PlatypusNexus.process"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5norm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lo_wavelength</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">hi_wavelength</span><span class="o">=</span><span class="mf">19.</span><span class="p">,</span>
+                <span class="n">background</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">twotheta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">rebin_percent</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">wavelength_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">integrate</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">eventmode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peak_pos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">background_mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes the ProcessNexus object to produce a time of flight spectrum.</span>
+<span class="sd">        The processed spectrum is stored in the `processed_spectrum` attribute.</span>
+<span class="sd">        The specular spectrum is also returned from this function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h5norm : HDF5 NeXus file</span>
+<span class="sd">            The hdf5 file containing the floodfield data.</span>
+<span class="sd">        lo_wavelength : float</span>
+<span class="sd">            The low wavelength cutoff for the rebinned data (A).</span>
+<span class="sd">        hi_wavelength : float</span>
+<span class="sd">            The high wavelength cutoff for the rebinned data (A).</span>
+<span class="sd">        background : bool</span>
+<span class="sd">            Should a background subtraction be carried out?</span>
+<span class="sd">        direct : bool</span>
+<span class="sd">            Is it a direct beam you measured? This is so a gravity correction</span>
+<span class="sd">            can be applied.</span>
+<span class="sd">        omega : float</span>
+<span class="sd">            Expected angle of incidence of beam. If this is None, then the</span>
+<span class="sd">            rough angle of incidence is obtained from the NeXus file.</span>
+<span class="sd">        twotheta : float</span>
+<span class="sd">            Expected two theta value of specular beam. If this is None then</span>
+<span class="sd">            the rough angle of incidence is obtained from the NeXus file.</span>
+<span class="sd">        rebin_percent : float</span>
+<span class="sd">            Specifies the rebinning percentage for the spectrum.  If</span>
+<span class="sd">            `rebin_percent is None`, then no rebinning is done.</span>
+<span class="sd">        wavelength_bins : array_like</span>
+<span class="sd">            The wavelength bins for rebinning.  If `wavelength_bins is not</span>
+<span class="sd">             None` then the `rebin_percent` parameter is ignored.</span>
+<span class="sd">        normalise : bool</span>
+<span class="sd">            Normalise by the monitor counts.</span>
+<span class="sd">        integrate : int</span>
+
+<span class="sd">            - integrate == -1</span>
+<span class="sd">                the spectrum is integrated over all the scanpoints.</span>
+<span class="sd">            - integrate &gt;= 0</span>
+<span class="sd">              the individual spectra are calculated individually.</span>
+<span class="sd">              If `eventmode is not None` then integrate specifies which</span>
+<span class="sd">              scanpoint to examine.</span>
+
+<span class="sd">        eventmode : None or array_like</span>
+<span class="sd">            If eventmode is `None` then the integrated detector image is used.</span>
+<span class="sd">            If eventmode is an array then the array specifies the integration</span>
+<span class="sd">            times (in seconds) for the detector image, e.g. [0, 20, 30] would</span>
+<span class="sd">            result in two spectra. The first would contain data for 0 s to 20s,</span>
+<span class="sd">            the second would contain data for 20 s to 30 s.  This option can</span>
+<span class="sd">            only be used when `integrate &gt;= -1`.</span>
+<span class="sd">            If eventmode has zero length (e.g. []), then a single time interval</span>
+<span class="sd">            for the entire acquisition is used, [0, acquisition_time].  This</span>
+<span class="sd">            would source the image from the eventmode file, rather than the</span>
+<span class="sd">            NeXUS file.</span>
+<span class="sd">        peak_pos : None or (float, float)</span>
+<span class="sd">            Specifies the peak position and peak standard deviation to use.</span>
+<span class="sd">        background_mask : array_like</span>
+<span class="sd">            An array of bool that specifies which y-pixels to use for</span>
+<span class="sd">            background subtraction.  Should be the same length as the number of</span>
+<span class="sd">            y pixels in the detector image.  Otherwise an automatic mask is</span>
+<span class="sd">            applied (if background is True).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        After processing this object contains the following the following</span>
+<span class="sd">        attributes:</span>
+
+<span class="sd">        - path - path to the data file</span>
+<span class="sd">        - datafilename - name of the datafile</span>
+<span class="sd">        - datafile_number - datafile number.</span>
+<span class="sd">        - m_topandtail - the corrected 2D detector image, (n_spectra, TOF, Y)</span>
+<span class="sd">        - m_topandtail_sd - corresponding standard deviations</span>
+<span class="sd">        - n_spectra - number of spectra in processed data</span>
+<span class="sd">        - bm1_counts - beam montor counts, (n_spectra,)</span>
+<span class="sd">        - m_spec - specular intensity, (n_spectra, TOF)</span>
+<span class="sd">        - m_spec_sd - corresponding standard deviations</span>
+<span class="sd">        - m_beampos - beam_centre for each spectrum, (n_spectra, )</span>
+<span class="sd">        - m_lambda - wavelengths for each spectrum, (n_spectra, TOF)</span>
+<span class="sd">        - m_lambda_fwhm - corresponding FWHM of wavelength distribution</span>
+<span class="sd">        - m_lambda_hist - wavelength bins for each spectrum, (n_spectra, TOF)</span>
+<span class="sd">        - m_spec_tof - TOF for each wavelength bin, (n_spectra, TOF)</span>
+<span class="sd">        - mode - the Platypus mode, e.g. FOC/MT/POL/POLANAL/SB/DB</span>
+<span class="sd">        - detector_z - detector height, (n_spectra, )</span>
+<span class="sd">        - detector_y - sample-detector distance, (n_spectra, )</span>
+<span class="sd">        - domega - collimation uncertainty</span>
+<span class="sd">        - lopx - lowest extent of specular beam (in y pixels), (n_spectra, )</span>
+<span class="sd">        - hipx - highest extent of specular beam (in y pixels), (n_spectra, )</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        m_lambda, m_spec, m_spec_sd: np.ndarray</span>
+<span class="sd">            Arrays containing the wavelength, specular intensity as a function</span>
+<span class="sd">            of wavelength, standard deviation of specular intensity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat</span>
+
+        <span class="n">scanpoint</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># beam monitor counts for normalising data</span>
+        <span class="n">bm1_counts</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">bm1_counts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c"># TOF bins</span>
+        <span class="n">TOF</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">t_bins</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c"># This section controls how multiple detector images are handled.</span>
+        <span class="c"># We want event streaming.</span>
+        <span class="k">if</span> <span class="n">eventmode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">scanpoint</span> <span class="o">=</span> <span class="n">integrate</span>
+            <span class="k">if</span> <span class="n">integrate</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">scanpoint</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_event_stream</span><span class="p">(</span><span class="n">scanpoint</span><span class="o">=</span><span class="n">scanpoint</span><span class="p">,</span>
+                                               <span class="n">frame_bins</span><span class="o">=</span><span class="n">eventmode</span><span class="p">)</span>
+            <span class="n">frame_bins</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">bm1_counts</span> <span class="o">=</span> <span class="n">output</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># we don&#39;t want detector streaming</span>
+            <span class="n">detector</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">detector</span>
+            <span class="n">scanpoint</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># integrate over all spectra</span>
+            <span class="k">if</span> <span class="n">integrate</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">detector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">]</span>
+                <span class="n">bm1_counts</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bm1_counts</span><span class="p">)</span>
+
+        <span class="n">n_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Up until this point detector.shape=(N, T, Y,</span>
+        <span class="c">#  pre-average over x, leaving (n, t, y) also convert to dp</span>
+        <span class="n">detector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c"># detector shape should now be (n, t, y)</span>
+        <span class="c"># calculate the counting uncertainties</span>
+        <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+        <span class="n">bm1_counts_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">bm1_counts</span><span class="p">)</span>
+
+        <span class="c"># detector normalisation with a water file</span>
+        <span class="k">if</span> <span class="n">h5norm</span><span class="p">:</span>
+            <span class="n">x_bins</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">x_bins</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+            <span class="c"># shape (y,)</span>
+            <span class="n">detector_norm</span><span class="p">,</span> <span class="n">detector_norm_sd</span> <span class="o">=</span> <span class="n">create_detector_norm</span><span class="p">(</span><span class="n">h5norm</span><span class="p">,</span>
+                                                                   <span class="n">x_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                                   <span class="n">x_bins</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c"># detector has shape (N, T, Y), shape of detector_norm should</span>
+            <span class="c"># broadcast to (1, 1, y)</span>
+            <span class="c"># TODO: Correlated Uncertainties?</span>
+            <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPdiv</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">,</span>
+                                             <span class="n">detector_norm</span><span class="p">,</span> <span class="n">detector_norm_sd</span><span class="p">)</span>
+
+        <span class="c"># shape of these is (n_spectra, TOFbins)</span>
+        <span class="n">m_spec_tof_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">TOF</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                                   <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">m_lambda_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">TOF</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                                 <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">m_spec_tof_hist</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">TOF</span>
+
+        <span class="c"># chopper to detector distances</span>
+        <span class="c"># note that if eventmode is specified the n_spectra is NOT</span>
+        <span class="c"># equal to the number of entries in e.g. /longitudinal_translation</span>
+        <span class="c"># this means you have to copy values in from the correct scanpoint</span>
+        <span class="n">flight_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">d_cx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">detpositions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c"># The angular divergence of the instrument</span>
+        <span class="n">domega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="n">phase_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c"># process each of the spectra taken in the detector image</span>
+        <span class="n">originalscanpoint</span> <span class="o">=</span> <span class="n">scanpoint</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">):</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">frequency</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+
+            <span class="c"># calculate the angular divergence</span>
+            <span class="n">domega</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">ss2vg</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                                      <span class="n">cat</span><span class="o">.</span><span class="n">ss3vg</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span>
+                                      <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">slit3_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                                       <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">slit2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># work out the total flight length</span>
+            <span class="c"># IMPORTANT: this varies as a function of twotheta. This is</span>
+            <span class="c"># because the Platypus detector does not move on an arc.</span>
+            <span class="c"># At high angles chod can be ~ 0.75% different. This is will</span>
+            <span class="c"># visibly shift fringes.</span>
+            <span class="k">if</span> <span class="n">omega</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">omega</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">omega</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">twotheta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">twotheta</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">twotheta</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chod</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">twotheta</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="n">scanpoint</span><span class="p">)</span>
+            <span class="n">flight_distance</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">d_cx</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+
+            <span class="c"># calculate phase openings</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_angle</span><span class="p">(</span><span class="n">scanpoint</span><span class="p">)</span>
+            <span class="n">phase_angle</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span> <span class="n">master_opening</span> <span class="o">=</span> <span class="n">output</span>
+
+            <span class="c"># toffset - the time difference between the magnet pickup on the</span>
+            <span class="c"># choppers (TTL pulse), which is situated in the middle of the</span>
+            <span class="c"># chopper window, and the trailing edge of chopper 1, which is</span>
+            <span class="c"># supposed to be time0.  However, if there is a phase opening this</span>
+            <span class="c"># time offset has to be relocated slightly, as time0 is not at the</span>
+            <span class="c"># trailing edge.</span>
+            <span class="n">poff</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper1_phase_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">poffset</span> <span class="o">=</span> <span class="mf">1.e6</span> <span class="o">*</span> <span class="n">poff</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="mf">360.</span> <span class="o">*</span> <span class="n">freq</span><span class="p">)</span>
+            <span class="n">toffset</span> <span class="o">=</span> <span class="p">(</span><span class="n">poffset</span>
+                       <span class="o">+</span> <span class="mf">1.e6</span> <span class="o">*</span> <span class="n">master_opening</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">freq</span>
+                       <span class="o">-</span> <span class="mf">1.e6</span> <span class="o">*</span> <span class="n">phase_angle</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">360</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">freq</span><span class="p">))</span>
+            <span class="n">m_spec_tof_hist</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-=</span> <span class="n">toffset</span>
+
+            <span class="n">detpositions</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">eventmode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">m_spec_tof_hist</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">TOF</span> <span class="o">-</span> <span class="n">toffset</span>
+                <span class="n">flight_distance</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">flight_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">detpositions</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">detpositions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scanpoint</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">scanpoint</span> <span class="o">=</span> <span class="n">originalscanpoint</span>
+
+        <span class="c"># convert TOF to lambda</span>
+        <span class="c"># m_spec_tof_hist (n, t) and chod is (n,)</span>
+        <span class="n">m_lambda_hist</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">velocity_wavelength</span><span class="p">(</span>
+                    <span class="mf">1.e3</span> <span class="o">*</span> <span class="n">flight_distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">/</span> <span class="n">m_spec_tof_hist</span><span class="p">)</span>
+
+        <span class="n">m_lambda</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">m_lambda_hist</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">m_lambda_hist</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">TOF</span> <span class="o">-=</span> <span class="n">toffset</span>
+
+        <span class="c"># gravity correction if direct beam</span>
+        <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
+            <span class="c"># TODO: Correlated Uncertainties?</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">correct_for_gravity</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span>
+                                         <span class="n">detector_sd</span><span class="p">,</span>
+                                         <span class="n">m_lambda</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">collimation_distance</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span>
+                                         <span class="n">lo_wavelength</span><span class="p">,</span>
+                                         <span class="n">hi_wavelength</span><span class="p">)</span>
+            <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">,</span> <span class="n">m_gravcorrcoefs</span> <span class="o">=</span> <span class="n">output</span>
+            <span class="n">beam_centre</span><span class="p">,</span> <span class="n">beam_sd</span> <span class="o">=</span> <span class="n">find_specular_ridge</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">)</span>
+            <span class="c"># beam_centre = m_gravcorrcoefs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">beam_centre</span><span class="p">,</span> <span class="n">beam_sd</span> <span class="o">=</span> <span class="n">find_specular_ridge</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">)</span>
+
+        <span class="c"># you want to specify the specular ridge on the averaged detector image</span>
+        <span class="k">if</span> <span class="n">peak_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">beam_centre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">)</span> <span class="o">*</span> <span class="n">peak_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">beam_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">)</span> <span class="o">*</span> <span class="n">peak_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Rebinning in lambda for all detector</span>
+<span class="sd">        Rebinning is the default option, but sometimes you don&#39;t want to.</span>
+<span class="sd">        detector shape input is (n, t, y)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">wavelength_bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">rebinning</span> <span class="o">=</span> <span class="n">wavelength_bins</span>
+        <span class="k">elif</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">rebin_percent</span> <span class="o">&lt;</span> <span class="mf">15.</span><span class="p">:</span>
+            <span class="n">rebinning</span> <span class="o">=</span> <span class="n">calculate_wavelength_bins</span><span class="p">(</span><span class="n">lo_wavelength</span><span class="p">,</span>
+                                                  <span class="n">hi_wavelength</span><span class="p">,</span>
+                                                  <span class="n">rebin_percent</span><span class="p">)</span>
+
+        <span class="c"># rebin_percent percentage is zero. No rebinning, just cutoff</span>
+        <span class="c"># wavelength</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rebinning</span> <span class="o">=</span> <span class="n">m_lambda_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">rebinning</span> <span class="o">=</span> <span class="n">rebinning</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">rebinning</span><span class="p">,</span> <span class="n">lo_wavelength</span><span class="p">):</span>
+                                  <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">rebinning</span><span class="p">,</span> <span class="n">hi_wavelength</span><span class="p">)]</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        now do the rebinning for all the N detector images</span>
+<span class="sd">        rebin.rebinND could do all of these at once.  However, m_lambda_hist</span>
+<span class="sd">        could vary across the range of spectra.  If it was the same I could</span>
+<span class="sd">        eliminate the loop.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">output_sd</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">):</span>
+            <span class="c"># TODO: Correlated Uncertainties?</span>
+            <span class="n">plane</span><span class="p">,</span> <span class="n">plane_sd</span> <span class="o">=</span> <span class="n">rebin</span><span class="o">.</span><span class="n">rebin_along_axis</span><span class="p">(</span><span class="n">detector</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                                     <span class="n">m_lambda_hist</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                                     <span class="n">rebinning</span><span class="p">,</span>
+                                                     <span class="n">y1_sd</span><span class="o">=</span><span class="n">detector_sd</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span>
+            <span class="n">output_sd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane_sd</span><span class="p">)</span>
+
+        <span class="n">detector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output_sd</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">]</span>
+            <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">detector_sd</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">]</span>
+
+        <span class="c"># (1, T)</span>
+        <span class="n">m_lambda_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">rebinning</span><span class="p">)</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Divide the detector intensities by the width of the wavelength bin.</span>
+<span class="sd">        This is so the intensities between different rebinning strategies can</span>
+<span class="sd">        be compared.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">div</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">m_lambda_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPmulk</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span>
+                                          <span class="n">detector_sd</span><span class="p">,</span>
+                                          <span class="n">div</span><span class="p">)</span>
+
+        <span class="c"># convert the wavelength base to a timebase</span>
+        <span class="n">m_spec_tof_hist</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001</span> <span class="o">*</span> <span class="n">flight_distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+                           <span class="o">/</span> <span class="n">general</span><span class="o">.</span><span class="n">wavelength_velocity</span><span class="p">(</span><span class="n">m_lambda_hist</span><span class="p">))</span>
+
+        <span class="n">m_lambda</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">m_lambda_hist</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">m_lambda_hist</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">m_spec_tof</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001</span> <span class="o">*</span> <span class="n">flight_distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+                      <span class="o">/</span> <span class="n">general</span><span class="o">.</span><span class="n">wavelength_velocity</span><span class="p">(</span><span class="n">m_lambda</span><span class="p">))</span>
+
+        <span class="c"># we want to integrate over the following pixel region</span>
+        <span class="n">lopx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">beam_centre</span> <span class="o">-</span> <span class="n">beam_sd</span> <span class="o">*</span> <span class="n">EXTENT_MULT</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">hipx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">beam_centre</span> <span class="o">+</span> <span class="n">beam_sd</span> <span class="o">*</span> <span class="n">EXTENT_MULT</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+
+        <span class="n">m_spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">m_spec</span><span class="p">)</span>
+
+        <span class="c"># background subtraction</span>
+        <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">background_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># background_mask is (Y), need to make 3 dimensional (N, T, Y)</span>
+                <span class="c"># first make into (T, Y)</span>
+                <span class="n">backgnd_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">background_mask</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span>
+                                         <span class="n">detector</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                         <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c"># make into (N, T, Y)</span>
+                <span class="n">full_backgnd_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">backgnd_mask</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span>
+                                              <span class="n">n_spectra</span><span class="p">,</span>
+                                              <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># there may be different background regions for each spectrum</span>
+                <span class="c"># in the file</span>
+                <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">lopx</span> <span class="o">-</span> <span class="n">PIXEL_OFFSET</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+                <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="p">(</span><span class="n">EXTENT_MULT</span> <span class="o">*</span> <span class="n">beam_sd</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+
+                <span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">hipx</span> <span class="o">+</span> <span class="n">PIXEL_OFFSET</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+                <span class="n">y3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">y2</span> <span class="o">+</span> <span class="p">(</span><span class="n">EXTENT_MULT</span> <span class="o">*</span> <span class="n">beam_sd</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int&#39;</span><span class="p">)</span>
+
+                <span class="n">full_backgnd_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;bool&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">):</span>
+                    <span class="n">full_backgnd_mask</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="n">y0</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">y1</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">full_backgnd_mask</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="n">y2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">y3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="c"># TODO: Correlated Uncertainties?</span>
+            <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">background_subtract</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span>
+                                                        <span class="n">detector_sd</span><span class="p">,</span>
+                                                        <span class="n">full_backgnd_mask</span><span class="p">)</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        top and tail the specular beam with the known beam centres.</span>
+<span class="sd">        All this does is produce a specular intensity with shape (N, T),</span>
+<span class="sd">        i.e. integrate over specular beam</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">):</span>
+            <span class="n">m_spec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">detector</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="n">lopx</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">hipx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">detector_sd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="n">lopx</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">hipx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">m_spec_sd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+
+        <span class="c"># assert np.isfinite(m_spec).all()</span>
+        <span class="c"># assert np.isfinite(m_specSD).all()</span>
+        <span class="c"># assert np.isfinite(detector).all()</span>
+        <span class="c"># assert np.isfinite(detectorSD).all()</span>
+
+        <span class="c"># normalise by beam monitor 1.</span>
+        <span class="k">if</span> <span class="n">normalise</span><span class="p">:</span>
+            <span class="n">m_spec</span><span class="p">,</span> <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPdiv</span><span class="p">(</span><span class="n">m_spec</span><span class="p">,</span>
+                                         <span class="n">m_spec_sd</span><span class="p">,</span>
+                                         <span class="n">bm1_counts</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                         <span class="n">bm1_counts_sd</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPdiv</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span>
+                              <span class="n">detector_sd</span><span class="p">,</span>
+                              <span class="n">bm1_counts</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                              <span class="n">bm1_counts_sd</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+            <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">output</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        now work out dlambda/lambda, the resolution contribution from</span>
+<span class="sd">        wavelength.</span>
+<span class="sd">        van Well, Physica B,  357(2005) pp204-207), eqn 4.</span>
+<span class="sd">        this is only an approximation for our instrument, as the 2nd and 3rd</span>
+<span class="sd">        discs have smaller openings compared to the master chopper.</span>
+<span class="sd">        Therefore the burst time needs to be looked at.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">tau_da</span> <span class="o">=</span> <span class="n">m_spec_tof_hist</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">m_spec_tof_hist</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">m_lambda_fwhm</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">resolution_double_chopper</span><span class="p">(</span><span class="n">m_lambda</span><span class="p">,</span>
+                                     <span class="n">z0</span><span class="o">=</span><span class="n">d_cx</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1000.</span><span class="p">,</span>
+                                     <span class="n">freq</span><span class="o">=</span><span class="n">cat</span><span class="o">.</span><span class="n">frequency</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                     <span class="n">L</span><span class="o">=</span><span class="n">flight_distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1000.</span><span class="p">,</span>
+                                     <span class="n">H</span><span class="o">=</span><span class="n">cat</span><span class="o">.</span><span class="n">ss2vg</span><span class="p">[</span><span class="n">originalscanpoint</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1000.</span><span class="p">,</span>
+                                     <span class="n">xsi</span><span class="o">=</span><span class="n">phase_angle</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                     <span class="n">tau_da</span><span class="o">=</span><span class="n">tau_da</span><span class="p">)</span>
+
+        <span class="n">m_lambda_fwhm</span> <span class="o">*=</span> <span class="n">m_lambda</span>
+
+        <span class="c"># put the detector positions and mode into the dictionary as well.</span>
+        <span class="n">detector_z</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">dz</span>
+        <span class="n">detector_y</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">dy</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">mode</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;datafilename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">filename</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;datafile_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">datafile_number</span>
+
+        <span class="k">if</span> <span class="n">h5norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s">&#39;normfilename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5norm</span><span class="o">.</span><span class="n">filename</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_topandtail&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_topandtail_sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector_sd</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;n_spectra&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_spectra</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;bm1_counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bm1_counts</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_spec</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_spec_sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_spec_sd</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_beampos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam_centre</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_lambda</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_lambda_fwhm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_lambda_fwhm</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_lambda_hist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_lambda_hist</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;m_spec_tof&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_spec_tof</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;detector_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector_z</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;detector_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector_y</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;domega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">domega</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;lopx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lopx</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;hipx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hipx</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="k">return</span> <span class="n">m_lambda</span><span class="p">,</span> <span class="n">m_spec</span><span class="p">,</span> <span class="n">m_spec_sd</span>
+</div>
+<div class="viewcode-block" id="PlatypusNexus.phase_angle"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus.phase_angle">[docs]</a>    <span class="k">def</span> <span class="nf">phase_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the phase angle for a given scanpoint</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scanpoint : int</span>
+<span class="sd">            The scanpoint you&#39;re interested in</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        phase_angle, master_opening : float</span>
+<span class="sd">            The phase angle in degrees, and the angular opening of the master</span>
+<span class="sd">            chopper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat</span>
+        <span class="n">master</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">master</span>
+        <span class="n">slave</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">slave</span>
+        <span class="n">disc_phase</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">phase</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">phase_angle</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">master</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">O_C1d</span>
+            <span class="n">master_opening</span> <span class="o">=</span> <span class="n">O_C1</span>
+        <span class="k">elif</span> <span class="n">master</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">O_C2d</span>
+            <span class="n">master_opening</span> <span class="o">=</span> <span class="n">O_C2</span>
+        <span class="k">elif</span> <span class="n">master</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">O_C3d</span>
+            <span class="n">master_opening</span> <span class="o">=</span> <span class="n">O_C3</span>
+
+        <span class="k">if</span> <span class="n">slave</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">O_C2d</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="o">-</span><span class="n">disc_phase</span> <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper2_phase_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">slave</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">O_C3d</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="o">-</span><span class="n">disc_phase</span> <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper3_phase_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">slave</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">O_C4d</span>
+            <span class="n">phase_angle</span> <span class="o">+=</span> <span class="n">disc_phase</span> <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper4_phase_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">phase_angle</span><span class="p">,</span> <span class="n">master_opening</span>
+</div>
+<div class="viewcode-block" id="PlatypusNexus.chod"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus.chod">[docs]</a>    <span class="k">def</span> <span class="nf">chod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">twotheta</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the flight length of the neutrons in the Platypus instrument.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        omega : float, optional</span>
+<span class="sd">            Rough angle of incidence</span>
+<span class="sd">        twotheta : float, optional</span>
+<span class="sd">            Rough 2 theta angle</span>
+<span class="sd">        scanpoint : int, optional</span>
+<span class="sd">            Which dataset is being considered</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        chod, d_cx : float, float</span>
+<span class="sd">            Flight distance (mm), distance between chopper discs (mm)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">chod</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># guide 1 is the single deflection mirror (SB)</span>
+        <span class="c"># its distance is from chopper 1 to the middle of the mirror (1m long)</span>
+        <span class="c"># guide 2 is the double deflection mirror (DB)</span>
+        <span class="c"># its distance is from chopper 1 to the middle of the second of the</span>
+        <span class="c"># compound mirrors! (a bit weird, I know).</span>
+
+        <span class="n">cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">mode</span>
+
+        <span class="c"># Find out chopper pairing</span>
+        <span class="n">master</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">master</span>
+        <span class="n">slave</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">slave</span>
+
+        <span class="n">d_cx</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">master</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">chod</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">master</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">chod</span> <span class="o">-=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">d_cx</span> <span class="o">-=</span> <span class="n">chod</span>
+        <span class="k">elif</span> <span class="n">master</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">chod</span> <span class="o">-=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper3_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">d_cx</span> <span class="o">-=</span> <span class="n">chod</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Chopper pairing should be one of &#39;12&#39;, &#39;13&#39;,&quot;</span>
+                             <span class="s">&quot;&#39;14&#39;, &#39;23&#39;, &#39;24&#39;, &#39;34&#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">slave</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">chod</span> <span class="o">-=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">d_cx</span> <span class="o">+=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">slave</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">chod</span> <span class="o">-=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper3_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">d_cx</span> <span class="o">+=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper3_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">slave</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">chod</span> <span class="o">-=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper4_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">d_cx</span> <span class="o">+=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper4_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># start of flight length is midway between master and slave, but master</span>
+        <span class="c"># may not necessarily be disk 1. However, all instrument lengths are</span>
+        <span class="c"># measured from disk1</span>
+        <span class="n">chod</span> <span class="o">/=</span> <span class="mf">2.</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;FOC&#39;</span><span class="p">,</span> <span class="s">&#39;POL&#39;</span><span class="p">,</span> <span class="s">&#39;MT&#39;</span><span class="p">,</span> <span class="s">&#39;POLANAL&#39;</span><span class="p">]:</span>
+            <span class="n">chod</span> <span class="o">+=</span> <span class="n">cat</span><span class="o">.</span><span class="n">sample_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">chod</span> <span class="o">+=</span> <span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">twotheta</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;SB&#39;</span><span class="p">:</span>
+            <span class="c"># assumes guide1_distance is in the MIDDLE OF THE MIRROR</span>
+            <span class="n">chod</span> <span class="o">+=</span> <span class="n">cat</span><span class="o">.</span><span class="n">guide1_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">chod</span> <span class="o">+=</span> <span class="p">((</span><span class="n">cat</span><span class="o">.</span><span class="n">sample_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">guide1_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                     <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">omega</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">twotheta</span> <span class="o">&gt;</span> <span class="n">omega</span><span class="p">:</span>
+                <span class="n">chod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span> <span class="o">/</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">twotheta</span> <span class="o">-</span> <span class="n">omega</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+                         <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">omega</span> <span class="o">-</span> <span class="n">twotheta</span><span class="p">)))</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;DB&#39;</span><span class="p">:</span>
+            <span class="c"># guide2_distance in in the middle of the 2nd compound mirror</span>
+            <span class="c"># guide2_distance - longitudinal length from midpoint1 -&gt; midpoint2</span>
+            <span class="c">#  + direct length from midpoint1-&gt;midpoint2</span>
+            <span class="n">chod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">guide2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                     <span class="o">+</span> <span class="mf">600.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">1.2</span><span class="p">))</span>
+                     <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">2.4</span><span class="p">))))</span>
+
+            <span class="c"># add on distance from midpoint2 to sample</span>
+            <span class="n">chod</span> <span class="o">+=</span> <span class="p">((</span><span class="n">cat</span><span class="o">.</span><span class="n">sample_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">guide2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                     <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">4.8</span><span class="p">)))</span>
+
+            <span class="c"># add on sample -&gt; detector</span>
+            <span class="k">if</span> <span class="n">twotheta</span> <span class="o">&gt;</span> <span class="n">omega</span><span class="p">:</span>
+                <span class="n">chod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+                         <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">twotheta</span> <span class="o">-</span> <span class="mf">4.8</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+                         <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">4.8</span> <span class="o">-</span> <span class="n">twotheta</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">chod</span><span class="p">,</span> <span class="n">d_cx</span>
+</div>
+<div class="viewcode-block" id="PlatypusNexus.process_event_stream"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus.process_event_stream">[docs]</a>    <span class="k">def</span> <span class="nf">process_event_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">x_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">y_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                             <span class="n">frame_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes the event mode dataset for the nexus file. Assumes that</span>
+<span class="sd">        there is a event mode directory in the same directory as the NeXUS</span>
+<span class="sd">        file, as specified by in &#39;entry1/instrument/detector/daq_dirname&#39;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frame_bins : array_like, optional</span>
+<span class="sd">            specifies the frame bins required in the image. If</span>
+<span class="sd">            framebins = [5, 10, 120] you will get 2 images.  The first starts</span>
+<span class="sd">            at 5s and finishes at 10s. The second starts at 10s and finishes</span>
+<span class="sd">            at 120s. If frame_bins has zero length, e.g. [], then a single</span>
+<span class="sd">            interval consisting of the entire acquisition time is used:</span>
+<span class="sd">            [0, acquisition_time].</span>
+<span class="sd">        t_bins : array_like, optional</span>
+<span class="sd">            specifies the time bins required in the image</span>
+<span class="sd">        x_bins : array_like, optional</span>
+<span class="sd">            specifies the x bins required in the image</span>
+<span class="sd">        y_bins : array_like, optional</span>
+<span class="sd">            specifies the y bins required in the image</span>
+<span class="sd">        scanpoint : int, optional</span>
+<span class="sd">            Scanpoint you are interested in</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        frame_bins, detector, bm1_counts</span>
+
+<span class="sd">        Create a new detector image based on the t_bins, x_bins, y_bins and</span>
+<span class="sd">        frame_bins you supply to the method (these should all be lists/numpy</span>
+<span class="sd">        arrays specifying the edges of the required bins). If these are not</span>
+<span class="sd">        specified, then the default bins are taken from the nexus file. This</span>
+<span class="sd">        would essentially return the same detector image as the nexus file.</span>
+<span class="sd">        However, you can specify the frame_bins list to generate detector</span>
+<span class="sd">        images based on subdivided periods of the total acquisition.</span>
+<span class="sd">        For example if framebins = [5, 10, 120] you will get 2 images.  The</span>
+<span class="sd">        first starts at 5s and finishes at 10s. The second starts at 10s</span>
+<span class="sd">        and finishes at 120s. The frame_bins are clipped to the total</span>
+<span class="sd">        acquisition time if necessary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">t_bins</span><span class="p">:</span>
+            <span class="n">t_bins</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">t_bins</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">y_bins</span><span class="p">:</span>
+            <span class="n">y_bins</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">y_bins</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">x_bins</span><span class="p">:</span>
+            <span class="n">x_bins</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">x_bins</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">frame_bins</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">frame_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]]</span>
+
+        <span class="n">total_acquisition_time</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">frequency</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">frequency</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+
+        <span class="n">bm1_counts_for_scanpoint</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">bm1_counts</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
+
+        <span class="n">event_directory_name</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">daq_dirname</span>
+
+        <span class="n">stream_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                       <span class="n">event_directory_name</span><span class="p">,</span>
+                                       <span class="s">&#39;DATASET_</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">scanpoint</span><span class="p">,</span>
+                                       <span class="s">&#39;EOS.bin&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">stream_filename</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">events</span><span class="p">,</span> <span class="n">end_of_last_event</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">events</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
+                                    <span class="n">max_frames</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">frequency</span><span class="p">))</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">process_event_stream</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">)</span>
+                                            <span class="o">*</span> <span class="n">frequency</span><span class="p">,</span>
+                                            <span class="n">t_bins</span><span class="p">,</span>
+                                            <span class="n">y_bins</span><span class="p">,</span>
+                                            <span class="n">x_bins</span><span class="p">)</span>
+
+        <span class="n">detector</span><span class="p">,</span> <span class="n">new_frame_bins</span> <span class="o">=</span> <span class="n">output</span>
+
+        <span class="n">new_frame_bins</span> <span class="o">/=</span> <span class="n">frequency</span>
+
+        <span class="n">bm1_counts</span> <span class="o">=</span> <span class="n">new_frame_bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">new_frame_bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">bm1_counts</span> <span class="o">*=</span> <span class="p">(</span><span class="n">bm1_counts_for_scanpoint</span> <span class="o">/</span> <span class="n">total_acquisition_time</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_frame_bins</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">bm1_counts</span>
+</div>
+<div class="viewcode-block" id="PlatypusNexus.write_spectrum_dat"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus.write_spectrum_dat">[docs]</a>    <span class="k">def</span> <span class="nf">write_spectrum_dat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method writes a dat representation of the corrected spectrum to</span>
+<span class="sd">        file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        f : file-like object</span>
+<span class="sd">            The file to write the spectrum to</span>
+<span class="sd">        scanpoint : int</span>
+<span class="sd">            Which scanpoint to write.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">m_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">m_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">m_lambda_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_sd&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
+
+        <span class="n">stacked_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">m_lambda</span><span class="p">,</span> <span class="n">m_spec</span><span class="p">,</span> <span class="n">m_spec_sd</span><span class="p">,</span> <span class="n">m_lambda_sd</span><span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">stacked_data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="PlatypusNexus.write_spectrum_xml"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.PlatypusNexus.write_spectrum_xml">[docs]</a>    <span class="k">def</span> <span class="nf">write_spectrum_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method writes an XML representation of the corrected spectrum to</span>
+<span class="sd">        file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        f : file-like object</span>
+<span class="sd">            The file to write the spectrum to</span>
+<span class="sd">        scanpoint : int</span>
+<span class="sd">            Which scanpoint to write.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">spectrum_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="s">        &lt;REFroot xmlns=&quot;&quot;&gt;</span>
+<span class="s">        &lt;REFentry time=&quot;$time&quot;&gt;</span>
+<span class="s">        &lt;Title&gt;$title&lt;/Title&gt;</span>
+<span class="s">        &lt;REFdata axes=&quot;lambda&quot; rank=&quot;1&quot; type=&quot;POINT&quot; spin=&quot;UNPOLARISED&quot; dim=&quot;$n_spectra&quot;&gt;</span>
+<span class="s">        &lt;Run filename=&quot;$runnumber&quot;/&gt;</span>
+<span class="s">        &lt;R uncertainty=&quot;dR&quot;&gt;$r&lt;/R&gt;</span>
+<span class="s">        &lt;lambda uncertainty=&quot;dlambda&quot; units=&quot;1/A&quot;&gt;$l&lt;/lambda&gt;</span>
+<span class="s">        &lt;dR type=&quot;SD&quot;&gt;$dr&lt;/dR&gt;</span>
+<span class="s">        &lt;dlambda type=&quot;_FWHM&quot; units=&quot;1/A&quot;&gt;$dl&lt;/dlambda&gt;</span>
+<span class="s">        &lt;/REFdata&gt;</span>
+<span class="s">        &lt;/REFentry&gt;</span>
+<span class="s">        &lt;/REFroot&gt;&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="n">spectrum_template</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">sample_name</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%a, </span><span class="si">%d</span><span class="s"> %b %Y %H:%M:%S +0000&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">())</span>
+
+        <span class="n">m_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">]</span>
+        <span class="n">m_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">]</span>
+        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">]</span>
+        <span class="n">m_lambda_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_sd&#39;</span><span class="p">]</span>
+
+        <span class="c"># sort the data</span>
+        <span class="nb">sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_lambda</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">m_spec</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">m_lambda</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
+        <span class="n">dl</span> <span class="o">=</span> <span class="n">m_lambda_sd</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="n">m_spec_sd</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;n_spectra&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;n_spectra&#39;</span><span class="p">]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;runnumber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;PLP{:07d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">datafile_number</span><span class="p">)</span>
+
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">dr</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;l&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">dl</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">thefile</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">thefile</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_sd&#39;</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="create_detector_norm"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.create_detector_norm">[docs]</a><span class="k">def</span> <span class="nf">create_detector_norm</span><span class="p">(</span><span class="n">h5norm</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produces a detector normalisation array for Platypus.</span>
+<span class="sd">    Here we average over N, T and X to provide  a relative efficiency for each</span>
+<span class="sd">    y wire.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    h5norm : hdf5 file</span>
+<span class="sd">        Containing a flood field run (water)</span>
+<span class="sd">    x_min : int</span>
+<span class="sd">        Minimum x pixel to use</span>
+<span class="sd">    x_max : int</span>
+<span class="sd">        Maximum x pixel to use</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    norm, norm_sd : array_like</span>
+<span class="sd">        1D array containing the normalisation data for each y pixel</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># sum over N and T</span>
+    <span class="n">detector</span> <span class="o">=</span> <span class="n">h5norm</span><span class="p">[</span><span class="s">&#39;entry1/data/hmm&#39;</span><span class="p">]</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                  <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+    <span class="c"># By this point you have norm[y][x]</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span><span class="p">[:,</span> <span class="n">x_min</span><span class="p">:</span> <span class="n">x_max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">norm</span> <span class="o">/</span> <span class="n">mean</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span> <span class="o">/</span> <span class="n">mean</span>
+
+</div>
+<div class="viewcode-block" id="background_subtract"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.background_subtract">[docs]</a><span class="k">def</span> <span class="nf">background_subtract</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">,</span> <span class="n">background_mask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Background subtraction of Platypus detector image.</span>
+<span class="sd">    Shape of detector is (N, T, Y), do a linear background subn for each</span>
+<span class="sd">    (N, T) slice.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector : np.ndarray</span>
+<span class="sd">        detector array with shape (N, T, Y).</span>
+<span class="sd">    detector_sd : np.ndarray</span>
+<span class="sd">        standard deviations for detector array</span>
+<span class="sd">    background_mask : array_like</span>
+<span class="sd">        array of bool with shape (N, T, Y) that specifies which Y pixels to use</span>
+<span class="sd">        for background subtraction.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    detector, detector_sd : np.ndarray, np.ndarray</span>
+<span class="sd">        Detector image with background subtracted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+    <span class="n">ret_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndindex</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span> <span class="mi">2</span><span class="p">]):</span>
+        <span class="n">ret</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">ret_sd</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">background_subtract_line</span><span class="p">(</span><span class="n">detector</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                                         <span class="n">detector_sd</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                                         <span class="n">background_mask</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="n">ret_sd</span>
+
+</div>
+<div class="viewcode-block" id="background_subtract_line"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.background_subtract_line">[docs]</a><span class="k">def</span> <span class="nf">background_subtract_line</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">profile_sd</span><span class="p">,</span> <span class="n">background_mask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs a linear background subtraction on a 1D peak profile</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    profile : np.ndarray</span>
+<span class="sd">        1D profile</span>
+<span class="sd">    profile_sd : np.ndarray</span>
+<span class="sd">        standard deviations for profile</span>
+<span class="sd">    background_mask : array_like</span>
+<span class="sd">        array of bool that specifies which Y pixels to use for background</span>
+<span class="sd">        subtraction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># which values to use as a background region</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">background_mask</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;bool&#39;</span><span class="p">)</span>
+    <span class="n">x_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">y_vals</span> <span class="o">=</span> <span class="n">profile</span><span class="p">[</span><span class="n">x_vals</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span>
+
+    <span class="n">y_sdvals</span> <span class="o">=</span> <span class="n">profile_sd</span><span class="p">[</span><span class="n">x_vals</span><span class="p">]</span>
+    <span class="n">x_vals</span> <span class="o">=</span> <span class="n">x_vals</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;float&#39;</span><span class="p">)</span>
+
+    <span class="c"># some SD values may have 0 SD, which will screw up curvefitting.</span>
+    <span class="n">y_sdvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y_sdvals</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y_sdvals</span><span class="p">)</span>
+
+    <span class="c"># equation for a straight line</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">x</span>
+
+    <span class="c"># estimate the linear fit</span>
+    <span class="n">y_bar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_vals</span><span class="p">)</span>
+    <span class="n">x_bar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span>
+    <span class="n">bhat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_vals</span> <span class="o">-</span> <span class="n">x_bar</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_vals</span> <span class="o">-</span> <span class="n">y_bar</span><span class="p">))</span>
+    <span class="n">bhat</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_vals</span> <span class="o">-</span> <span class="n">x_bar</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">ahat</span> <span class="o">=</span> <span class="n">y_bar</span> <span class="o">-</span> <span class="n">bhat</span> <span class="o">*</span> <span class="n">x_bar</span>
+
+    <span class="c"># get the weighted fit values</span>
+    <span class="c"># we know the absolute sigma values</span>
+    <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">y_sdvals</span><span class="p">,</span>
+                           <span class="n">p0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ahat</span><span class="p">,</span> <span class="n">bhat</span><span class="p">]),</span> <span class="n">absolute_sigma</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">CI</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">pcovmat</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pcovmat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pcovmat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">xx</span>
+                <span class="o">+</span> <span class="n">pcovmat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">xx</span> <span class="o">+</span> <span class="n">pcovmat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">bkgd</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c"># now work out confidence intervals</span>
+    <span class="c"># TODO, should this be confidence interval or prediction interval?</span>
+    <span class="c"># if you try to do a fit which has a singular matrix</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">pcov</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">bkgd_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">CI</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pcov</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">))],</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bkgd_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">bkgd</span><span class="p">)</span>
+
+    <span class="n">bkgd_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">bkgd_sd</span><span class="p">)</span>
+
+    <span class="c"># get the t value for a two sided student t test at the 68.3 confidence</span>
+    <span class="c"># level</span>
+    <span class="n">bkgd_sd</span> <span class="o">*=</span> <span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="mf">0.1585</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPsub</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">profile_sd</span><span class="p">,</span> <span class="n">bkgd</span><span class="p">,</span> <span class="n">bkgd_sd</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="find_specular_ridge"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.find_specular_ridge">[docs]</a><span class="k">def</span> <span class="nf">find_specular_ridge</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">,</span> <span class="n">starting_offset</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                        <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the specular ridges in a detector(n, t, y) plot. Assumes that the</span>
+<span class="sd">    specular ridge _does not_ change position.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector : array_like</span>
+<span class="sd">        detector array</span>
+<span class="sd">    detector_sd : array_like</span>
+<span class="sd">        standard deviations of detector array</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    centre, SD:</span>
+<span class="sd">        peak centres and standard deviations of peak width</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">beam_centre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">beam_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">search_increment</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="n">starting_offset</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">starting_offset</span><span class="p">)</span>
+
+    <span class="n">n_increments</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">starting_offset</span><span class="p">)</span>
+                    <span class="o">//</span> <span class="n">search_increment</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="n">last_centre</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+        <span class="n">last_sd</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+        <span class="n">converged</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_increments</span><span class="p">):</span>
+            <span class="n">how_many</span> <span class="o">=</span> <span class="o">-</span><span class="n">starting_offset</span> <span class="o">-</span> <span class="n">search_increment</span> <span class="o">*</span> <span class="n">i</span>
+
+            <span class="n">det_subset</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">how_many</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">det_sd_subset</span> <span class="o">=</span> <span class="n">detector_sd</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">how_many</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c"># Uncertainties code takes a while to run</span>
+            <span class="c"># total_y = np.sum(det_subset, axis=0)</span>
+            <span class="n">y_cross</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">det_subset</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">y_cross_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">det_sd_subset</span> <span class="o">**</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="c"># find the centroid and gauss peak in the last sections of the TOF</span>
+            <span class="c"># plot</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">centroid</span><span class="p">,</span> <span class="n">gauss_peak</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">peak_finder</span><span class="p">(</span><span class="n">y_cross</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">y_cross_sd</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">((</span><span class="n">gauss_peak</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">last_centre</span><span class="p">)</span> <span class="o">/</span> <span class="n">last_centre</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+                <span class="ow">and</span> <span class="nb">abs</span><span class="p">((</span><span class="n">gauss_peak</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">last_sd</span><span class="p">)</span> <span class="o">/</span> <span class="n">last_sd</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">):</span>
+                <span class="n">last_centre</span> <span class="o">=</span> <span class="n">gauss_peak</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">last_sd</span> <span class="o">=</span> <span class="n">gauss_peak</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">converged</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+
+            <span class="n">last_centre</span> <span class="o">=</span> <span class="n">gauss_peak</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">last_sd</span> <span class="o">=</span> <span class="n">gauss_peak</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;specular ridge search did not work properly&#39;</span>
+                          <span class="s">&#39; using last known centre&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+        <span class="n">beam_centre</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_centre</span>
+        <span class="n">beam_sd</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">last_sd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">beam_centre</span><span class="p">,</span> <span class="n">beam_sd</span>
+
+</div>
+<div class="viewcode-block" id="correct_for_gravity"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.correct_for_gravity">[docs]</a><span class="k">def</span> <span class="nf">correct_for_gravity</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span><span class="p">,</span> <span class="n">lamda</span><span class="p">,</span> <span class="n">coll_distance</span><span class="p">,</span>
+                        <span class="n">sample_det</span><span class="p">,</span> <span class="n">lo_wavelength</span><span class="p">,</span> <span class="n">hi_wavelength</span><span class="p">,</span>
+                        <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a gravity corrected yt plot, given the data, its associated errors,</span>
+<span class="sd">    the wavelength corresponding to each of the time bins, and the trajectory</span>
+<span class="sd">    of the neutrons. Low lambda and high Lambda are wavelength cutoffs to</span>
+<span class="sd">    ignore.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector : np.ndarray</span>
+<span class="sd">        Detector image. Has shape (N, T, Y)</span>
+<span class="sd">    detector_sd : np.ndarray</span>
+<span class="sd">        Standard deviations of detector image</span>
+<span class="sd">    lamda : np.ndarray</span>
+<span class="sd">        Wavelengths corresponding to the detector image, has shape (N, T)</span>
+<span class="sd">    coll_distance : float</span>
+<span class="sd">        Collimation distance between slits, mm</span>
+<span class="sd">    sample_det : float</span>
+<span class="sd">        Sample - detector distance, mm</span>
+<span class="sd">    lo_wavelength : float</span>
+<span class="sd">        Low wavelength cut off, Angstrom</span>
+<span class="sd">    hi_wavelength : float</span>
+<span class="sd">        High wavelength cutoff, Angstrom</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Angle between second collimation slit, first collimation slit, and</span>
+<span class="sd">        horizontal</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    corrected_data, corrected_data_sd, m_gravcorrcoefs :</span>
+<span class="sd">                    np.ndarray, np.ndarray, np.ndarray</span>
+<span class="sd">        Corrected image. This is a theoretical prediction where the spectral</span>
+<span class="sd">        ridge is for each wavelength.  This will be used to calculate the</span>
+<span class="sd">        actual angle of incidence in the reduction process.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">lamda</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">x_init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+
+    <span class="n">m_gravcorrcoefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+    <span class="n">corrected_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+    <span class="n">corrected_data_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="n">neutron_speeds</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">wavelength_velocity</span><span class="p">(</span><span class="n">lamda</span><span class="p">[</span><span class="n">spec</span><span class="p">])</span>
+        <span class="n">trajectories</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">find_trajectory</span><span class="p">(</span><span class="n">coll_distance</span> <span class="o">/</span> <span class="mf">1000.</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">neutron_speeds</span><span class="p">)</span>
+        <span class="n">travel_distance</span> <span class="o">=</span> <span class="p">(</span><span class="n">coll_distance</span> <span class="o">+</span> <span class="n">sample_det</span><span class="p">[</span><span class="n">spec</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1000.</span>
+
+        <span class="c"># centres(t,)</span>
+        <span class="c"># TODO, don&#39;t use centroids, use Gaussian peak</span>
+        <span class="n">centroids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">ut</span><span class="o">.</span><span class="n">centroid</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">detector</span><span class="p">[</span><span class="n">spec</span><span class="p">])</span>
+        <span class="n">lopx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">lamda</span><span class="p">[</span><span class="n">spec</span><span class="p">],</span> <span class="n">lo_wavelength</span><span class="p">)</span>
+        <span class="n">hipx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">lamda</span><span class="p">[</span><span class="n">spec</span><span class="p">],</span> <span class="n">hi_wavelength</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">tru_centre</span><span class="p">):</span>
+            <span class="n">deflections</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">y_deflection</span><span class="p">(</span><span class="n">trajectories</span><span class="p">[</span><span class="n">lopx</span><span class="p">:</span> <span class="n">hipx</span><span class="p">],</span> <span class="n">neutron_speeds</span><span class="p">[</span><span class="n">lopx</span><span class="p">:</span> <span class="n">hipx</span><span class="p">],</span> <span class="n">travel_distance</span><span class="p">)</span>
+
+            <span class="n">model</span> <span class="o">=</span> <span class="mf">1000.</span> <span class="o">*</span> <span class="n">deflections</span> <span class="o">/</span> <span class="n">Y_PIXEL_SPACING</span> <span class="o">+</span> <span class="n">tru_centre</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">model</span> <span class="o">-</span> <span class="n">centroids</span><span class="p">[</span><span class="n">lopx</span><span class="p">:</span> <span class="n">hipx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">diff</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">diff</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">diff</span>
+
+        <span class="c"># find the beam centre for an infinitely fast neutron</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">centroids</span><span class="p">[</span><span class="n">lopx</span><span class="p">:</span> <span class="n">hipx</span><span class="p">,</span> <span class="mi">0</span><span class="p">])])</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">leastsq</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
+        <span class="n">m_gravcorrcoefs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">total_deflection</span> <span class="o">=</span> <span class="mf">1000.</span> <span class="o">*</span> <span class="n">pm</span><span class="o">.</span><span class="n">y_deflection</span><span class="p">(</span><span class="n">trajectories</span><span class="p">,</span> <span class="n">neutron_speeds</span><span class="p">,</span> <span class="n">travel_distance</span><span class="p">)</span>
+        <span class="n">total_deflection</span> <span class="o">/=</span> <span class="n">Y_PIXEL_SPACING</span>
+
+        <span class="n">x_rebin</span> <span class="o">=</span> <span class="n">x_init</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">total_deflection</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">wavelength</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">rebin</span><span class="o">.</span><span class="n">rebin</span><span class="p">(</span><span class="n">x_init</span><span class="p">,</span>
+                                 <span class="n">detector</span><span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">],</span>
+                                 <span class="n">x_rebin</span><span class="p">[</span><span class="n">wavelength</span><span class="p">],</span>
+                                 <span class="n">y1_sd</span><span class="o">=</span><span class="n">detector_sd</span><span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">])</span>
+
+            <span class="n">corrected_data</span><span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">corrected_data_sd</span><span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">corrected_data</span><span class="p">,</span> <span class="n">corrected_data_sd</span><span class="p">,</span> <span class="n">m_gravcorrcoefs</span>
+
+</div>
+<div class="viewcode-block" id="calculate_wavelength_bins"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.calculate_wavelength_bins">[docs]</a><span class="k">def</span> <span class="nf">calculate_wavelength_bins</span><span class="p">(</span><span class="n">lo_wavelength</span><span class="p">,</span> <span class="n">hi_wavelength</span><span class="p">,</span> <span class="n">rebin_percent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates optimal logarithmically spaced wavelength histogram bins. The</span>
+<span class="sd">    bins are equal size in log10 space, but they may not be exactly be</span>
+<span class="sd">    `rebin_percent` in size. The limits would have to change slightly for that.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lo_wavelength : float</span>
+<span class="sd">        Low wavelength cutoff</span>
+<span class="sd">    hi_wavelength : float</span>
+<span class="sd">        High wavelength cutoff</span>
+<span class="sd">    rebin_percent : float</span>
+<span class="sd">        Rebinning percentage</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    wavelength_bins : np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frac</span> <span class="o">=</span> <span class="p">(</span><span class="n">rebin_percent</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">lowspac</span> <span class="o">=</span> <span class="n">rebin_percent</span> <span class="o">/</span> <span class="mf">100.</span> <span class="o">*</span> <span class="n">lo_wavelength</span>
+    <span class="n">hispac</span> <span class="o">=</span> <span class="n">rebin_percent</span> <span class="o">/</span> <span class="mf">100.</span> <span class="o">*</span> <span class="n">hi_wavelength</span>
+
+    <span class="n">lowl</span> <span class="o">=</span> <span class="n">lo_wavelength</span> <span class="o">-</span> <span class="n">lowspac</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">hil</span> <span class="o">=</span> <span class="n">hi_wavelength</span> <span class="o">+</span> <span class="n">hispac</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">num_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">hil</span> <span class="o">/</span> <span class="n">lowl</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">frac</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">rebinning</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lowl</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">hil</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="n">num_steps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rebinning</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;Process some Platypus NeXUS&#39;</span>
+                                                 <span class="s">&#39;files to produce their TOF &#39;</span>
+                                                 <span class="s">&#39;spectra.&#39;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;file_list&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;N&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;integer file numbers&#39;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-b&#39;</span><span class="p">,</span> <span class="s">&#39;--bdir&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;define the location to find the nexus files&#39;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--direct&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;is the file a direct beam?&#39;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="s">&#39;--rebin&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;rebin percentage for the wavelength -1&lt;rebin&lt;10&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-ll&#39;</span><span class="p">,</span> <span class="s">&#39;--lolambda&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;lo wavelength cutoff for the rebinning&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-hl&#39;</span><span class="p">,</span> <span class="s">&#39;--hilambda&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;lo wavelength cutoff for the rebinning&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mf">19.</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="s">&#39;--integrate&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;-1 to integrate all spectra, otherwise enter the&#39;</span>
+                             <span class="s">&#39; spectrum number.&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">file_list</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;PLP</span><span class="si">%07d</span><span class="s">.nx.hdf&#39;</span> <span class="o">%</span> <span class="nb">file</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">bdir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">PlatypusNexus</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">lo_wavelength</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">lolambda</span><span class="p">,</span>
+                      <span class="n">hi_wavelength</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">hilambda</span><span class="p">,</span>
+                      <span class="n">direct</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">direct</span><span class="p">,</span>
+                      <span class="n">rebin_percent</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">rebin</span><span class="p">,</span>
+                      <span class="n">integrate</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">integrate</span><span class="p">)</span>
+
+            <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;PLP</span><span class="si">%07d</span><span class="s">.spectrum&#39;</span> <span class="o">%</span> <span class="nb">file</span>
+            <span class="n">out_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">bdir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+            <span class="n">integrate</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">integrate</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">integrate</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">integrate</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">a</span><span class="o">.</span><span class="n">write_spectrum_dat</span><span class="p">(</span><span class="n">out_fname</span><span class="p">,</span> <span class="n">scanpoint</span><span class="o">=</span><span class="n">integrate</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Couldn&#39;t find file: </span><span class="si">%d</span><span class="s">.  Use --basedir option&quot;</span> <span class="o">%</span> <span class="nb">file</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

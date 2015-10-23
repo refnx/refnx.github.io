@@ -1,0 +1,1500 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.util package &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="refnx-util-package">
+<h1>refnx.util package<a class="headerlink" href="#refnx-util-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-refnx.util.ErrorProp">
+<span id="refnx-util-errorprop-module"></span><h2>refnx.util.ErrorProp module<a class="headerlink" href="#module-refnx.util.ErrorProp" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPadd">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPadd</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPadd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPadd" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A + B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPcos">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPcos</code><span class="sig-paren">(</span><em>a</em>, <em>da</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPcos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPcos" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = cos (A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPdiv">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPdiv</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPdiv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPdiv" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A / B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPexp">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPexp</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k=1</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = n * exp(k * A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPlog">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPlog</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k=1</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPlog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPlog" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = n * log(k * A )</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPlog10">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPlog10</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k=1</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPlog10"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPlog10" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = n * log10(k * A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPmul">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPmul</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPmul"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPmul" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A * B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPmulk">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPmulk</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPmulk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPmulk" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A * k</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPpow">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPpow</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPpow" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A ** B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPpowk">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPpowk</code><span class="sig-paren">(</span><em>k</em>, <em>A * n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpowk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPpowk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPsin">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPsin</code><span class="sig-paren">(</span><em>a</em>, <em>da</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPsin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPsin" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = sin (A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPsub">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPsub</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPsub"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPsub" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A - B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.ErrorProp.EPtan">
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPtan</code><span class="sig-paren">(</span><em>a</em>, <em>da</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPtan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPtan" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = tan (A)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.util.general">
+<span id="refnx-util-general-module"></span><h2>refnx.util.general module<a class="headerlink" href="#module-refnx.util.general" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.util.general.actual_footprint">
+<code class="descclassname">refnx.util.general.</code><code class="descname">actual_footprint</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>L2S</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#actual_footprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.actual_footprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the actual footprint on a sample.
+Parameters:</p>
+<blockquote>
+<div>d1 - opening of first collimation slit
+d2 - opening of second collimation slit
+L12 - distance between first and second collimation slits
+L2S - distance from second collimation slit to sample</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>(umbra_footprint, penumbra_footprint)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.angle">
+<code class="descclassname">refnx.util.general.</code><code class="descname">angle</code><span class="sig-paren">(</span><em>q</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate angle given Q and wavelength
+q - wavevector (A^-1)
+wavelength -  wavelength of radiation (Angstrom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.beamfrac">
+<code class="descclassname">refnx.util.general.</code><code class="descname">beamfrac</code><span class="sig-paren">(</span><em>FWHM</em>, <em>length</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#beamfrac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.beamfrac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the beam fraction intercepted by a sample.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>FWHM: float</strong></p>
+<blockquote>
+<div><p>The FWHM of the beam height</p>
+</div></blockquote>
+<p><strong>length: float</strong></p>
+<blockquote>
+<div><p>Length of the sample in mm</p>
+</div></blockquote>
+<p><strong>angle: float</strong></p>
+<blockquote>
+<div><p>Angle that the sample makes w.r.t the beam (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">beamfrac: float</p>
+<blockquote class="last">
+<div><p>The fraction of the beam that intercepts the sample</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.beamfrackernel">
+<code class="descclassname">refnx.util.general.</code><code class="descname">beamfrackernel</code><span class="sig-paren">(</span><em>kernelx</em>, <em>kernely</em>, <em>length</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#beamfrackernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.beamfrackernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the beam fraction intercepted by a sample of length length at sample
+tilt angle.
+The beam has the shape &#8216;kernel&#8217;, a 2 row array, which gives the PDF for the
+beam intensity as a function of height. The first row is position, the
+second row is probability at that position.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.div">
+<code class="descclassname">refnx.util.general.</code><code class="descname">div</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12=2859</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the angular resolution for a set of collimation conditions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
+<blockquote>
+<div><p>slit 1 opening</p>
+</div></blockquote>
+<p><strong>d2: float</strong></p>
+<blockquote>
+<div><p>slit 2 opening</p>
+</div></blockquote>
+<p><strong>L12: float</strong></p>
+<blockquote>
+<div><p>distance between slits</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(dtheta, alpha, beta)</p>
+<p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal</p>
+<p>resolution function</p>
+<p>alpha is the angular divergence of the penumbra</p>
+<p>beta is the angular divergence of the umbra</p>
+<p>When calculating dtheta / theta values for resolution, then dtheta is the</p>
+<p>value you need to use.</p>
+<p>See equations 11-14 in:</p>
+<p>[1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
+<p>Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</p>
+<p>reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</p>
+<p class="last">Research A, 1995, 362, 434-453</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.double_chopper_frequency">
+<code class="descclassname">refnx.util.general.</code><code class="descname">double_chopper_frequency</code><span class="sig-paren">(</span><em>min_wavelength</em>, <em>max_wavelength</em>, <em>L</em>, <em>N=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#double_chopper_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.double_chopper_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the maximum frequency available for a given wavelength band
+without getting frame overlap in a chopper spectrometer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>min_wavelength: float</strong></p>
+<blockquote>
+<div><p>minimum wavelength to be used</p>
+</div></blockquote>
+<p><strong>max_wavelength: float</strong></p>
+<blockquote>
+<div><p>maximum wavelength to be used</p>
+</div></blockquote>
+<p><strong>L: float</strong></p>
+<blockquote>
+<div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+<p><strong>N: float, optional</strong></p>
+<blockquote class="last">
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.energy_wavelength">
+<code class="descclassname">refnx.util.general.</code><code class="descname">energy_wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#energy_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.energy_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts wavelength to energy in meV
+Parameters
+&#8212;&#8212;&#8212;-
+energy : float</p>
+<blockquote>
+<div>Energy in meV.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<blockquote class="last">
+<div><p>Wavelength in Angstrom.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.height_of_beam_after_dx">
+<code class="descclassname">refnx.util.general.</code><code class="descname">height_of_beam_after_dx</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>distance</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#height_of_beam_after_dx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.height_of_beam_after_dx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the widths of beam a given distance away from a collimation slit.</p>
+<p>if distance &gt;= 0, then it&#8217;s taken to be the distance after d2.
+if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>d1 - opening of first collimation slit
+d2 - opening of second collimation slit
+L12 - distance between first and second collimation slits
+distance - distance from first or last slit to a given position</dd>
+</dl>
+<p>Units - equivalent distances (inches, mm, light years)</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>(umbra, penumbra)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.penetration_depth">
+<code class="descclassname">refnx.util.general.</code><code class="descname">penetration_depth</code><span class="sig-paren">(</span><em>qq</em>, <em>rho</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#penetration_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.penetration_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the penetration depth of a neutron/xray beam</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>qq: float</strong></p>
+<blockquote>
+<div><p>Q values to calculate the penetration depth at</p>
+</div></blockquote>
+<p><strong>rho: float or complex</strong></p>
+<blockquote>
+<div><p>Complex SLD of material</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">penetration_depth: float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.q">
+<code class="descclassname">refnx.util.general.</code><code class="descname">q</code><span class="sig-paren">(</span><em>angle</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Q given angle of incidence and wavelength
+angle - angle of incidence (degrees)
+wavelength -  wavelength of radiation (Angstrom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.qcrit">
+<code class="descclassname">refnx.util.general.</code><code class="descname">qcrit</code><span class="sig-paren">(</span><em>SLD1</em>, <em>SLD2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#qcrit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.qcrit" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate critical Q vector given SLD of super and subphases
+SLD1 - SLD of superphase (10^-6 A^-2)
+SLD2 - SLD of subphase (10^-6 A^-2)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.resolution_double_chopper">
+<code class="descclassname">refnx.util.general.</code><code class="descname">resolution_double_chopper</code><span class="sig-paren">(</span><em>wavelength</em>, <em>z0=0.358</em>, <em>R=0.35</em>, <em>freq=24</em>, <em>H=0.005</em>, <em>xsi=0</em>, <em>L=7.5</em>, <em>tau_da=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#resolution_double_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.resolution_double_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fractional resolution of a double chopper pair, dl/l.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>z0: float</strong></p>
+<blockquote>
+<div><p>distance between chopper pair (m)</p>
+</div></blockquote>
+<p><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote>
+<div><p>height of beam (m)</p>
+</div></blockquote>
+<p><strong>xsi: float</strong></p>
+<blockquote>
+<div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+<p><strong>L: float</strong></p>
+<blockquote>
+<div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+<p><strong>tau_da</strong> : float</p>
+<blockquote class="last">
+<div><p>Width of timebin (s)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.resolution_single_chopper">
+<code class="descclassname">refnx.util.general.</code><code class="descname">resolution_single_chopper</code><span class="sig-paren">(</span><em>wavelength</em>, <em>R=0.35</em>, <em>freq=24</em>, <em>H=0.005</em>, <em>phi=60</em>, <em>L=7.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#resolution_single_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.resolution_single_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fractional resolution of a single chopper, dl/l.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote>
+<div><p>height of beam (m)</p>
+</div></blockquote>
+<p><strong>phi: float</strong></p>
+<blockquote>
+<div><p>angular opening of chopper window (degrees)</p>
+</div></blockquote>
+<p><strong>L: float</strong></p>
+<blockquote class="last">
+<div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.slit_optimiser">
+<code class="descclassname">refnx.util.general.</code><code class="descname">slit_optimiser</code><span class="sig-paren">(</span><em>footprint</em>, <em>resolution</em>, <em>angle=1.0</em>, <em>L12=2859.5</em>, <em>L2S=180</em>, <em>LS3=290.5</em>, <em>LSD=2500</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#slit_optimiser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.slit_optimiser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimise slit settings for a given angular resolution, and a given footprint.</p>
+<dl class="docutils">
+<dt>footprint: float</dt>
+<dd>maximum footprint onto sample (mm)</dd>
+<dt>resolution: float</dt>
+<dd>fractional dtheta/theta resolution (FWHM)</dd>
+<dt>angle: float, optional</dt>
+<dd>angle of incidence in degrees</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.tauC">
+<code class="descclassname">refnx.util.general.</code><code class="descname">tauC</code><span class="sig-paren">(</span><em>wavelength</em>, <em>xsi=0</em>, <em>z0=0.358</em>, <em>freq=24</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#tauC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.tauC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the burst time of a double chopper pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>z0: float</strong></p>
+<blockquote>
+<div><p>distance between chopper pair (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>xsi: float</strong></p>
+<blockquote class="last">
+<div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>[1] A. A. van Well and H. Fredrikze, On the resolution and intensity of a
+time-of-flight neutron reflectometer, Physica B 357 (2005) 204-207
+[2] A. Nelson and C. Dewhurst, Towards a detailed resolution smearing
+kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
+46, 1338-1343</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.transmission_double_chopper">
+<code class="descclassname">refnx.util.general.</code><code class="descname">transmission_double_chopper</code><span class="sig-paren">(</span><em>wavelength</em>, <em>z0=0.358</em>, <em>R=0.35</em>, <em>freq=24</em>, <em>N=1</em>, <em>H=0.005</em>, <em>xsi=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#transmission_double_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.transmission_double_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transmission of a double chopper pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>z0: float</strong></p>
+<blockquote>
+<div><p>distance between chopper pair (m)</p>
+</div></blockquote>
+<p><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote>
+<div><p>height of beam (m)</p>
+</div></blockquote>
+<p><strong>xsi: float</strong></p>
+<blockquote class="last">
+<div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>[1] A. A. van Well and H. Fredrikze, On the resolution and intensity of a
+time-of-flight neutron reflectometer, Physica B 357 (2005) 204-207
+[2] A. Nelson and C. Dewhurst, Towards a detailed resolution smearing
+kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
+46, 1338-1343</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.transmission_single_chopper">
+<code class="descclassname">refnx.util.general.</code><code class="descname">transmission_single_chopper</code><span class="sig-paren">(</span><em>R=0.35</em>, <em>phi=60</em>, <em>N=1</em>, <em>H=0.005</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#transmission_single_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.transmission_single_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transmission of a single chopper</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>phi: float</strong></p>
+<blockquote>
+<div><p>angular opening of chopper disc (degrees)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote class="last">
+<div><p>height of beam (m)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>[1] A. A. van Well and H. Fredrikze, On the resolution and intensity of a
+time-of-flight neutron reflectometer, Physica B 357 (2005) 204-207
+[2] A. Nelson and C. Dewhurst, Towards a detailed resolution smearing
+kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
+46, 1338-1343</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.velocity_wavelength">
+<code class="descclassname">refnx.util.general.</code><code class="descname">velocity_wavelength</code><span class="sig-paren">(</span><em>velocity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#velocity_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.velocity_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts neutron velocity to wavelength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>velocity: float</strong></p>
+<blockquote>
+<div><p>velocity of neutron in m/s</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">wavelength: float</p>
+<blockquote class="last">
+<div><p>wavelength of neutron in A</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.wavelength">
+<code class="descclassname">refnx.util.general.</code><code class="descname">wavelength</code><span class="sig-paren">(</span><em>q</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate wavelength given Q vector and angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : float</p>
+<blockquote>
+<div><p>Wavevector (A**-1)</p>
+</div></blockquote>
+<p><strong>angle</strong> : float</p>
+<blockquote>
+<div><p>angle of incidence (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<blockquote class="last">
+<div><p>Wavelength of radiation (A)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.wavelength_energy">
+<code class="descclassname">refnx.util.general.</code><code class="descname">wavelength_energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.wavelength_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts wavelength to energy in meV
+Parameters
+&#8212;&#8212;&#8212;-
+wavelength : float</p>
+<blockquote>
+<div>Wavelength in Angstrom.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
+<blockquote class="last">
+<div><p>Energy in meV.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.wavelength_velocity">
+<code class="descclassname">refnx.util.general.</code><code class="descname">wavelength_velocity</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength_velocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.wavelength_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts wavelength to neutron velocity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength of neutron in Angstrom.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">velocity: float</p>
+<blockquote class="last">
+<div><p>velocity of neutron in ms**-1</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.xray_energy">
+<code class="descclassname">refnx.util.general.</code><code class="descname">xray_energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#xray_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.xray_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert energy (keV) to wavelength (angstrom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.xray_wavelength">
+<code class="descclassname">refnx.util.general.</code><code class="descname">xray_wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#xray_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.xray_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert energy (keV) to wavelength (angstrom)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.util.nsplice">
+<span id="refnx-util-nsplice-module"></span><h2>refnx.util.nsplice module<a class="headerlink" href="#module-refnx.util.nsplice" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.util.nsplice.get_scaling_in_overlap">
+<code class="descclassname">refnx.util.nsplice.</code><code class="descname">get_scaling_in_overlap</code><span class="sig-paren">(</span><em>x0</em>, <em>y0</em>, <em>dy0</em>, <em>x1</em>, <em>y1</em>, <em>dy1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/nsplice.html#get_scaling_in_overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.nsplice.get_scaling_in_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Obtain vertical scaling factor that splices the second dataset onto the
+first.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x0: np.ndarray</strong></p>
+<blockquote>
+<div><blockquote>
+<div><p>abscissae for the first dataset</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>y0: np.ndarray</dt>
+<dd><p class="first last">y values for the first dataset</p>
+</dd>
+<dt>dy0: np.ndarray</dt>
+<dd><p class="first last">dy (standard deviation) values for the first dataset</p>
+</dd>
+<dt>x1: np.ndarray</dt>
+<dd><p class="first last">abscissae values for the second dataset</p>
+</dd>
+<dt>y1: np.ndarray</dt>
+<dd><p class="first last">y values for the second dataset</p>
+</dd>
+<dt>dy1: np.ndarray</dt>
+<dd><p class="first last">dy (standard deviation) values for the second dataset</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points):</p>
+<blockquote>
+<div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
+They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
+<cite>overlap_points</cite> indicates the points in the <em>first</em> dataset that are
+in the overlap region.</p>
+</div></blockquote>
+<p class="last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.util.quickplot">
+<span id="refnx-util-quickplot-module"></span><h2>refnx.util.quickplot module<a class="headerlink" href="#module-refnx.util.quickplot" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.util.quickplot.the_ref_plot">
+<code class="descclassname">refnx.util.quickplot.</code><code class="descname">the_ref_plot</code><span class="sig-paren">(</span><em>name</em>, <em>xdata</em>, <em>ydata</em>, <em>yerr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/quickplot.html#the_ref_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.quickplot.the_ref_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-refnx.util">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-refnx.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.util.EPadd">
+<code class="descclassname">refnx.util.</code><code class="descname">EPadd</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPadd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPadd" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A + B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPcos">
+<code class="descclassname">refnx.util.</code><code class="descname">EPcos</code><span class="sig-paren">(</span><em>a</em>, <em>da</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPcos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPcos" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = cos (A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPdiv">
+<code class="descclassname">refnx.util.</code><code class="descname">EPdiv</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPdiv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPdiv" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A / B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPexp">
+<code class="descclassname">refnx.util.</code><code class="descname">EPexp</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k=1</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = n * exp(k * A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPlog">
+<code class="descclassname">refnx.util.</code><code class="descname">EPlog</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k=1</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPlog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPlog" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = n * log(k * A )</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPlog10">
+<code class="descclassname">refnx.util.</code><code class="descname">EPlog10</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k=1</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPlog10"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPlog10" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = n * log10(k * A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPmul">
+<code class="descclassname">refnx.util.</code><code class="descname">EPmul</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPmul"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPmul" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A * B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPmulk">
+<code class="descclassname">refnx.util.</code><code class="descname">EPmulk</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPmulk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPmulk" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A * k</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPpow">
+<code class="descclassname">refnx.util.</code><code class="descname">EPpow</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPpow" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A ** B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPpowk">
+<code class="descclassname">refnx.util.</code><code class="descname">EPpowk</code><span class="sig-paren">(</span><em>k</em>, <em>A * n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpowk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPpowk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPsin">
+<code class="descclassname">refnx.util.</code><code class="descname">EPsin</code><span class="sig-paren">(</span><em>a</em>, <em>da</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPsin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPsin" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = sin (A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPsub">
+<code class="descclassname">refnx.util.</code><code class="descname">EPsub</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>b</em>, <em>db</em>, <em>covar=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPsub"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPsub" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = A - B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.EPtan">
+<code class="descclassname">refnx.util.</code><code class="descname">EPtan</code><span class="sig-paren">(</span><em>a</em>, <em>da</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPtan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPtan" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = tan (A)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.actual_footprint">
+<code class="descclassname">refnx.util.</code><code class="descname">actual_footprint</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>L2S</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#actual_footprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.actual_footprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the actual footprint on a sample.
+Parameters:</p>
+<blockquote>
+<div>d1 - opening of first collimation slit
+d2 - opening of second collimation slit
+L12 - distance between first and second collimation slits
+L2S - distance from second collimation slit to sample</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>(umbra_footprint, penumbra_footprint)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.angle">
+<code class="descclassname">refnx.util.</code><code class="descname">angle</code><span class="sig-paren">(</span><em>q</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate angle given Q and wavelength
+q - wavevector (A^-1)
+wavelength -  wavelength of radiation (Angstrom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.beamfrac">
+<code class="descclassname">refnx.util.</code><code class="descname">beamfrac</code><span class="sig-paren">(</span><em>FWHM</em>, <em>length</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#beamfrac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.beamfrac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the beam fraction intercepted by a sample.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>FWHM: float</strong></p>
+<blockquote>
+<div><p>The FWHM of the beam height</p>
+</div></blockquote>
+<p><strong>length: float</strong></p>
+<blockquote>
+<div><p>Length of the sample in mm</p>
+</div></blockquote>
+<p><strong>angle: float</strong></p>
+<blockquote>
+<div><p>Angle that the sample makes w.r.t the beam (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">beamfrac: float</p>
+<blockquote class="last">
+<div><p>The fraction of the beam that intercepts the sample</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.beamfrackernel">
+<code class="descclassname">refnx.util.</code><code class="descname">beamfrackernel</code><span class="sig-paren">(</span><em>kernelx</em>, <em>kernely</em>, <em>length</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#beamfrackernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.beamfrackernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the beam fraction intercepted by a sample of length length at sample
+tilt angle.
+The beam has the shape &#8216;kernel&#8217;, a 2 row array, which gives the PDF for the
+beam intensity as a function of height. The first row is position, the
+second row is probability at that position.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.div">
+<code class="descclassname">refnx.util.</code><code class="descname">div</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12=2859</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the angular resolution for a set of collimation conditions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
+<blockquote>
+<div><p>slit 1 opening</p>
+</div></blockquote>
+<p><strong>d2: float</strong></p>
+<blockquote>
+<div><p>slit 2 opening</p>
+</div></blockquote>
+<p><strong>L12: float</strong></p>
+<blockquote>
+<div><p>distance between slits</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(dtheta, alpha, beta)</p>
+<p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal</p>
+<p>resolution function</p>
+<p>alpha is the angular divergence of the penumbra</p>
+<p>beta is the angular divergence of the umbra</p>
+<p>When calculating dtheta / theta values for resolution, then dtheta is the</p>
+<p>value you need to use.</p>
+<p>See equations 11-14 in:</p>
+<p>[1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
+<p>Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</p>
+<p>reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</p>
+<p class="last">Research A, 1995, 362, 434-453</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.double_chopper_frequency">
+<code class="descclassname">refnx.util.</code><code class="descname">double_chopper_frequency</code><span class="sig-paren">(</span><em>min_wavelength</em>, <em>max_wavelength</em>, <em>L</em>, <em>N=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#double_chopper_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.double_chopper_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the maximum frequency available for a given wavelength band
+without getting frame overlap in a chopper spectrometer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>min_wavelength: float</strong></p>
+<blockquote>
+<div><p>minimum wavelength to be used</p>
+</div></blockquote>
+<p><strong>max_wavelength: float</strong></p>
+<blockquote>
+<div><p>maximum wavelength to be used</p>
+</div></blockquote>
+<p><strong>L: float</strong></p>
+<blockquote>
+<div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+<p><strong>N: float, optional</strong></p>
+<blockquote class="last">
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.energy_wavelength">
+<code class="descclassname">refnx.util.</code><code class="descname">energy_wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#energy_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.energy_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts wavelength to energy in meV
+Parameters
+&#8212;&#8212;&#8212;-
+energy : float</p>
+<blockquote>
+<div>Energy in meV.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<blockquote class="last">
+<div><p>Wavelength in Angstrom.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.get_scaling_in_overlap">
+<code class="descclassname">refnx.util.</code><code class="descname">get_scaling_in_overlap</code><span class="sig-paren">(</span><em>x0</em>, <em>y0</em>, <em>dy0</em>, <em>x1</em>, <em>y1</em>, <em>dy1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/nsplice.html#get_scaling_in_overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.get_scaling_in_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Obtain vertical scaling factor that splices the second dataset onto the
+first.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x0: np.ndarray</strong></p>
+<blockquote>
+<div><blockquote>
+<div><p>abscissae for the first dataset</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>y0: np.ndarray</dt>
+<dd><p class="first last">y values for the first dataset</p>
+</dd>
+<dt>dy0: np.ndarray</dt>
+<dd><p class="first last">dy (standard deviation) values for the first dataset</p>
+</dd>
+<dt>x1: np.ndarray</dt>
+<dd><p class="first last">abscissae values for the second dataset</p>
+</dd>
+<dt>y1: np.ndarray</dt>
+<dd><p class="first last">y values for the second dataset</p>
+</dd>
+<dt>dy1: np.ndarray</dt>
+<dd><p class="first last">dy (standard deviation) values for the second dataset</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points):</p>
+<blockquote>
+<div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
+They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
+<cite>overlap_points</cite> indicates the points in the <em>first</em> dataset that are
+in the overlap region.</p>
+</div></blockquote>
+<p class="last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.height_of_beam_after_dx">
+<code class="descclassname">refnx.util.</code><code class="descname">height_of_beam_after_dx</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>distance</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#height_of_beam_after_dx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.height_of_beam_after_dx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the widths of beam a given distance away from a collimation slit.</p>
+<p>if distance &gt;= 0, then it&#8217;s taken to be the distance after d2.
+if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>d1 - opening of first collimation slit
+d2 - opening of second collimation slit
+L12 - distance between first and second collimation slits
+distance - distance from first or last slit to a given position</dd>
+</dl>
+<p>Units - equivalent distances (inches, mm, light years)</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>(umbra, penumbra)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.penetration_depth">
+<code class="descclassname">refnx.util.</code><code class="descname">penetration_depth</code><span class="sig-paren">(</span><em>qq</em>, <em>rho</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#penetration_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.penetration_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the penetration depth of a neutron/xray beam</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>qq: float</strong></p>
+<blockquote>
+<div><p>Q values to calculate the penetration depth at</p>
+</div></blockquote>
+<p><strong>rho: float or complex</strong></p>
+<blockquote>
+<div><p>Complex SLD of material</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">penetration_depth: float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.q">
+<code class="descclassname">refnx.util.</code><code class="descname">q</code><span class="sig-paren">(</span><em>angle</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Q given angle of incidence and wavelength
+angle - angle of incidence (degrees)
+wavelength -  wavelength of radiation (Angstrom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.qcrit">
+<code class="descclassname">refnx.util.</code><code class="descname">qcrit</code><span class="sig-paren">(</span><em>SLD1</em>, <em>SLD2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#qcrit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.qcrit" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate critical Q vector given SLD of super and subphases
+SLD1 - SLD of superphase (10^-6 A^-2)
+SLD2 - SLD of subphase (10^-6 A^-2)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.resolution_double_chopper">
+<code class="descclassname">refnx.util.</code><code class="descname">resolution_double_chopper</code><span class="sig-paren">(</span><em>wavelength</em>, <em>z0=0.358</em>, <em>R=0.35</em>, <em>freq=24</em>, <em>H=0.005</em>, <em>xsi=0</em>, <em>L=7.5</em>, <em>tau_da=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#resolution_double_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.resolution_double_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fractional resolution of a double chopper pair, dl/l.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>z0: float</strong></p>
+<blockquote>
+<div><p>distance between chopper pair (m)</p>
+</div></blockquote>
+<p><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote>
+<div><p>height of beam (m)</p>
+</div></blockquote>
+<p><strong>xsi: float</strong></p>
+<blockquote>
+<div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+<p><strong>L: float</strong></p>
+<blockquote>
+<div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+<p><strong>tau_da</strong> : float</p>
+<blockquote class="last">
+<div><p>Width of timebin (s)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.resolution_single_chopper">
+<code class="descclassname">refnx.util.</code><code class="descname">resolution_single_chopper</code><span class="sig-paren">(</span><em>wavelength</em>, <em>R=0.35</em>, <em>freq=24</em>, <em>H=0.005</em>, <em>phi=60</em>, <em>L=7.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#resolution_single_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.resolution_single_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fractional resolution of a single chopper, dl/l.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote>
+<div><p>height of beam (m)</p>
+</div></blockquote>
+<p><strong>phi: float</strong></p>
+<blockquote>
+<div><p>angular opening of chopper window (degrees)</p>
+</div></blockquote>
+<p><strong>L: float</strong></p>
+<blockquote class="last">
+<div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.slit_optimiser">
+<code class="descclassname">refnx.util.</code><code class="descname">slit_optimiser</code><span class="sig-paren">(</span><em>footprint</em>, <em>resolution</em>, <em>angle=1.0</em>, <em>L12=2859.5</em>, <em>L2S=180</em>, <em>LS3=290.5</em>, <em>LSD=2500</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#slit_optimiser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.slit_optimiser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimise slit settings for a given angular resolution, and a given footprint.</p>
+<dl class="docutils">
+<dt>footprint: float</dt>
+<dd>maximum footprint onto sample (mm)</dd>
+<dt>resolution: float</dt>
+<dd>fractional dtheta/theta resolution (FWHM)</dd>
+<dt>angle: float, optional</dt>
+<dd>angle of incidence in degrees</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.tauC">
+<code class="descclassname">refnx.util.</code><code class="descname">tauC</code><span class="sig-paren">(</span><em>wavelength</em>, <em>xsi=0</em>, <em>z0=0.358</em>, <em>freq=24</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#tauC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.tauC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the burst time of a double chopper pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>z0: float</strong></p>
+<blockquote>
+<div><p>distance between chopper pair (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>xsi: float</strong></p>
+<blockquote class="last">
+<div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>[1] A. A. van Well and H. Fredrikze, On the resolution and intensity of a
+time-of-flight neutron reflectometer, Physica B 357 (2005) 204-207
+[2] A. Nelson and C. Dewhurst, Towards a detailed resolution smearing
+kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
+46, 1338-1343</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.transmission_double_chopper">
+<code class="descclassname">refnx.util.</code><code class="descname">transmission_double_chopper</code><span class="sig-paren">(</span><em>wavelength</em>, <em>z0=0.358</em>, <em>R=0.35</em>, <em>freq=24</em>, <em>N=1</em>, <em>H=0.005</em>, <em>xsi=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#transmission_double_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.transmission_double_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transmission of a double chopper pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength in Angstroms</p>
+</div></blockquote>
+<p><strong>z0: float</strong></p>
+<blockquote>
+<div><p>distance between chopper pair (m)</p>
+</div></blockquote>
+<p><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>freq: float</strong></p>
+<blockquote>
+<div><p>rotation frequency of choppers (Hz)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote>
+<div><p>height of beam (m)</p>
+</div></blockquote>
+<p><strong>xsi: float</strong></p>
+<blockquote class="last">
+<div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>[1] A. A. van Well and H. Fredrikze, On the resolution and intensity of a
+time-of-flight neutron reflectometer, Physica B 357 (2005) 204-207
+[2] A. Nelson and C. Dewhurst, Towards a detailed resolution smearing
+kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
+46, 1338-1343</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.transmission_single_chopper">
+<code class="descclassname">refnx.util.</code><code class="descname">transmission_single_chopper</code><span class="sig-paren">(</span><em>R=0.35</em>, <em>phi=60</em>, <em>N=1</em>, <em>H=0.005</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#transmission_single_chopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.transmission_single_chopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transmission of a single chopper</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>R: float</strong></p>
+<blockquote>
+<div><p>radius of chopper discs (m)</p>
+</div></blockquote>
+<p><strong>phi: float</strong></p>
+<blockquote>
+<div><p>angular opening of chopper disc (degrees)</p>
+</div></blockquote>
+<p><strong>N: float</strong></p>
+<blockquote>
+<div><p>number of windows in chopper pair</p>
+</div></blockquote>
+<p><strong>H: float</strong></p>
+<blockquote class="last">
+<div><p>height of beam (m)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>[1] A. A. van Well and H. Fredrikze, On the resolution and intensity of a
+time-of-flight neutron reflectometer, Physica B 357 (2005) 204-207
+[2] A. Nelson and C. Dewhurst, Towards a detailed resolution smearing
+kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
+46, 1338-1343</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.velocity_wavelength">
+<code class="descclassname">refnx.util.</code><code class="descname">velocity_wavelength</code><span class="sig-paren">(</span><em>velocity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#velocity_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.velocity_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts neutron velocity to wavelength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>velocity: float</strong></p>
+<blockquote>
+<div><p>velocity of neutron in m/s</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">wavelength: float</p>
+<blockquote class="last">
+<div><p>wavelength of neutron in A</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.wavelength">
+<code class="descclassname">refnx.util.</code><code class="descname">wavelength</code><span class="sig-paren">(</span><em>q</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate wavelength given Q vector and angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : float</p>
+<blockquote>
+<div><p>Wavevector (A**-1)</p>
+</div></blockquote>
+<p><strong>angle</strong> : float</p>
+<blockquote>
+<div><p>angle of incidence (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<blockquote class="last">
+<div><p>Wavelength of radiation (A)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.wavelength_energy">
+<code class="descclassname">refnx.util.</code><code class="descname">wavelength_energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.wavelength_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts wavelength to energy in meV
+Parameters
+&#8212;&#8212;&#8212;-
+wavelength : float</p>
+<blockquote>
+<div>Wavelength in Angstrom.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
+<blockquote class="last">
+<div><p>Energy in meV.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.wavelength_velocity">
+<code class="descclassname">refnx.util.</code><code class="descname">wavelength_velocity</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength_velocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.wavelength_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts wavelength to neutron velocity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength of neutron in Angstrom.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">velocity: float</p>
+<blockquote class="last">
+<div><p>velocity of neutron in ms**-1</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.xray_energy">
+<code class="descclassname">refnx.util.</code><code class="descname">xray_energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#xray_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.xray_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert energy (keV) to wavelength (angstrom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.xray_wavelength">
+<code class="descclassname">refnx.util.</code><code class="descname">xray_wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#xray_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.xray_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert energy (keV) to wavelength (angstrom)</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">refnx.util package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-refnx.util.ErrorProp">refnx.util.ErrorProp module</a></li>
+<li><a class="reference internal" href="#module-refnx.util.general">refnx.util.general module</a></li>
+<li><a class="reference internal" href="#module-refnx.util.nsplice">refnx.util.nsplice module</a></li>
+<li><a class="reference internal" href="#module-refnx.util.quickplot">refnx.util.quickplot module</a></li>
+<li><a class="reference internal" href="#module-refnx.util">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/refnx.util.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/refnx.util.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

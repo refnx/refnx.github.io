@@ -1,0 +1,2186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.reduce package &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="refnx-reduce-package">
+<h1>refnx.reduce package<a class="headerlink" href="#refnx-reduce-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-refnx.reduce.bounded_splines">
+<span id="refnx-reduce-bounded-splines-module"></span><h2>refnx.reduce.bounded_splines module<a class="headerlink" href="#module-refnx.reduce.bounded_splines" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (c) 2011, Joshua M. Hykes
+All rights reserved.</p>
+<p>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</li>
+<li>Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.</li>
+</ul>
+</div></blockquote>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &#8220;AS IS&#8221; AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL JOSHUA M. HYKES BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<dl class="class">
+<dt id="refnx.reduce.bounded_splines.BoundedRectBivariateSpline">
+<em class="property">class </em><code class="descclassname">refnx.reduce.bounded_splines.</code><code class="descname">BoundedRectBivariateSpline</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em>, <em>fill_value=0.0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/bounded_splines.html#BoundedRectBivariateSpline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.bounded_splines.BoundedRectBivariateSpline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">scipy.interpolate.fitpack2.RectBivariateSpline</span></code></p>
+<p>2D spline that returns a constant for x outside the specified domain.</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.bounded_splines.BoundedRectBivariateSpline.integral">
+<code class="descname">integral</code><span class="sig-paren">(</span><em>xa</em>, <em>xb</em>, <em>ya</em>, <em>yb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/bounded_splines.html#BoundedRectBivariateSpline.integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.bounded_splines.BoundedRectBivariateSpline.integral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.bounded_splines.BoundedRectBivariateSpline.is_outside_domain">
+<code class="descname">is_outside_domain</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/bounded_splines.html#BoundedRectBivariateSpline.is_outside_domain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.bounded_splines.BoundedRectBivariateSpline.is_outside_domain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="refnx.reduce.bounded_splines.BoundedUnivariateSpline">
+<em class="property">class </em><code class="descclassname">refnx.reduce.bounded_splines.</code><code class="descname">BoundedUnivariateSpline</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>fill_value=0.0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/bounded_splines.html#BoundedUnivariateSpline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.bounded_splines.BoundedUnivariateSpline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">scipy.interpolate.fitpack2.UnivariateSpline</span></code></p>
+<p>1D spline that returns a constant for x outside the specified domain.</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.bounded_splines.BoundedUnivariateSpline.integral">
+<code class="descname">integral</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/bounded_splines.html#BoundedUnivariateSpline.integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.bounded_splines.BoundedUnivariateSpline.integral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.bounded_splines.BoundedUnivariateSpline.is_outside_domain">
+<code class="descname">is_outside_domain</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/bounded_splines.html#BoundedUnivariateSpline.is_outside_domain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.bounded_splines.BoundedUnivariateSpline.is_outside_domain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.event">
+<span id="refnx-reduce-event-module"></span><h2>refnx.reduce.event module<a class="headerlink" href="#module-refnx.reduce.event" title="Permalink to this headline">¶</a></h2>
+<p>unpack streaming file
+&#64;author: andrew</p>
+<dl class="function">
+<dt id="refnx.reduce.event.events">
+<code class="descclassname">refnx.reduce.event.</code><code class="descname">events</code><span class="sig-paren">(</span><em>f</em>, <em>endoflastevent=127</em>, <em>max_frames=inf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/event.html#events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.event.events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpacks event data from packedbinary format for the ANSTO Platypus
+instrument</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file</p>
+<blockquote>
+<div><p>The file to read the data from.</p>
+</div></blockquote>
+<p><strong>endoflastevent</strong> : uint</p>
+<blockquote>
+<div><p>The file position to start the read from. The data starts from byte
+127.</p>
+</div></blockquote>
+<p><strong>max_frames</strong> : int</p>
+<blockquote>
+<div><p>Stop reading the event file when you get to this many frames.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(f_events, t_events, y_events, x_events), endoflastevent:</p>
+<blockquote class="last">
+<div><p>x_events, y_events, t_events and f_events are numpy arrays containing
+the events. endoflastevent is a byte offset to the end of the last
+successful event read from the file. Use this value to extract more
+events from the same file at a future date.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.event.process_event_stream">
+<code class="descclassname">refnx.reduce.event.</code><code class="descname">process_event_stream</code><span class="sig-paren">(</span><em>events</em>, <em>frame_bins</em>, <em>t_bins</em>, <em>y_bins</em>, <em>x_bins</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/event.html#process_event_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.event.process_event_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the event mode dataset into a histogram.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>events</strong> : tuple(np.ndarray, np.ndarray, np.ndarray, np.ndarray)</p>
+<blockquote>
+<div><p>the 4-tuple of events (F, T, Y, X)</p>
+</div></blockquote>
+<p><strong>frame_bins</strong> : array_like</p>
+<blockquote>
+<div><p>specifies the frame bins required in the image.</p>
+</div></blockquote>
+<p><strong>t_bins</strong> : array_like</p>
+<blockquote>
+<div><p>specifies the time bins required in the image</p>
+</div></blockquote>
+<p><strong>x_bins</strong> : array_like</p>
+<blockquote>
+<div><p>specifies the x bins required in the image</p>
+</div></blockquote>
+<p><strong>y_bins</strong> : array_like</p>
+<blockquote>
+<div><p>specifies the y bins required in the image</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>detector, frame_bins</strong> : np.ndarray, np.ndarray</p>
+<blockquote class="last">
+<div><p>The new detector image and the amended frame bins. The frame bins that
+are supplied to this function are truncated to 0 and the maximum frame
+bin in the event file.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.parabolic_motion">
+<span id="refnx-reduce-parabolic-motion-module"></span><h2>refnx.reduce.parabolic_motion module<a class="headerlink" href="#module-refnx.reduce.parabolic_motion" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.reduce.parabolic_motion.parabola">
+<code class="descclassname">refnx.reduce.parabolic_motion.</code><code class="descname">parabola</code><span class="sig-paren">(</span><em>initial_trajectory</em>, <em>speed</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/parabolic_motion.html#parabola"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.parabolic_motion.parabola" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the quadratic form of the parabolic path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>initial_trajectory</strong> : float</p>
+<blockquote>
+<div><p>The initial angular trajectory of the path (degrees), measured from
+the x-axis. A positive angle is in an anticlockwise direction.</p>
+</div></blockquote>
+<p><strong>speed</strong> : float</p>
+<blockquote>
+<div><p>The initial speed of the object (m/s)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>eqn</strong> : np.polynomial.Polynomial object</p>
+<blockquote class="last">
+<div><p>Equation of parabolic path</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.peak_utils">
+<span id="refnx-reduce-peak-utils-module"></span><h2>refnx.reduce.peak_utils module<a class="headerlink" href="#module-refnx.reduce.peak_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.reduce.peak_utils.centroid">
+<code class="descclassname">refnx.reduce.peak_utils.</code><code class="descname">centroid</code><span class="sig-paren">(</span><em>y</em>, <em>x=None</em>, <em>dx=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/peak_utils.html#centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.peak_utils.centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the centroid for the specified data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>y</strong> : array_like</p>
+<blockquote>
+<div><p>Array whose centroid is to be calculated.</p>
+</div></blockquote>
+<p><strong>x</strong> : array_like, optional</p>
+<blockquote>
+<div><p>The points at which y is sampled.</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>&#8212;&#8212;-</strong></p>
+<p><strong>(centroid, sd)</strong></p>
+<blockquote>
+<div><p>Centroid and standard deviation of the data. If there are no
+intensities at all in <cite>y</cite>, then <cite>centroid</cite> and <cite>sd</cite> are <cite>np.nan</cite>.</p>
+</div></blockquote>
+<p><strong>This is not really all that good of an algorithm, unless the peak is much</strong></p>
+<p class="last"><strong>higher than the background</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.peak_utils.gauss">
+<code class="descclassname">refnx.reduce.peak_utils.</code><code class="descname">gauss</code><span class="sig-paren">(</span><em>x</em>, <em>bkg</em>, <em>peak</em>, <em>mean</em>, <em>sd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/peak_utils.html#gauss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.peak_utils.gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the gaussian function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : array_like</p>
+<blockquote>
+<div><p>The points at which the distribution is sampled.</p>
+</div></blockquote>
+<p><strong>bkg</strong> : float</p>
+<blockquote>
+<div><p>constant background value.</p>
+</div></blockquote>
+<p><strong>peak</strong> : float</p>
+<blockquote>
+<div><p>peak multiplier.</p>
+</div></blockquote>
+<p><strong>mean</strong> : float</p>
+<blockquote>
+<div><p>mean of gaussian distribution.</p>
+</div></blockquote>
+<p><strong>sd</strong> : float</p>
+<blockquote>
+<div><p>standard deviation of distribution.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>gval</strong> : float</p>
+<blockquote class="last">
+<div><p>evaluated gaussian distribution value at each of the sampling points.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.peak_utils.gauss_fit">
+<code class="descclassname">refnx.reduce.peak_utils.</code><code class="descname">gauss_fit</code><span class="sig-paren">(</span><em>p0</em>, <em>x</em>, <em>y</em>, <em>sigma=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/peak_utils.html#gauss_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.peak_utils.gauss_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.peak_utils.median">
+<code class="descclassname">refnx.reduce.peak_utils.</code><code class="descname">median</code><span class="sig-paren">(</span><em>y</em>, <em>x=None</em>, <em>dx=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/peak_utils.html#median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.peak_utils.median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the median for the specified data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>y</strong> : array_like</p>
+<blockquote>
+<div><p>Array whose median is to be calculated.</p>
+</div></blockquote>
+<p><strong>x</strong> : array_like, optional</p>
+<blockquote>
+<div><p>The points at which y is sampled.</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>&#8212;&#8212;-</strong></p>
+<p><strong>(median, sd)</strong></p>
+<blockquote class="last">
+<div><p>Centroid and standard deviation of the data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.peak_utils.peak_finder">
+<code class="descclassname">refnx.reduce.peak_utils.</code><code class="descname">peak_finder</code><span class="sig-paren">(</span><em>y</em>, <em>x=None</em>, <em>sigma=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/peak_utils.html#peak_finder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.peak_utils.peak_finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds a peak in the specified data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>y</strong> : array_like</p>
+<blockquote>
+<div><p>Array in which a peak is to be found.</p>
+</div></blockquote>
+<p><strong>x</strong> : array_like, optional</p>
+<blockquote>
+<div><p>The points at which y is sampled.</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>&#8212;&#8212;-</strong></p>
+<p><strong>(centroid, sd), (gfit_mean, gfit_sd)</strong> : (float, float), (float, float)</p>
+<p><strong>centroid and sd are the centroid and standard deviation of the data.</strong></p>
+<p><strong>gfit_mean and gfit_sd are the mean and standard deviation obtained by</strong></p>
+<p class="last"><strong>fitting the data to a Gaussian function.</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.platypusnexus">
+<span id="refnx-reduce-platypusnexus-module"></span><h2>refnx.reduce.platypusnexus module<a class="headerlink" href="#module-refnx.reduce.platypusnexus" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="refnx.reduce.platypusnexus.Catalogue">
+<em class="property">class </em><code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">Catalogue</code><span class="sig-paren">(</span><em>h5data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#Catalogue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.Catalogue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p class="rubric">Attributes</p>
+<dl class="attribute">
+<dt id="refnx.reduce.platypusnexus.Catalogue.datafile_number">
+<code class="descname">datafile_number</code><a class="headerlink" href="#refnx.reduce.platypusnexus.Catalogue.datafile_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus">
+<em class="property">class </em><code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">PlatypusNexus</code><span class="sig-paren">(</span><em>h5data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Processes Platypus NeXus files to produce an intensity vs wavelength
+spectrum</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>h5data</strong> : HDF5 NeXus file or str</p>
+<blockquote class="last">
+<div><p>An HDF5 NeXus file for Platypus, or a <cite>str</cite> containing the path
+to one</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.chod">
+<code class="descname">chod</code><span class="sig-paren">(</span><em>omega=0.0</em>, <em>twotheta=0.0</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.chod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.chod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the flight length of the neutrons in the Platypus instrument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>omega</strong> : float, optional</p>
+<blockquote>
+<div><p>Rough angle of incidence</p>
+</div></blockquote>
+<p><strong>twotheta</strong> : float, optional</p>
+<blockquote>
+<div><p>Rough 2 theta angle</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int, optional</p>
+<blockquote>
+<div><p>Which dataset is being considered</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>chod, d_cx</strong> : float, float</p>
+<blockquote class="last">
+<div><p>Flight distance (mm), distance between chopper discs (mm)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.phase_angle">
+<code class="descname">phase_angle</code><span class="sig-paren">(</span><em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.phase_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.phase_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the phase angle for a given scanpoint</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scanpoint</strong> : int</p>
+<blockquote>
+<div><p>The scanpoint you&#8217;re interested in</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>phase_angle, master_opening</strong> : float</p>
+<blockquote class="last">
+<div><p>The phase angle in degrees, and the angular opening of the master
+chopper</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>h5norm=None</em>, <em>lo_wavelength=2.5</em>, <em>hi_wavelength=19.0</em>, <em>background=True</em>, <em>direct=False</em>, <em>omega=None</em>, <em>twotheta=None</em>, <em>rebin_percent=1.0</em>, <em>wavelength_bins=None</em>, <em>normalise=True</em>, <em>integrate=-1</em>, <em>eventmode=None</em>, <em>peak_pos=None</em>, <em>background_mask=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the ProcessNexus object to produce a time of flight spectrum.
+The processed spectrum is stored in the <cite>processed_spectrum</cite> attribute.
+The specular spectrum is also returned from this function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>h5norm</strong> : HDF5 NeXus file</p>
+<blockquote>
+<div><p>The hdf5 file containing the floodfield data.</p>
+</div></blockquote>
+<p><strong>lo_wavelength</strong> : float</p>
+<blockquote>
+<div><p>The low wavelength cutoff for the rebinned data (A).</p>
+</div></blockquote>
+<p><strong>hi_wavelength</strong> : float</p>
+<blockquote>
+<div><p>The high wavelength cutoff for the rebinned data (A).</p>
+</div></blockquote>
+<p><strong>background</strong> : bool</p>
+<blockquote>
+<div><p>Should a background subtraction be carried out?</p>
+</div></blockquote>
+<p><strong>direct</strong> : bool</p>
+<blockquote>
+<div><p>Is it a direct beam you measured? This is so a gravity correction
+can be applied.</p>
+</div></blockquote>
+<p><strong>omega</strong> : float</p>
+<blockquote>
+<div><p>Expected angle of incidence of beam. If this is None, then the
+rough angle of incidence is obtained from the NeXus file.</p>
+</div></blockquote>
+<p><strong>twotheta</strong> : float</p>
+<blockquote>
+<div><p>Expected two theta value of specular beam. If this is None then
+the rough angle of incidence is obtained from the NeXus file.</p>
+</div></blockquote>
+<p><strong>rebin_percent</strong> : float</p>
+<blockquote>
+<div><p>Specifies the rebinning percentage for the spectrum.  If
+<cite>rebin_percent is None</cite>, then no rebinning is done.</p>
+</div></blockquote>
+<p><strong>wavelength_bins</strong> : array_like</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>The wavelength bins for rebinning.  If <a href="#id1"><span class="problematic" id="id2">`</span></a>wavelength_bins is not</dt>
+<dd><p class="first last">None` then the <cite>rebin_percent</cite> parameter is ignored.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>normalise</strong> : bool</p>
+<blockquote>
+<div><p>Normalise by the monitor counts.</p>
+</div></blockquote>
+<p><strong>integrate</strong> : int</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>integrate == -1</dt>
+<dd><p class="first last">the spectrum is integrated over all the scanpoints.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">integrate &gt;= 0
+the individual spectra are calculated individually.
+If <cite>eventmode is not None</cite> then integrate specifies which
+scanpoint to examine.</p>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>eventmode</strong> : None or array_like</p>
+<blockquote>
+<div><p>If eventmode is <cite>None</cite> then the integrated detector image is used.
+If eventmode is an array then the array specifies the integration
+times (in seconds) for the detector image, e.g. [0, 20, 30] would
+result in two spectra. The first would contain data for 0 s to 20s,
+the second would contain data for 20 s to 30 s.  This option can
+only be used when <cite>integrate &gt;= -1</cite>.
+If eventmode has zero length (e.g. []), then a single time interval
+for the entire acquisition is used, [0, acquisition_time].  This
+would source the image from the eventmode file, rather than the
+NeXUS file.</p>
+</div></blockquote>
+<p><strong>peak_pos</strong> : None or (float, float)</p>
+<blockquote>
+<div><p>Specifies the peak position and peak standard deviation to use.</p>
+</div></blockquote>
+<p><strong>background_mask</strong> : array_like</p>
+<blockquote>
+<div><p>An array of bool that specifies which y-pixels to use for
+background subtraction.  Should be the same length as the number of
+y pixels in the detector image.  Otherwise an automatic mask is
+applied (if background is True).</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">m_lambda, m_spec, m_spec_sd: np.ndarray</p>
+<blockquote class="last">
+<div><p>Arrays containing the wavelength, specular intensity as a function
+of wavelength, standard deviation of specular intensity</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>After processing this object contains the following the following
+attributes:</p>
+<ul class="simple">
+<li>path - path to the data file</li>
+<li>datafilename - name of the datafile</li>
+<li>datafile_number - datafile number.</li>
+<li>m_topandtail - the corrected 2D detector image, (n_spectra, TOF, Y)</li>
+<li>m_topandtail_sd - corresponding standard deviations</li>
+<li>n_spectra - number of spectra in processed data</li>
+<li>bm1_counts - beam montor counts, (n_spectra,)</li>
+<li>m_spec - specular intensity, (n_spectra, TOF)</li>
+<li>m_spec_sd - corresponding standard deviations</li>
+<li>m_beampos - beam_centre for each spectrum, (n_spectra, )</li>
+<li>m_lambda - wavelengths for each spectrum, (n_spectra, TOF)</li>
+<li>m_lambda_fwhm - corresponding FWHM of wavelength distribution</li>
+<li>m_lambda_hist - wavelength bins for each spectrum, (n_spectra, TOF)</li>
+<li>m_spec_tof - TOF for each wavelength bin, (n_spectra, TOF)</li>
+<li>mode - the Platypus mode, e.g. FOC/MT/POL/POLANAL/SB/DB</li>
+<li>detector_z - detector height, (n_spectra, )</li>
+<li>detector_y - sample-detector distance, (n_spectra, )</li>
+<li>domega - collimation uncertainty</li>
+<li>lopx - lowest extent of specular beam (in y pixels), (n_spectra, )</li>
+<li>hipx - highest extent of specular beam (in y pixels), (n_spectra, )</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.process_event_stream">
+<code class="descname">process_event_stream</code><span class="sig-paren">(</span><em>t_bins=None</em>, <em>x_bins=None</em>, <em>y_bins=None</em>, <em>frame_bins=None</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process_event_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.process_event_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the event mode dataset for the nexus file. Assumes that
+there is a event mode directory in the same directory as the NeXUS
+file, as specified by in &#8216;entry1/instrument/detector/daq_dirname&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>frame_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the frame bins required in the image. If
+framebins = [5, 10, 120] you will get 2 images.  The first starts
+at 5s and finishes at 10s. The second starts at 10s and finishes
+at 120s. If frame_bins has zero length, e.g. [], then a single
+interval consisting of the entire acquisition time is used:
+[0, acquisition_time].</p>
+</div></blockquote>
+<p><strong>t_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the time bins required in the image</p>
+</div></blockquote>
+<p><strong>x_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the x bins required in the image</p>
+</div></blockquote>
+<p><strong>y_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the y bins required in the image</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int, optional</p>
+<blockquote>
+<div><p>Scanpoint you are interested in</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">frame_bins, detector, bm1_counts</p>
+<p>Create a new detector image based on the t_bins, x_bins, y_bins and</p>
+<p>frame_bins you supply to the method (these should all be lists/numpy</p>
+<p>arrays specifying the edges of the required bins). If these are not</p>
+<p>specified, then the default bins are taken from the nexus file. This</p>
+<p>would essentially return the same detector image as the nexus file.</p>
+<p>However, you can specify the frame_bins list to generate detector</p>
+<p>images based on subdivided periods of the total acquisition.</p>
+<p>For example if framebins = [5, 10, 120] you will get 2 images.  The</p>
+<p>first starts at 5s and finishes at 10s. The second starts at 10s</p>
+<p>and finishes at 120s. The frame_bins are clipped to the total</p>
+<p class="last">acquisition time if necessary.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.spectrum">
+<code class="descname">spectrum</code><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.spectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.write_spectrum_dat">
+<code class="descname">write_spectrum_dat</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.write_spectrum_dat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.write_spectrum_dat" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes a dat representation of the corrected spectrum to
+file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<blockquote>
+<div><p>The file to write the spectrum to</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int</p>
+<blockquote class="last">
+<div><p>Which scanpoint to write.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.platypusnexus.PlatypusNexus.write_spectrum_xml">
+<code class="descname">write_spectrum_xml</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.write_spectrum_xml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.write_spectrum_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes an XML representation of the corrected spectrum to
+file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<blockquote>
+<div><p>The file to write the spectrum to</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int</p>
+<blockquote class="last">
+<div><p>Which scanpoint to write.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.background_subtract">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">background_subtract</code><span class="sig-paren">(</span><em>detector</em>, <em>detector_sd</em>, <em>background_mask</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#background_subtract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.background_subtract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Background subtraction of Platypus detector image.
+Shape of detector is (N, T, Y), do a linear background subn for each
+(N, T) slice.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>detector</strong> : np.ndarray</p>
+<blockquote>
+<div><p>detector array with shape (N, T, Y).</p>
+</div></blockquote>
+<p><strong>detector_sd</strong> : np.ndarray</p>
+<blockquote>
+<div><p>standard deviations for detector array</p>
+</div></blockquote>
+<p><strong>background_mask</strong> : array_like</p>
+<blockquote>
+<div><p>array of bool with shape (N, T, Y) that specifies which Y pixels to use
+for background subtraction.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>detector, detector_sd</strong> : np.ndarray, np.ndarray</p>
+<blockquote class="last">
+<div><p>Detector image with background subtracted</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.background_subtract_line">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">background_subtract_line</code><span class="sig-paren">(</span><em>profile</em>, <em>profile_sd</em>, <em>background_mask</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#background_subtract_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.background_subtract_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a linear background subtraction on a 1D peak profile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>profile</strong> : np.ndarray</p>
+<blockquote>
+<div><p>1D profile</p>
+</div></blockquote>
+<p><strong>profile_sd</strong> : np.ndarray</p>
+<blockquote>
+<div><p>standard deviations for profile</p>
+</div></blockquote>
+<p><strong>background_mask</strong> : array_like</p>
+<blockquote class="last">
+<div><p>array of bool that specifies which Y pixels to use for background
+subtraction.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.calculate_wavelength_bins">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">calculate_wavelength_bins</code><span class="sig-paren">(</span><em>lo_wavelength</em>, <em>hi_wavelength</em>, <em>rebin_percent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#calculate_wavelength_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.calculate_wavelength_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates optimal logarithmically spaced wavelength histogram bins. The
+bins are equal size in log10 space, but they may not be exactly be
+<cite>rebin_percent</cite> in size. The limits would have to change slightly for that.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lo_wavelength</strong> : float</p>
+<blockquote>
+<div><p>Low wavelength cutoff</p>
+</div></blockquote>
+<p><strong>hi_wavelength</strong> : float</p>
+<blockquote>
+<div><p>High wavelength cutoff</p>
+</div></blockquote>
+<p><strong>rebin_percent</strong> : float</p>
+<blockquote>
+<div><p>Rebinning percentage</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>wavelength_bins</strong> : np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.correct_for_gravity">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">correct_for_gravity</code><span class="sig-paren">(</span><em>detector</em>, <em>detector_sd</em>, <em>lamda</em>, <em>coll_distance</em>, <em>sample_det</em>, <em>lo_wavelength</em>, <em>hi_wavelength</em>, <em>theta=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#correct_for_gravity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.correct_for_gravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a gravity corrected yt plot, given the data, its associated errors,
+the wavelength corresponding to each of the time bins, and the trajectory
+of the neutrons. Low lambda and high Lambda are wavelength cutoffs to
+ignore.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>detector</strong> : np.ndarray</p>
+<blockquote>
+<div><p>Detector image. Has shape (N, T, Y)</p>
+</div></blockquote>
+<p><strong>detector_sd</strong> : np.ndarray</p>
+<blockquote>
+<div><p>Standard deviations of detector image</p>
+</div></blockquote>
+<p><strong>lamda</strong> : np.ndarray</p>
+<blockquote>
+<div><p>Wavelengths corresponding to the detector image, has shape (N, T)</p>
+</div></blockquote>
+<p><strong>coll_distance</strong> : float</p>
+<blockquote>
+<div><p>Collimation distance between slits, mm</p>
+</div></blockquote>
+<p><strong>sample_det</strong> : float</p>
+<blockquote>
+<div><p>Sample - detector distance, mm</p>
+</div></blockquote>
+<p><strong>lo_wavelength</strong> : float</p>
+<blockquote>
+<div><p>Low wavelength cut off, Angstrom</p>
+</div></blockquote>
+<p><strong>hi_wavelength</strong> : float</p>
+<blockquote>
+<div><p>High wavelength cutoff, Angstrom</p>
+</div></blockquote>
+<p><strong>theta</strong> : float</p>
+<blockquote>
+<div><p>Angle between second collimation slit, first collimation slit, and
+horizontal</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">corrected_data, corrected_data_sd, m_gravcorrcoefs :</p>
+<blockquote class="last">
+<div><blockquote>
+<div><p>np.ndarray, np.ndarray, np.ndarray</p>
+</div></blockquote>
+<p>Corrected image. This is a theoretical prediction where the spectral
+ridge is for each wavelength.  This will be used to calculate the
+actual angle of incidence in the reduction process.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.create_detector_norm">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">create_detector_norm</code><span class="sig-paren">(</span><em>h5norm</em>, <em>x_min</em>, <em>x_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#create_detector_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.create_detector_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces a detector normalisation array for Platypus.
+Here we average over N, T and X to provide  a relative efficiency for each
+y wire.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>h5norm</strong> : hdf5 file</p>
+<blockquote>
+<div><p>Containing a flood field run (water)</p>
+</div></blockquote>
+<p><strong>x_min</strong> : int</p>
+<blockquote>
+<div><p>Minimum x pixel to use</p>
+</div></blockquote>
+<p><strong>x_max</strong> : int</p>
+<blockquote>
+<div><p>Maximum x pixel to use</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>norm, norm_sd</strong> : array_like</p>
+<blockquote class="last">
+<div><p>1D array containing the normalisation data for each y pixel</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.datafile_number">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">datafile_number</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#datafile_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.datafile_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a filename figure out what the run number was</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.find_specular_ridge">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">find_specular_ridge</code><span class="sig-paren">(</span><em>detector</em>, <em>detector_sd</em>, <em>starting_offset=50</em>, <em>tolerance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#find_specular_ridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.find_specular_ridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the specular ridges in a detector(n, t, y) plot. Assumes that the
+specular ridge _does <a href="#id5"><span class="problematic" id="id6">not_</span></a> change position.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>detector</strong> : array_like</p>
+<blockquote>
+<div><p>detector array</p>
+</div></blockquote>
+<p><strong>detector_sd</strong> : array_like</p>
+<blockquote>
+<div><p>standard deviations of detector array</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">centre, SD:</p>
+<blockquote class="last">
+<div><p>peak centres and standard deviations of peak width</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.number_datafile">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">number_datafile</code><span class="sig-paren">(</span><em>run_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#number_datafile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.number_datafile" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a run number figure out what the file name is.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.rebin">
+<span id="refnx-reduce-rebin-module"></span><h2>refnx.reduce.rebin module<a class="headerlink" href="#module-refnx.reduce.rebin" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.reduce.rebin.rebin">
+<code class="descclassname">refnx.reduce.rebin.</code><code class="descname">rebin</code><span class="sig-paren">(</span><em>x1</em>, <em>y1</em>, <em>x2</em>, <em>y1_sd=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/rebin.html#rebin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.rebin.rebin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebin histogram values y1 from old bin edges x1 to new edges x2.
+(Piecewise_constant)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x1</strong> : np.ndarray</p>
+<blockquote>
+<div><blockquote>
+<div><p>M + 1 array of old bin edges.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>y1 <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">M + 1 array of old histogram values. This is the total number in
+each bin, not an average.</p>
+</dd>
+<dt>x2 <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">N + 1 array of new bin edges.</p>
+</dd>
+<dt>y1_sd <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray, optional</span></dt>
+<dd><p class="first last">Standard deviations of values in y1</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y2</strong> : np.ndarray</p>
+<p>&#8211;OR&#8211;</p>
+<p><strong>(y2, y2_sd)</strong> : np.ndarray</p>
+<blockquote>
+<div><p>An array of rebinned histogram values.</p>
+</div></blockquote>
+<p>The rebinning algorithm assumes that the counts in each old bin are</p>
+<p>uniformly distributed in that bin.</p>
+<p class="last">Bins in x2 that are entirely outside the range of x1 are assigned 0.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.rebin.rebinND">
+<code class="descclassname">refnx.reduce.rebin.</code><code class="descname">rebinND</code><span class="sig-paren">(</span><em>y1</em>, <em>axes</em>, <em>old_bins</em>, <em>new_bins</em>, <em>y1_sd=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/rebin.html#rebinND"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.rebin.rebinND" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebin y1 along several axes, in a piecewise-constant fashion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>y1</strong> : array_like</p>
+<blockquote>
+<div><p>The image to be rebinned</p>
+</div></blockquote>
+<p><strong>axes</strong> : tuple of int</p>
+<blockquote>
+<div><p>The axes to be rebinned.</p>
+</div></blockquote>
+<p><strong>old_bins</strong> : tuple of np.ndarray</p>
+<blockquote>
+<div><p>The old histogram bins along each axis in <cite>axes</cite>.</p>
+</div></blockquote>
+<p><strong>new_bins</strong> : tuple of np.ndarray</p>
+<blockquote>
+<div><p>The new histogram bins along each axis in <cite>axes</cite>.</p>
+</div></blockquote>
+<p><strong>y1_sd</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Standard deviations for pixels in the image</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>output</strong> : np.ndarray</p>
+<p>&#8211;OR&#8211;</p>
+<p><strong>(output, output_sd)</strong> : np.ndarray</p>
+<blockquote class="last">
+<div><p>The rebinned image</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.rebin.rebin_along_axis">
+<code class="descclassname">refnx.reduce.rebin.</code><code class="descname">rebin_along_axis</code><span class="sig-paren">(</span><em>y1</em>, <em>x1</em>, <em>x2</em>, <em>axis=0</em>, <em>y1_sd=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/rebin.html#rebin_along_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.rebin.rebin_along_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebins an N-dimensional array along a given axis, in a piecewise-constant
+fashion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>y1</strong> : array_like</p>
+<blockquote>
+<div><p>The input image</p>
+</div></blockquote>
+<p><strong>x1</strong> : array_like</p>
+<blockquote>
+<div><p>The monotonically increasing/decreasing original bin edges along
+<cite>axis</cite>, must be 1 greater than <cite>np.size(y1, axis)</cite>.</p>
+</div></blockquote>
+<p><strong>y2</strong> : array_like</p>
+<blockquote>
+<div><p>The final bin_edges along <cite>axis</cite>.</p>
+</div></blockquote>
+<p><strong>axis</strong> : int</p>
+<blockquote>
+<div><p>The axis to be rebinned, it must exist in the original image.</p>
+</div></blockquote>
+<p><strong>y1_sd</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Standard deviations for each pixel in y1.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>output</strong> : np.ndarray</p>
+<p>&#8211;OR&#8211;</p>
+<p><strong>output, output_sd</strong> : np.ndarray</p>
+<blockquote class="last">
+<div><p>The rebinned image.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.reduce">
+<span id="refnx-reduce-reduce-module"></span><h2>refnx.reduce.reduce module<a class="headerlink" href="#module-refnx.reduce.reduce" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="refnx.reduce.reduce.ReducePlatypus">
+<em class="property">class </em><code class="descclassname">refnx.reduce.reduce.</code><code class="descname">ReducePlatypus</code><span class="sig-paren">(</span><em>direct</em>, <em>reflect=None</em>, <em>data_folder=None</em>, <em>scale=1.0</em>, <em>save=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.ReducePlatypus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Reduces Platypus reflectometer data to give the specular reflectivity.
+Offspecular data maps are also produced.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>direct</strong> : string, hdf5 file-handle or PlatypusNexus object</p>
+<blockquote>
+<div><p>A string containing the path to the direct beam hdf5 file,
+the hdf5 file itself, or a PlatypusNexus object.</p>
+</div></blockquote>
+<p><strong>reflect</strong> : string, hdf5 file-handle or PlatypusNexus object, optional</p>
+<blockquote>
+<div><p>A string containing the path to the specularly reflected hdf5 file,
+the hdf5 file itself, or a PlatypusNexus object.</p>
+</div></blockquote>
+<p><strong>data_folder</strong> : str, optional</p>
+<blockquote>
+<div><p>Where is the raw data stored?</p>
+</div></blockquote>
+<p><strong>scale</strong> : float, optional</p>
+<blockquote>
+<div><p>Divide all specular reflectivity values by this number.</p>
+</div></blockquote>
+<p><strong>save</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>True</cite> then the reduced dataset is saved to the current
+directory, with a name os.path.basename(reflect)</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict, optional</p>
+<blockquote>
+<div><p>Options passed directly to <cite>refnx.reduce.platypusnexus.process</cite>,
+for processing of individual spectra. Look at that method docstring
+for specification of options.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>If <cite>reflect</cite> was specified during construction a reduction will be
+done. See <code class="docutils literal"><span class="pre">reduce</span></code> for attributes available from this object on
+completion of reduction.</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.reduce.ReducePlatypus.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.ReducePlatypus.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The specular reflectivity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scanpoint: int</strong></p>
+<blockquote>
+<div><p>Find a particular specular reflectivity image. scanpoints upto
+<cite>self.n_spectra - 1</cite> can be specified.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(Q, R, dR, dQ): np.ndarray tuple</p>
+<blockquote class="last">
+<div><p>dR is standard deviation, dQ is FWHM</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.reduce.ReducePlatypus.data2d">
+<code class="descname">data2d</code><span class="sig-paren">(</span><em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.data2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.ReducePlatypus.data2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>The offspecular data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scanpoint: int</strong></p>
+<blockquote>
+<div><p>Find a particular offspecular image. scanpoints upto 
+self.n_spectra - 1 can be specified.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(Qz, Qy, R, dR): np.ndarrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.reduce.ReducePlatypus.reduce">
+<code class="descname">reduce</code><span class="sig-paren">(</span><em>reflect</em>, <em>scale=1.0</em>, <em>save=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.ReducePlatypus.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduction of a single dataset.</p>
+<p>The reduction uses the direct beam specified during construction of
+this object. This method reduces all the spectra present in the
+reflected beam file (see platypusnexus.PlatypusNexus.process for
+eventmode specification and other related options), but aggregates
+all data in the direct beam spectrum.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>reflect</strong> : string, hdf5 file-handle or PlatypusNexus object</p>
+<blockquote>
+<div><p>A string containing the path to the specularly reflected hdf5 file,
+the hdf5 file itself, or a PlatypusNexus object.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float, optional</p>
+<blockquote>
+<div><p>Divide all the reflectivity values by this number.</p>
+</div></blockquote>
+<p><strong>save</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>True</cite> then the reduced dataset is saved to the current
+directory, with a name os.path.basename(reflect)</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict, optional</p>
+<blockquote>
+<div><p>Options passed directly to <cite>refnx.reduce.platypusnexus.process</cite>,
+for processing of individual spectra. Look at that method docstring
+for specification of options.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>reduction</strong> : dict</p>
+<blockquote>
+<div><p>Contains the following entries:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>&#8216;x&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Q values, shape (N, T).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;x_sd&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Uncertainty in Q values (FWHM), shape (N, T).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;y&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Specular Reflectivity, shape (N, T)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;y_sd&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Uncertainty in specular reflectivity (SD), shape (N, T)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_ref&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Offspecular reflectivity map, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_refSD&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">uncertainty in offspecular reflectivity, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_qz&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Qz for offspecular map, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_qy&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Qy for offspecular map, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;n_spectra&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">number of reflectivity spectra</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;datafile_number&#8217;: int</dt>
+<dd><p class="first last">run number for the reflected beam</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>N corresponds to the number of spectra</p>
+<p>T corresponds to the number of Q (wavelength) bins</p>
+<p class="last">Y corresponds to the number of y pixels on the detector.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>All the values returned from this method are also contained as instance
+attributes for this object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.reduce.ReducePlatypus.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>scale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.ReducePlatypus.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divides the reflectivity values by this scale factor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scale: float</strong></p>
+<blockquote class="last">
+<div><p>Divides the reflectivity values by a constant amount</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.reduce.ReducePlatypus.write_offspecular">
+<code class="descname">write_offspecular</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.write_offspecular"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.ReducePlatypus.write_offspecular" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.reduce.reduce_stitch">
+<code class="descclassname">refnx.reduce.reduce.</code><code class="descname">reduce_stitch</code><span class="sig-paren">(</span><em>reflect_list</em>, <em>direct_list</em>, <em>norm_file_num=None</em>, <em>data_folder=None</em>, <em>trim_trailing=True</em>, <em>save=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#reduce_stitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce.reduce_stitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces a list of reflected beam run numbers and a list of corresponding
+direct beam run numbers from the Platypus reflectometer. If there are
+multiple reflectivity files they are spliced together.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>reflect_list</strong> : list</p>
+<blockquote>
+<div><p>Reflected beam run numbers, e.g. <cite>[708, 709, 710]</cite>
+708 corresponds to the file PLP0000708.nx.hdf.</p>
+</div></blockquote>
+<p><strong>direct_list</strong> : list</p>
+<blockquote>
+<div><p>Direct beam run numbers, e.g. <cite>[711, 711, 711]</cite></p>
+</div></blockquote>
+<p><strong>norm_file_num</strong> : int, optional</p>
+<blockquote>
+<div><p>The run number for the water flood field correction.</p>
+</div></blockquote>
+<p><strong>data_folder</strong> : str, optional</p>
+<blockquote>
+<div><p>Where is the raw data stored?</p>
+</div></blockquote>
+<p><strong>trim_trailing</strong> : bool, optional</p>
+<blockquote>
+<div><p>When datasets are spliced together do you want to remove points in the
+overlap region from the preceding dataset?</p>
+</div></blockquote>
+<p><strong>save</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>True</cite> then the spliced file is written to a file (in the working
+directory) with a name like: <cite>c_PLP0000708.dat</cite>.</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict, optional</p>
+<blockquote>
+<div><p>Options passed directly to <cite>refnx.reduce.platypusnexus.process</cite>,
+for processing of individual spectra. Look at that method docstring
+for specification of options.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>combined_dataset, reduced_filename</strong> : refnx.dataset.ReflectDataset, str</p>
+<blockquote class="last">
+<div><p>The combined dataset and the file name of the reduced data, if it was
+saved. If it wasn&#8217;t saved <cite>reduced_filename</cite> is <cite>None</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce.xray">
+<span id="refnx-reduce-xray-module"></span><h2>refnx.reduce.xray module<a class="headerlink" href="#module-refnx.reduce.xray" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="refnx.reduce.xray.parse_xrdml_file">
+<code class="descclassname">refnx.reduce.xray.</code><code class="descname">parse_xrdml_file</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/xray.html#parse_xrdml_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.xray.parse_xrdml_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses an XRML file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f: file-like object or string</strong></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">d: dict</p>
+<blockquote class="last">
+<div><p>A dictionary containing the XRDML file information.  The following keys
+are used:</p>
+<dl class="docutils">
+<dt>&#8216;intensities&#8217; - np.ndarray</dt>
+<dd><p class="first last">Intensities</p>
+</dd>
+<dt>&#8216;twotheta&#8217; - np.ndarray</dt>
+<dd><p class="first last">Two theta values</p>
+</dd>
+<dt>&#8216;omega&#8217; - np.ndarray</dt>
+<dd><p class="first last">Omega values</p>
+</dd>
+<dt>&#8216;count_time&#8217; - float</dt>
+<dd><p class="first last">How long each point was counted for</p>
+</dd>
+<dt>&#8216;wavelength&#8217; - float</dt>
+<dd><p class="first last">Wavelength of X-ray radiation</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.xray.reduce_xrdml">
+<code class="descclassname">refnx.reduce.xray.</code><code class="descname">reduce_xrdml</code><span class="sig-paren">(</span><em>f</em>, <em>bkg=None</em>, <em>scale=1</em>, <em>sample_length=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/xray.html#reduce_xrdml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.xray.reduce_xrdml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces a Panalytical XRDML file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f: file-like object or string</strong></p>
+<blockquote>
+<div><p>The specular reflectivity (XRDML) file of interest</p>
+</div></blockquote>
+<p><strong>bkg: list</strong></p>
+<blockquote>
+<div><p>A list of file-like objects or strings that contain background
+measurements. The background is assumed to have the same number of
+points as the specular reflectivity curve.  The backgrounds are
+averaged and subtracted from the specular reflectivity</p>
+</div></blockquote>
+<p><strong>scale: float</strong></p>
+<blockquote>
+<div><p>The direct beam intensity (cps)</p>
+</div></blockquote>
+<p><strong>sample_length: None or float</strong></p>
+<blockquote>
+<div><p>If None then no footprint correction is done. Otherwise the transverse
+footprint of the sample (mm).</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">specular_q, specular_r, specular_dr: np.ndarray</p>
+<blockquote class="last">
+<div><p>The specular reflectivity as a function of momentum transfer, Q.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-refnx.reduce">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-refnx.reduce" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="refnx.reduce.Catalogue">
+<em class="property">class </em><code class="descclassname">refnx.reduce.</code><code class="descname">Catalogue</code><span class="sig-paren">(</span><em>h5data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#Catalogue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.Catalogue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p class="rubric">Attributes</p>
+<dl class="attribute">
+<dt id="refnx.reduce.Catalogue.datafile_number">
+<code class="descname">datafile_number</code><a class="headerlink" href="#refnx.reduce.Catalogue.datafile_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="refnx.reduce.PlatypusNexus">
+<em class="property">class </em><code class="descclassname">refnx.reduce.</code><code class="descname">PlatypusNexus</code><span class="sig-paren">(</span><em>h5data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Processes Platypus NeXus files to produce an intensity vs wavelength
+spectrum</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>h5data</strong> : HDF5 NeXus file or str</p>
+<blockquote class="last">
+<div><p>An HDF5 NeXus file for Platypus, or a <cite>str</cite> containing the path
+to one</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.PlatypusNexus.chod">
+<code class="descname">chod</code><span class="sig-paren">(</span><em>omega=0.0</em>, <em>twotheta=0.0</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.chod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.chod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the flight length of the neutrons in the Platypus instrument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>omega</strong> : float, optional</p>
+<blockquote>
+<div><p>Rough angle of incidence</p>
+</div></blockquote>
+<p><strong>twotheta</strong> : float, optional</p>
+<blockquote>
+<div><p>Rough 2 theta angle</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int, optional</p>
+<blockquote>
+<div><p>Which dataset is being considered</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>chod, d_cx</strong> : float, float</p>
+<blockquote class="last">
+<div><p>Flight distance (mm), distance between chopper discs (mm)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.PlatypusNexus.phase_angle">
+<code class="descname">phase_angle</code><span class="sig-paren">(</span><em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.phase_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.phase_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the phase angle for a given scanpoint</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scanpoint</strong> : int</p>
+<blockquote>
+<div><p>The scanpoint you&#8217;re interested in</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>phase_angle, master_opening</strong> : float</p>
+<blockquote class="last">
+<div><p>The phase angle in degrees, and the angular opening of the master
+chopper</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.PlatypusNexus.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>h5norm=None</em>, <em>lo_wavelength=2.5</em>, <em>hi_wavelength=19.0</em>, <em>background=True</em>, <em>direct=False</em>, <em>omega=None</em>, <em>twotheta=None</em>, <em>rebin_percent=1.0</em>, <em>wavelength_bins=None</em>, <em>normalise=True</em>, <em>integrate=-1</em>, <em>eventmode=None</em>, <em>peak_pos=None</em>, <em>background_mask=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the ProcessNexus object to produce a time of flight spectrum.
+The processed spectrum is stored in the <cite>processed_spectrum</cite> attribute.
+The specular spectrum is also returned from this function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>h5norm</strong> : HDF5 NeXus file</p>
+<blockquote>
+<div><p>The hdf5 file containing the floodfield data.</p>
+</div></blockquote>
+<p><strong>lo_wavelength</strong> : float</p>
+<blockquote>
+<div><p>The low wavelength cutoff for the rebinned data (A).</p>
+</div></blockquote>
+<p><strong>hi_wavelength</strong> : float</p>
+<blockquote>
+<div><p>The high wavelength cutoff for the rebinned data (A).</p>
+</div></blockquote>
+<p><strong>background</strong> : bool</p>
+<blockquote>
+<div><p>Should a background subtraction be carried out?</p>
+</div></blockquote>
+<p><strong>direct</strong> : bool</p>
+<blockquote>
+<div><p>Is it a direct beam you measured? This is so a gravity correction
+can be applied.</p>
+</div></blockquote>
+<p><strong>omega</strong> : float</p>
+<blockquote>
+<div><p>Expected angle of incidence of beam. If this is None, then the
+rough angle of incidence is obtained from the NeXus file.</p>
+</div></blockquote>
+<p><strong>twotheta</strong> : float</p>
+<blockquote>
+<div><p>Expected two theta value of specular beam. If this is None then
+the rough angle of incidence is obtained from the NeXus file.</p>
+</div></blockquote>
+<p><strong>rebin_percent</strong> : float</p>
+<blockquote>
+<div><p>Specifies the rebinning percentage for the spectrum.  If
+<cite>rebin_percent is None</cite>, then no rebinning is done.</p>
+</div></blockquote>
+<p><strong>wavelength_bins</strong> : array_like</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>The wavelength bins for rebinning.  If <a href="#id3"><span class="problematic" id="id4">`</span></a>wavelength_bins is not</dt>
+<dd><p class="first last">None` then the <cite>rebin_percent</cite> parameter is ignored.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>normalise</strong> : bool</p>
+<blockquote>
+<div><p>Normalise by the monitor counts.</p>
+</div></blockquote>
+<p><strong>integrate</strong> : int</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>integrate == -1</dt>
+<dd><p class="first last">the spectrum is integrated over all the scanpoints.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">integrate &gt;= 0
+the individual spectra are calculated individually.
+If <cite>eventmode is not None</cite> then integrate specifies which
+scanpoint to examine.</p>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>eventmode</strong> : None or array_like</p>
+<blockquote>
+<div><p>If eventmode is <cite>None</cite> then the integrated detector image is used.
+If eventmode is an array then the array specifies the integration
+times (in seconds) for the detector image, e.g. [0, 20, 30] would
+result in two spectra. The first would contain data for 0 s to 20s,
+the second would contain data for 20 s to 30 s.  This option can
+only be used when <cite>integrate &gt;= -1</cite>.
+If eventmode has zero length (e.g. []), then a single time interval
+for the entire acquisition is used, [0, acquisition_time].  This
+would source the image from the eventmode file, rather than the
+NeXUS file.</p>
+</div></blockquote>
+<p><strong>peak_pos</strong> : None or (float, float)</p>
+<blockquote>
+<div><p>Specifies the peak position and peak standard deviation to use.</p>
+</div></blockquote>
+<p><strong>background_mask</strong> : array_like</p>
+<blockquote>
+<div><p>An array of bool that specifies which y-pixels to use for
+background subtraction.  Should be the same length as the number of
+y pixels in the detector image.  Otherwise an automatic mask is
+applied (if background is True).</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">m_lambda, m_spec, m_spec_sd: np.ndarray</p>
+<blockquote class="last">
+<div><p>Arrays containing the wavelength, specular intensity as a function
+of wavelength, standard deviation of specular intensity</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>After processing this object contains the following the following
+attributes:</p>
+<ul class="simple">
+<li>path - path to the data file</li>
+<li>datafilename - name of the datafile</li>
+<li>datafile_number - datafile number.</li>
+<li>m_topandtail - the corrected 2D detector image, (n_spectra, TOF, Y)</li>
+<li>m_topandtail_sd - corresponding standard deviations</li>
+<li>n_spectra - number of spectra in processed data</li>
+<li>bm1_counts - beam montor counts, (n_spectra,)</li>
+<li>m_spec - specular intensity, (n_spectra, TOF)</li>
+<li>m_spec_sd - corresponding standard deviations</li>
+<li>m_beampos - beam_centre for each spectrum, (n_spectra, )</li>
+<li>m_lambda - wavelengths for each spectrum, (n_spectra, TOF)</li>
+<li>m_lambda_fwhm - corresponding FWHM of wavelength distribution</li>
+<li>m_lambda_hist - wavelength bins for each spectrum, (n_spectra, TOF)</li>
+<li>m_spec_tof - TOF for each wavelength bin, (n_spectra, TOF)</li>
+<li>mode - the Platypus mode, e.g. FOC/MT/POL/POLANAL/SB/DB</li>
+<li>detector_z - detector height, (n_spectra, )</li>
+<li>detector_y - sample-detector distance, (n_spectra, )</li>
+<li>domega - collimation uncertainty</li>
+<li>lopx - lowest extent of specular beam (in y pixels), (n_spectra, )</li>
+<li>hipx - highest extent of specular beam (in y pixels), (n_spectra, )</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.PlatypusNexus.process_event_stream">
+<code class="descname">process_event_stream</code><span class="sig-paren">(</span><em>t_bins=None</em>, <em>x_bins=None</em>, <em>y_bins=None</em>, <em>frame_bins=None</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process_event_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.process_event_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the event mode dataset for the nexus file. Assumes that
+there is a event mode directory in the same directory as the NeXUS
+file, as specified by in &#8216;entry1/instrument/detector/daq_dirname&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>frame_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the frame bins required in the image. If
+framebins = [5, 10, 120] you will get 2 images.  The first starts
+at 5s and finishes at 10s. The second starts at 10s and finishes
+at 120s. If frame_bins has zero length, e.g. [], then a single
+interval consisting of the entire acquisition time is used:
+[0, acquisition_time].</p>
+</div></blockquote>
+<p><strong>t_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the time bins required in the image</p>
+</div></blockquote>
+<p><strong>x_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the x bins required in the image</p>
+</div></blockquote>
+<p><strong>y_bins</strong> : array_like, optional</p>
+<blockquote>
+<div><p>specifies the y bins required in the image</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int, optional</p>
+<blockquote>
+<div><p>Scanpoint you are interested in</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">frame_bins, detector, bm1_counts</p>
+<p>Create a new detector image based on the t_bins, x_bins, y_bins and</p>
+<p>frame_bins you supply to the method (these should all be lists/numpy</p>
+<p>arrays specifying the edges of the required bins). If these are not</p>
+<p>specified, then the default bins are taken from the nexus file. This</p>
+<p>would essentially return the same detector image as the nexus file.</p>
+<p>However, you can specify the frame_bins list to generate detector</p>
+<p>images based on subdivided periods of the total acquisition.</p>
+<p>For example if framebins = [5, 10, 120] you will get 2 images.  The</p>
+<p>first starts at 5s and finishes at 10s. The second starts at 10s</p>
+<p>and finishes at 120s. The frame_bins are clipped to the total</p>
+<p class="last">acquisition time if necessary.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.reduce.PlatypusNexus.spectrum">
+<code class="descname">spectrum</code><a class="headerlink" href="#refnx.reduce.PlatypusNexus.spectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.PlatypusNexus.write_spectrum_dat">
+<code class="descname">write_spectrum_dat</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.write_spectrum_dat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.write_spectrum_dat" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes a dat representation of the corrected spectrum to
+file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<blockquote>
+<div><p>The file to write the spectrum to</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int</p>
+<blockquote class="last">
+<div><p>Which scanpoint to write.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.PlatypusNexus.write_spectrum_xml">
+<code class="descname">write_spectrum_xml</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.write_spectrum_xml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.write_spectrum_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes an XML representation of the corrected spectrum to
+file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<blockquote>
+<div><p>The file to write the spectrum to</p>
+</div></blockquote>
+<p><strong>scanpoint</strong> : int</p>
+<blockquote class="last">
+<div><p>Which scanpoint to write.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="refnx.reduce.ReducePlatypus">
+<em class="property">class </em><code class="descclassname">refnx.reduce.</code><code class="descname">ReducePlatypus</code><span class="sig-paren">(</span><em>direct</em>, <em>reflect=None</em>, <em>data_folder=None</em>, <em>scale=1.0</em>, <em>save=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Reduces Platypus reflectometer data to give the specular reflectivity.
+Offspecular data maps are also produced.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>direct</strong> : string, hdf5 file-handle or PlatypusNexus object</p>
+<blockquote>
+<div><p>A string containing the path to the direct beam hdf5 file,
+the hdf5 file itself, or a PlatypusNexus object.</p>
+</div></blockquote>
+<p><strong>reflect</strong> : string, hdf5 file-handle or PlatypusNexus object, optional</p>
+<blockquote>
+<div><p>A string containing the path to the specularly reflected hdf5 file,
+the hdf5 file itself, or a PlatypusNexus object.</p>
+</div></blockquote>
+<p><strong>data_folder</strong> : str, optional</p>
+<blockquote>
+<div><p>Where is the raw data stored?</p>
+</div></blockquote>
+<p><strong>scale</strong> : float, optional</p>
+<blockquote>
+<div><p>Divide all specular reflectivity values by this number.</p>
+</div></blockquote>
+<p><strong>save</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>True</cite> then the reduced dataset is saved to the current
+directory, with a name os.path.basename(reflect)</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict, optional</p>
+<blockquote>
+<div><p>Options passed directly to <cite>refnx.reduce.platypusnexus.process</cite>,
+for processing of individual spectra. Look at that method docstring
+for specification of options.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>If <cite>reflect</cite> was specified during construction a reduction will be
+done. See <code class="docutils literal"><span class="pre">reduce</span></code> for attributes available from this object on
+completion of reduction.</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.ReducePlatypus.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The specular reflectivity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scanpoint: int</strong></p>
+<blockquote>
+<div><p>Find a particular specular reflectivity image. scanpoints upto
+<cite>self.n_spectra - 1</cite> can be specified.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(Q, R, dR, dQ): np.ndarray tuple</p>
+<blockquote class="last">
+<div><p>dR is standard deviation, dQ is FWHM</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.ReducePlatypus.data2d">
+<code class="descname">data2d</code><span class="sig-paren">(</span><em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.data2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus.data2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>The offspecular data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scanpoint: int</strong></p>
+<blockquote>
+<div><p>Find a particular offspecular image. scanpoints upto 
+self.n_spectra - 1 can be specified.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(Qz, Qy, R, dR): np.ndarrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.ReducePlatypus.reduce">
+<code class="descname">reduce</code><span class="sig-paren">(</span><em>reflect</em>, <em>scale=1.0</em>, <em>save=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduction of a single dataset.</p>
+<p>The reduction uses the direct beam specified during construction of
+this object. This method reduces all the spectra present in the
+reflected beam file (see platypusnexus.PlatypusNexus.process for
+eventmode specification and other related options), but aggregates
+all data in the direct beam spectrum.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>reflect</strong> : string, hdf5 file-handle or PlatypusNexus object</p>
+<blockquote>
+<div><p>A string containing the path to the specularly reflected hdf5 file,
+the hdf5 file itself, or a PlatypusNexus object.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float, optional</p>
+<blockquote>
+<div><p>Divide all the reflectivity values by this number.</p>
+</div></blockquote>
+<p><strong>save</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>True</cite> then the reduced dataset is saved to the current
+directory, with a name os.path.basename(reflect)</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict, optional</p>
+<blockquote>
+<div><p>Options passed directly to <cite>refnx.reduce.platypusnexus.process</cite>,
+for processing of individual spectra. Look at that method docstring
+for specification of options.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>reduction</strong> : dict</p>
+<blockquote>
+<div><p>Contains the following entries:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>&#8216;x&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Q values, shape (N, T).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;x_sd&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Uncertainty in Q values (FWHM), shape (N, T).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;y&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Specular Reflectivity, shape (N, T)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;y_sd&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Uncertainty in specular reflectivity (SD), shape (N, T)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_ref&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Offspecular reflectivity map, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_refSD&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">uncertainty in offspecular reflectivity, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_qz&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Qz for offspecular map, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;m_qy&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">Qy for offspecular map, shape (N, T, Y)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;n_spectra&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">number of reflectivity spectra</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;datafile_number&#8217;: int</dt>
+<dd><p class="first last">run number for the reflected beam</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>N corresponds to the number of spectra</p>
+<p>T corresponds to the number of Q (wavelength) bins</p>
+<p class="last">Y corresponds to the number of y pixels on the detector.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>All the values returned from this method are also contained as instance
+attributes for this object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.ReducePlatypus.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>scale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divides the reflectivity values by this scale factor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scale: float</strong></p>
+<blockquote class="last">
+<div><p>Divides the reflectivity values by a constant amount</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.reduce.ReducePlatypus.write_offspecular">
+<code class="descname">write_offspecular</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.write_offspecular"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus.write_offspecular" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.datafile_number">
+<code class="descclassname">refnx.reduce.</code><code class="descname">datafile_number</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#datafile_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.datafile_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a filename figure out what the run number was</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.number_datafile">
+<code class="descclassname">refnx.reduce.</code><code class="descname">number_datafile</code><span class="sig-paren">(</span><em>run_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#number_datafile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.number_datafile" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a run number figure out what the file name is.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.reduce_stitch">
+<code class="descclassname">refnx.reduce.</code><code class="descname">reduce_stitch</code><span class="sig-paren">(</span><em>reflect_list</em>, <em>direct_list</em>, <em>norm_file_num=None</em>, <em>data_folder=None</em>, <em>trim_trailing=True</em>, <em>save=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#reduce_stitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce_stitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces a list of reflected beam run numbers and a list of corresponding
+direct beam run numbers from the Platypus reflectometer. If there are
+multiple reflectivity files they are spliced together.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>reflect_list</strong> : list</p>
+<blockquote>
+<div><p>Reflected beam run numbers, e.g. <cite>[708, 709, 710]</cite>
+708 corresponds to the file PLP0000708.nx.hdf.</p>
+</div></blockquote>
+<p><strong>direct_list</strong> : list</p>
+<blockquote>
+<div><p>Direct beam run numbers, e.g. <cite>[711, 711, 711]</cite></p>
+</div></blockquote>
+<p><strong>norm_file_num</strong> : int, optional</p>
+<blockquote>
+<div><p>The run number for the water flood field correction.</p>
+</div></blockquote>
+<p><strong>data_folder</strong> : str, optional</p>
+<blockquote>
+<div><p>Where is the raw data stored?</p>
+</div></blockquote>
+<p><strong>trim_trailing</strong> : bool, optional</p>
+<blockquote>
+<div><p>When datasets are spliced together do you want to remove points in the
+overlap region from the preceding dataset?</p>
+</div></blockquote>
+<p><strong>save</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>True</cite> then the spliced file is written to a file (in the working
+directory) with a name like: <cite>c_PLP0000708.dat</cite>.</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict, optional</p>
+<blockquote>
+<div><p>Options passed directly to <cite>refnx.reduce.platypusnexus.process</cite>,
+for processing of individual spectra. Look at that method docstring
+for specification of options.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>combined_dataset, reduced_filename</strong> : refnx.dataset.ReflectDataset, str</p>
+<blockquote class="last">
+<div><p>The combined dataset and the file name of the reduced data, if it was
+saved. If it wasn&#8217;t saved <cite>reduced_filename</cite> is <cite>None</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.reduce_xrdml">
+<code class="descclassname">refnx.reduce.</code><code class="descname">reduce_xrdml</code><span class="sig-paren">(</span><em>f</em>, <em>bkg=None</em>, <em>scale=1</em>, <em>sample_length=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/xray.html#reduce_xrdml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.reduce_xrdml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces a Panalytical XRDML file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f: file-like object or string</strong></p>
+<blockquote>
+<div><p>The specular reflectivity (XRDML) file of interest</p>
+</div></blockquote>
+<p><strong>bkg: list</strong></p>
+<blockquote>
+<div><p>A list of file-like objects or strings that contain background
+measurements. The background is assumed to have the same number of
+points as the specular reflectivity curve.  The backgrounds are
+averaged and subtracted from the specular reflectivity</p>
+</div></blockquote>
+<p><strong>scale: float</strong></p>
+<blockquote>
+<div><p>The direct beam intensity (cps)</p>
+</div></blockquote>
+<p><strong>sample_length: None or float</strong></p>
+<blockquote>
+<div><p>If None then no footprint correction is done. Otherwise the transverse
+footprint of the sample (mm).</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">specular_q, specular_r, specular_dr: np.ndarray</p>
+<blockquote class="last">
+<div><p>The specular reflectivity as a function of momentum transfer, Q.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">refnx.reduce package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.bounded_splines">refnx.reduce.bounded_splines module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.event">refnx.reduce.event module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.parabolic_motion">refnx.reduce.parabolic_motion module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.peak_utils">refnx.reduce.peak_utils module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.platypusnexus">refnx.reduce.platypusnexus module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.rebin">refnx.reduce.rebin module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.reduce">refnx.reduce.reduce module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce.xray">refnx.reduce.xray module</a></li>
+<li><a class="reference internal" href="#module-refnx.reduce">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/refnx.reduce.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/refnx.reduce.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

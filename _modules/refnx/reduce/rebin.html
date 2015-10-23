@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.reduce.rebin &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.reduce.rebin</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Rebins histograms in a piecewise-constant fashion.  Original code based</span>
+<span class="sd">on Joshua Hykes code.  However, the error propagation (with the uncertainties</span>
+<span class="sd">package) was _very_ slow, so I&#39;ve extracted the piecewise-constant code and</span>
+<span class="sd">modified it.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright (c) 2011, Joshua M. Hykes</span>
+<span class="sd">All rights reserved.</span>
+
+<span class="sd">Redistribution and use in source and binary forms, with or without</span>
+<span class="sd">modification, are permitted provided that the following conditions are met:</span>
+<span class="sd">    * Redistributions of source code must retain the above copyright</span>
+<span class="sd">      notice, this list of conditions and the following disclaimer.</span>
+<span class="sd">    * Redistributions in binary form must reproduce the above copyright</span>
+<span class="sd">      notice, this list of conditions and the following disclaimer in the</span>
+<span class="sd">      documentation and/or other materials provided with the distribution.</span>
+
+<span class="sd">THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND</span>
+<span class="sd">ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
+<span class="sd">WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
+<span class="sd">DISCLAIMED. IN NO EVENT SHALL JOSHUA M. HYKES BE LIABLE FOR ANY</span>
+<span class="sd">DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="sd">(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="sd">LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="sd">ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="sd">(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
+<span class="sd">SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="rebin_along_axis"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.rebin.rebin_along_axis">[docs]</a><span class="k">def</span> <span class="nf">rebin_along_axis</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1_sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rebins an N-dimensional array along a given axis, in a piecewise-constant</span>
+<span class="sd">    fashion.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y1 : array_like</span>
+<span class="sd">        The input image</span>
+<span class="sd">    x1 : array_like</span>
+<span class="sd">        The monotonically increasing/decreasing original bin edges along</span>
+<span class="sd">        `axis`, must be 1 greater than `np.size(y1, axis)`.</span>
+<span class="sd">    y2 : array_like</span>
+<span class="sd">        The final bin_edges along `axis`.</span>
+<span class="sd">    axis : int</span>
+<span class="sd">        The axis to be rebinned, it must exist in the original image.</span>
+<span class="sd">    y1_sd : array_like, optional</span>
+<span class="sd">        Standard deviations for each pixel in y1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : np.ndarray</span>
+<span class="sd">    --OR--</span>
+<span class="sd">    output, output_sd : np.ndarray</span>
+<span class="sd">        The rebinned image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">orig_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">num_axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">orig_shape</span><span class="p">)</span>
+
+    <span class="c"># Output is going to need reshaping</span>
+    <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">orig_shape</span><span class="p">)</span>
+    <span class="n">new_shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">axis</span> <span class="o">&gt;</span> <span class="n">num_axes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;That axis is not in y1&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The original number of xbins does not match the axis&quot;</span>
+                         <span class="s">&quot;size&quot;</span><span class="p">)</span>
+
+    <span class="n">odtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;float&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">y1</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;O&#39;</span><span class="p">):</span>
+        <span class="n">odtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;O&#39;</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">odtype</span><span class="p">)</span>
+    <span class="n">output_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">it</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;multi_index&#39;</span><span class="p">,</span> <span class="s">&#39;refs_ok&#39;</span><span class="p">])</span>
+    <span class="n">it</span><span class="o">.</span><span class="n">remove_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">it</span><span class="o">.</span><span class="n">finished</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">it</span><span class="o">.</span><span class="n">multi_index</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">y1_sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">rebinned</span><span class="p">,</span> <span class="n">rebinned_sd</span> <span class="o">=</span> <span class="n">rebin</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>
+                                          <span class="n">y1</span><span class="p">[</span><span class="n">a</span><span class="p">],</span>
+                                          <span class="n">x2</span><span class="p">,</span>
+                                          <span class="n">y1_sd</span><span class="o">=</span><span class="n">y1_sd</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
+
+            <span class="n">output_sd</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">rebinned_sd</span><span class="p">[:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rebinned</span> <span class="o">=</span> <span class="n">rebin</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">x2</span><span class="p">)</span>
+
+        <span class="n">output</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">rebinned</span><span class="p">[:]</span>
+        <span class="n">it</span><span class="o">.</span><span class="n">iternext</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">y1_sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">output_sd</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+</div>
+<div class="viewcode-block" id="rebinND"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.rebin.rebinND">[docs]</a><span class="k">def</span> <span class="nf">rebinND</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">old_bins</span><span class="p">,</span> <span class="n">new_bins</span><span class="p">,</span> <span class="n">y1_sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rebin y1 along several axes, in a piecewise-constant fashion.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y1 : array_like</span>
+<span class="sd">        The image to be rebinned</span>
+<span class="sd">    axes : tuple of int</span>
+<span class="sd">        The axes to be rebinned.</span>
+<span class="sd">    old_bins : tuple of np.ndarray</span>
+<span class="sd">        The old histogram bins along each axis in `axes`.</span>
+<span class="sd">    new_bins : tuple of np.ndarray</span>
+<span class="sd">        The new histogram bins along each axis in `axes`.</span>
+<span class="sd">    y1_sd : array_like, optional</span>
+<span class="sd">        Standard deviations for pixels in the image</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : np.ndarray</span>
+<span class="sd">    --OR--</span>
+<span class="sd">    (output, output_sd) : np.ndarray</span>
+<span class="sd">        The rebinned image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_axes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">num_axes</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;One of the axes is not in the original array&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">old_bins</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_bins</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_bins</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The number of bins must be the same as the number&quot;</span>
+                         <span class="s">&quot;of axes you wish to rebin&quot;</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">rebin_along_axis</span><span class="p">(</span><span class="n">output</span><span class="p">,</span>
+                                  <span class="n">old_bins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                  <span class="n">new_bins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                  <span class="n">axis</span><span class="p">,</span>
+                                  <span class="n">y1_sd</span><span class="o">=</span><span class="n">y1_sd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output</span>
+
+</div>
+<div class="viewcode-block" id="rebin"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.rebin.rebin">[docs]</a><span class="k">def</span> <span class="nf">rebin</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1_sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rebin histogram values y1 from old bin edges x1 to new edges x2.</span>
+<span class="sd">    (Piecewise_constant)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">     x1 : np.ndarray</span>
+<span class="sd">         M + 1 array of old bin edges.</span>
+<span class="sd">     y1 : np.ndarray</span>
+<span class="sd">        M + 1 array of old histogram values. This is the total number in</span>
+<span class="sd">        each bin, not an average.</span>
+<span class="sd">     x2 : np.ndarray</span>
+<span class="sd">        N + 1 array of new bin edges.</span>
+<span class="sd">     y1_sd : np.ndarray, optional</span>
+<span class="sd">        Standard deviations of values in y1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y2 : np.ndarray</span>
+<span class="sd">    --OR--</span>
+<span class="sd">    (y2, y2_sd) : np.ndarray</span>
+<span class="sd">        An array of rebinned histogram values.</span>
+
+<span class="sd">    The rebinning algorithm assumes that the counts in each old bin are</span>
+<span class="sd">    uniformly distributed in that bin.</span>
+
+<span class="sd">    Bins in x2 that are entirely outside the range of x1 are assigned 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+
+    <span class="n">y1_sd_temp</span> <span class="o">=</span> <span class="n">y1_sd</span>
+    <span class="k">if</span> <span class="n">y1_sd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">y1_sd_temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+
+    <span class="c"># Divide y1 by bin widths.</span>
+    <span class="c"># This converts y-values from bin total to bin average over bin width.</span>
+    <span class="n">x1_bin_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+    <span class="n">y1_ave</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">/</span> <span class="n">x1_bin_widths</span>
+    <span class="n">y1_ave_sd</span> <span class="o">=</span> <span class="n">y1_sd_temp</span> <span class="o">/</span> <span class="n">x1_bin_widths</span>
+
+    <span class="c"># Need to work with variances</span>
+    <span class="n">y1_ave_var</span> <span class="o">=</span> <span class="n">y1_ave_sd</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">y1_var_temp</span> <span class="o">=</span> <span class="n">y1_sd_temp</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c"># allocating y2 vector</span>
+    <span class="n">n</span>  <span class="o">=</span> <span class="n">x2</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">y2_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+
+    <span class="n">i_place</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+
+    <span class="c"># find out where x2 intersects with x1, this will determine which x2 bins</span>
+    <span class="c"># we need to consider</span>
+    <span class="n">start_pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">end_pos</span> <span class="o">=</span> <span class="n">n</span>
+
+    <span class="n">start_pos_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">i_place</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">start_pos_test</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">start_pos</span> <span class="o">=</span> <span class="n">start_pos_test</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">end_pos_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">i_place</span> <span class="o">==</span> <span class="n">x1</span><span class="o">.</span><span class="n">size</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">end_pos_test</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">end_pos</span> <span class="o">=</span> <span class="n">end_pos_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c"># the first bin totally covers x1 range</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">start_pos</span> <span class="o">==</span> <span class="n">end_pos</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="ow">and</span> <span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="ow">and</span> <span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">x1</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">sub_edges</span> <span class="o">=</span> <span class="n">x1</span>
+        <span class="n">sub_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">sub_edges</span><span class="p">)</span>
+        <span class="n">sub_y_ave</span> <span class="o">=</span> <span class="n">y1_ave</span>
+        <span class="n">sub_y_ave_var</span> <span class="o">=</span> <span class="n">y1_ave_var</span>
+
+        <span class="n">y2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sub_dx</span> <span class="o">*</span> <span class="n">sub_y_ave</span><span class="p">)</span>
+        <span class="n">y2_var</span><span class="p">[</span><span class="n">start_pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sub_y_ave_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">sub_dx</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">start_pos</span> <span class="o">=</span> <span class="n">end_pos</span>
+
+    <span class="c"># the first bin overlaps lower x1 boundary</span>
+    <span class="k">if</span> <span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">start_pos</span> <span class="o">&lt;</span> <span class="n">end_pos</span><span class="p">:</span>
+        <span class="n">x2_lo</span><span class="p">,</span> <span class="n">x2_hi</span> <span class="o">=</span> <span class="n">x2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">],</span> <span class="n">x2</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">i_lo</span><span class="p">,</span> <span class="n">i_hi</span> <span class="o">=</span> <span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">],</span> <span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">sub_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span> <span class="p">[</span> <span class="n">x1</span><span class="p">[</span><span class="n">i_lo</span><span class="p">:</span><span class="n">i_hi</span><span class="p">],</span> <span class="n">x2_hi</span> <span class="p">]</span> <span class="p">)</span>
+        <span class="n">sub_dx</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">sub_edges</span><span class="p">)</span>
+        <span class="n">sub_y_ave</span> <span class="o">=</span> <span class="n">y1_ave</span><span class="p">[</span><span class="n">i_lo</span><span class="p">:</span> <span class="n">i_hi</span><span class="p">]</span>
+        <span class="n">sub_y_ave_var</span> <span class="o">=</span> <span class="n">y1_ave_var</span><span class="p">[</span><span class="n">i_lo</span><span class="p">:</span><span class="n">i_hi</span><span class="p">]</span>
+
+        <span class="n">y2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sub_dx</span> <span class="o">*</span> <span class="n">sub_y_ave</span><span class="p">)</span>
+        <span class="n">y2_var</span><span class="p">[</span><span class="n">start_pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sub_y_ave_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">sub_dx</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">start_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c"># the last bin overlaps upper x1 boundary</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">i_place</span><span class="p">[</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">==</span> <span class="n">x1</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">start_pos</span> <span class="o">&lt;</span> <span class="n">end_pos</span><span class="p">):</span>
+        <span class="n">x2_lo</span><span class="p">,</span> <span class="n">x2_hi</span> <span class="o">=</span> <span class="n">x2</span><span class="p">[</span><span class="n">end_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x2</span><span class="p">[</span><span class="n">end_pos</span><span class="p">]</span>
+        <span class="n">i_lo</span><span class="p">,</span> <span class="n">i_hi</span> <span class="o">=</span> <span class="n">i_place</span><span class="p">[</span><span class="n">end_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">i_place</span><span class="p">[</span><span class="n">end_pos</span><span class="p">]</span>
+
+        <span class="n">sub_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span> <span class="p">[</span> <span class="n">x2_lo</span><span class="p">,</span> <span class="n">x1</span><span class="p">[</span><span class="n">i_lo</span><span class="p">:</span><span class="n">i_hi</span><span class="p">]</span> <span class="p">]</span> <span class="p">)</span>
+        <span class="n">sub_dx</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">sub_edges</span><span class="p">)</span>
+        <span class="n">sub_y_ave</span> <span class="o">=</span> <span class="n">y1_ave</span><span class="p">[</span><span class="n">i_lo</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="n">i_hi</span><span class="p">]</span>
+        <span class="n">sub_y_ave_var</span> <span class="o">=</span> <span class="n">y1_ave_var</span><span class="p">[</span><span class="n">i_lo</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="n">i_hi</span><span class="p">]</span>
+
+        <span class="n">y2</span><span class="p">[</span><span class="n">end_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sub_dx</span> <span class="o">*</span> <span class="n">sub_y_ave</span><span class="p">)</span>
+        <span class="n">y2_var</span><span class="p">[</span><span class="n">end_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sub_y_ave_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">sub_dx</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">end_pos</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">start_pos</span> <span class="o">&lt;</span> <span class="n">end_pos</span><span class="p">:</span>
+        <span class="c"># deal with whole parts of bin that are spanned</span>
+        <span class="n">cum_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+        <span class="n">cum_sum_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">y1_var_temp</span><span class="p">)</span>
+        <span class="n">running_sum</span> <span class="o">=</span> <span class="p">(</span><span class="n">cum_sum</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">end_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span>
+                       <span class="o">-</span> <span class="n">cum_sum</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">running_sum_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">cum_sum_var</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">end_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span>
+                       <span class="o">-</span> <span class="n">cum_sum_var</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">y2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">+=</span> <span class="n">running_sum</span>
+        <span class="n">y2_var</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">+=</span> <span class="n">running_sum_var</span>
+
+        <span class="c"># deal with fractional start of bin</span>
+        <span class="n">p_sub_dx</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]]</span> <span class="o">-</span> <span class="n">x2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span>
+        <span class="n">sub_y_ave</span> <span class="o">=</span> <span class="n">y1_ave</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">sub_y_ave_var</span> <span class="o">=</span> <span class="n">y1_ave_var</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">y2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">+=</span> <span class="n">p_sub_dx</span> <span class="o">*</span> <span class="n">sub_y_ave</span>
+        <span class="n">y2_var</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">+=</span> <span class="n">sub_y_ave_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">p_sub_dx</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="c"># deal with fractional end of bin</span>
+        <span class="n">p_sub_dx</span> <span class="o">=</span> <span class="n">x2</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">end_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x1</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">end_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">sub_y_ave</span> <span class="o">=</span> <span class="n">y1_ave</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">end_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">sub_y_ave_var</span> <span class="o">=</span> <span class="n">y1_ave_var</span><span class="p">[</span><span class="n">i_place</span><span class="p">[</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">end_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">y2</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">+=</span> <span class="n">p_sub_dx</span> <span class="o">*</span> <span class="n">sub_y_ave</span>
+        <span class="n">y2_var</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">end_pos</span><span class="p">]</span> <span class="o">+=</span> <span class="n">sub_y_ave_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">p_sub_dx</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">y1_sd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">y2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">y2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">y2_var</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

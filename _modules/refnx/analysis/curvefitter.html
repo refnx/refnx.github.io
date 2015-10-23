@@ -1,0 +1,766 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.analysis.curvefitter &mdash; refnx 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.analysis.curvefitter</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Sun Dec 21 15:37:29 2014</span>
+
+<span class="sd">@author: Andrew Nelson</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">lmfit</span> <span class="kn">import</span> <span class="n">Minimizer</span><span class="p">,</span> <span class="n">Parameters</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.ma</span> <span class="kn">as</span> <span class="nn">ma</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="c"># check for EMCEE</span>
+<span class="n">HAS_EMCEE</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">emcee</span> <span class="kn">as</span> <span class="nn">emcee</span>
+    <span class="n">HAS_EMCEE</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="n">_MACHEPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+
+<div class="viewcode-block" id="to_parameters"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.to_parameters">[docs]</a><span class="k">def</span> <span class="nf">to_parameters</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">varies</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility function to convert sequences into a lmfit.Parameters instance</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p0 : np.ndarray</span>
+<span class="sd">        numpy array containing parameter values.</span>
+<span class="sd">    varies : bool sequence, optional</span>
+<span class="sd">        Specifies whether a parameter is being held or varied.</span>
+<span class="sd">    bounds : sequence, optional</span>
+<span class="sd">        Tuple of (min, max) pairs specifying the lower and upper bounds for</span>
+<span class="sd">        each parameter</span>
+<span class="sd">    name : str sequence, optional</span>
+<span class="sd">        Name of each parameter</span>
+<span class="sd">    expr : str sequence, optional</span>
+<span class="sd">        Constraints for each parameter</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p : lmfit.Parameters instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">varies</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_varies</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_varies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">varies</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;p</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p0</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">lowlim</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hilim</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">bound</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
+            <span class="n">lowlim</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bound</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">hilim</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bound</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lowlim</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">hilim</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="k">if</span> <span class="n">expr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="n">_p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+    <span class="c"># go through and add the parameters</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p0</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="c"># if the limits are finite and equal, then you shouldn&#39;t be fitting</span>
+        <span class="c"># the parameter. So fix the parameter and set the upper limit to be</span>
+        <span class="c"># slightly larger (otherwise you&#39;ll get an error when setting the</span>
+        <span class="c"># Parameter up)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">lowlim</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+            <span class="ow">and</span> <span class="n">hilim</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+            <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lowlim</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">hilim</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="ow">and</span> <span class="n">lowlim</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">hilim</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+
+            <span class="n">hilim</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">_p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lowlim</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">_varies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">_p0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">min</span><span class="o">=</span><span class="n">lowlim</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">hilim</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+              <span class="n">vary</span><span class="o">=</span><span class="n">_varies</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">p</span>
+
+</div>
+<div class="viewcode-block" id="varys"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.varys">[docs]</a><span class="k">def</span> <span class="nf">varys</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A convenience function that takes an lmfit.Parameters instance and finds</span>
+<span class="sd">    out which ones vary</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : lmfit.Parameters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    varys : bool, sequence</span>
+<span class="sd">        Which parameters are varying</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">vary</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="exprs"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.exprs">[docs]</a><span class="k">def</span> <span class="nf">exprs</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A convenience function that takes an lmfit.Parameters instance and returns</span>
+<span class="sd">    the the constraint expressions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : lmfit.Parameters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    exprs : list of str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">expr</span>
+
+</div>
+<div class="viewcode-block" id="values"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.values">[docs]</a><span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A convenience function that takes an lmfit.Parameters instance and returns</span>
+<span class="sd">    the the values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">param</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="names"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.names">[docs]</a><span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="bounds"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.bounds">[docs]</a><span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">params</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">)</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="clear_bounds"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.clear_bounds">[docs]</a><span class="k">def</span> <span class="nf">clear_bounds</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">params</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+</div>
+<div class="viewcode-block" id="fitfunc"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.fitfunc">[docs]</a><span class="k">def</span> <span class="nf">fitfunc</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A decorator that can be used to say if something is a fitfunc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">fitfuncwraps</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+</div>
+<div class="viewcode-block" id="FitFunction"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.FitFunction">[docs]</a><span class="k">class</span> <span class="nc">FitFunction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An abstract FitFunction class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the FitFunction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+
+    <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="FitFunction.model"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.FitFunction.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the predictive model for the fit.</span>
+<span class="sd">        Override this method in your own fitfunction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array-like</span>
+<span class="sd">            The independent variable for the fit</span>
+<span class="sd">        params : lmfit.Parameters</span>
+<span class="sd">            The model parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predictive : np.ndarray</span>
+<span class="sd">            The predictive model for the fitfunction.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        `args` and `kws` can be used to fully specify the fit function.</span>
+<span class="sd">        Normally you would supply these via when the **FitFunction** object is</span>
+<span class="sd">        constructed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;You can&#39;t use the abstract base FitFunction in a&quot;</span>
+                           <span class="s">&quot; real fit&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FitFunction.parameter_names"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.FitFunction.parameter_names">[docs]</a>    <span class="k">def</span> <span class="nf">parameter_names</span><span class="p">(</span><span class="n">nparams</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a set of names for constructing an `lmfit.Parameters` instance</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nparams: int, optional</span>
+<span class="sd">            &gt;= 0 - provide a set of names with length `nparams`</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        names: list</span>
+<span class="sd">            names for the lmfit.Parameters instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">nparams</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;p</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nparams</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+</div></div>
+<div class="viewcode-block" id="CurveFitter"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.CurveFitter">[docs]</a><span class="k">class</span> <span class="nc">CurveFitter</span><span class="p">(</span><span class="n">Minimizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A curvefitting class that extends `lmfit.Minimize`</span>
+
+<span class="sd">    fitfunc : callable</span>
+<span class="sd">        Function calculating the generative model for the fit.  Should have</span>
+<span class="sd">        the signature: ``fitfunc(x, params, *fcn_args, **fcn_kws)``. You</span>
+<span class="sd">        can also supply a ``FitFunction`` instance.</span>
+<span class="sd">    x : np.ndarray</span>
+<span class="sd">        The independent variables</span>
+<span class="sd">    y : np.ndarray</span>
+<span class="sd">        The dependent (observed) variable</span>
+<span class="sd">    params : lmfit.Parameters instance</span>
+<span class="sd">        Specifies the parameter set for the fit</span>
+<span class="sd">    edata : np.ndarray, optional</span>
+<span class="sd">        The measured uncertainty in the dependent variable, expressed as</span>
+<span class="sd">        sd.  If this array is not specified, then edata is set to unity.</span>
+<span class="sd">    mask : np.ndarray, optional</span>
+<span class="sd">        A boolean array with the same shape as y.  If mask is True</span>
+<span class="sd">        then that point is excluded from the residuals calculation.</span>
+<span class="sd">    fcn_args : tuple, optional</span>
+<span class="sd">        Extra parameters required to fully specify fitfunc.</span>
+<span class="sd">    fcn_kws : dict, optional</span>
+<span class="sd">        Extra keyword parameters needed to fully specify fitfunc.</span>
+<span class="sd">    minimizer_kwds : dict, optional</span>
+<span class="sd">        Keywords passed to the minimizer.</span>
+<span class="sd">    callback : callable, optional</span>
+<span class="sd">        A function called at each minimization step. Has the signature:</span>
+<span class="sd">        ``callback(params, iter, resid, *args, **kwds)``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitfunc</span><span class="p">,</span> <span class="n">xdata</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">edata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">fcn_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">fcn_kws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunc</span> <span class="o">=</span> <span class="n">fitfunc</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;mask shape should be same as data&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">edata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_covar</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_covar</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">min_kwds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">kws</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">min_kwds</span> <span class="o">=</span> <span class="n">kws</span>
+
+        <span class="c"># self._resid = Calculator(fitfunc,</span>
+        <span class="c">#                          (self.xdata, self.ydata, self.edata),</span>
+        <span class="c">#                          mask=mask,</span>
+        <span class="c">#                          fcn_args=fcn_args,</span>
+        <span class="c">#                          fcn_kws=fcn_kws)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resid</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_parallel_residuals_calculator</span><span class="p">,</span>
+                              <span class="n">fitfunc</span><span class="o">=</span><span class="n">fitfunc</span><span class="p">,</span>
+                              <span class="n">data_tuple</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">edata</span><span class="p">),</span>
+                              <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+                              <span class="n">fcn_args</span><span class="o">=</span><span class="n">fcn_args</span><span class="p">,</span>
+                              <span class="n">fcn_kws</span><span class="o">=</span><span class="n">fcn_kws</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CurveFitter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resid</span><span class="p">,</span>
+                                          <span class="n">params</span><span class="p">,</span>
+                                          <span class="n">iter_cb</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span>
+                                          <span class="n">scale_covar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_covar</span><span class="p">,</span>
+                                          <span class="o">**</span><span class="n">min_kwds</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The unmasked data, and the mask</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (x, y, e, mask) : data tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">edata</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="nd">@data.setter</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ydata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+<div class="viewcode-block" id="CurveFitter.residuals"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.CurveFitter.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the difference between the data and the model. Also known as</span>
+<span class="sd">        the objective function. This is a convenience method. Over-riding it</span>
+<span class="sd">        will not change a fit.</span>
+
+<span class="sd">        :math:`residuals = (fitfunc - y) / edata`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : lmfit.Parameters instance</span>
+<span class="sd">            Specifies the entire parameter set</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        residuals : np.ndarray</span>
+<span class="sd">            The difference between the data and the model.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        This method should only return the points that are not masked.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resid</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CurveFitter.model"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.CurveFitter.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the model. This is a convenience method. Over-riding it will</span>
+<span class="sd">        not change a fit.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : lmfit.Parameters instance</span>
+<span class="sd">            Specifies the entire parameter set</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model : array_like</span>
+<span class="sd">            The model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resid</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CurveFitter.fit"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.CurveFitter.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;leastsq&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits the dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+
+<span class="sd">        method : str, optional</span>
+<span class="sd">            Name of the fitting method to use.</span>
+<span class="sd">            One of:</span>
+
+<span class="sd">            - &#39;leastsq&#39;                -    Levenberg-Marquardt (default)</span>
+<span class="sd">            - &#39;nelder&#39;                 -    Nelder-Mead</span>
+<span class="sd">            - &#39;lbfgsb&#39;                 -    L-BFGS-B</span>
+<span class="sd">            - &#39;powell&#39;                 -    Powell</span>
+<span class="sd">            - &#39;cg&#39;                     -    Conjugate-Gradient</span>
+<span class="sd">            - &#39;newton&#39;                 -    Newton-CG</span>
+<span class="sd">            - &#39;cobyla&#39;                 -    Cobyla</span>
+<span class="sd">            - &#39;tnc&#39;                    -    Truncate Newton</span>
+<span class="sd">            - &#39;trust-ncg&#39;              -    Trust Newton-CGn</span>
+<span class="sd">            - &#39;dogleg&#39;                 -    Dogleg</span>
+<span class="sd">            - &#39;slsqp&#39;                  -    Sequential Linear Squares Programming</span>
+<span class="sd">            - &#39;differential_evolution&#39; -    differential evolution</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        success : bool</span>
+<span class="sd">            Whether the fit succeeded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+</div></div>
+<div class="viewcode-block" id="GlobalFitter"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.GlobalFitter">[docs]</a><span class="k">class</span> <span class="nc">GlobalFitter</span><span class="p">(</span><span class="n">CurveFitter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simultaneous curvefitting of multiple datasets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitters</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="p">(),</span> <span class="n">kws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        fitters: sequence of CurveFitter instances</span>
+<span class="sd">            Contains all the fitters and fitfunctions for the global fit.</span>
+<span class="sd">        constraints: str sequence, optional</span>
+<span class="sd">            Of the type &#39;dN:param_name = constraint&#39;. Sets a constraint</span>
+<span class="sd">            expression for the parameter `param_name` in dataset N. The</span>
+<span class="sd">            constraint &#39;d2:scale = 2 * d0:back&#39; constrains the `scale`</span>
+<span class="sd">            parameter in dataset 2 to be twice the `back` parameter in</span>
+<span class="sd">            dataset 0.</span>
+<span class="sd">            **Important** For a parameter (`d2:scale` in this example) to be</span>
+<span class="sd">            constrained by this mechanism it must not have any pre-existing</span>
+<span class="sd">            constraints within its individual fitter. If there are</span>
+<span class="sd">            pre-existing constraints then those are honoured, and constraints</span>
+<span class="sd">            specified here are ignored.</span>
+<span class="sd">        kws: dict, optional</span>
+<span class="sd">            Extra minimization keywords to be passed to the minimizer of</span>
+<span class="sd">            choice.</span>
+<span class="sd">        callback: callable, optional</span>
+<span class="sd">            Function called at each step of the minimization. Has the</span>
+<span class="sd">            signature ``callback(params, iter, resid)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">min_kwds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">kws</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">min_kwds</span> <span class="o">=</span> <span class="n">kws</span>
+
+        <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fitter</span><span class="p">,</span> <span class="n">CurveFitter</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;All items in curve_fitter_list must be &#39;</span>
+                                 <span class="s">&#39;instances of CurveFitter&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span> <span class="o">=</span> <span class="n">fitters</span>
+
+        <span class="c"># new_param_reference.keys() will be the parameter names for the</span>
+        <span class="c"># composite fitting problem. new_param_reference.values() are the</span>
+        <span class="c"># (i, original_name) of the individual Parameter(s) from the individual</span>
+        <span class="c"># fitting problem, where i is the index of the fitter it&#39;s in.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_param_reference</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitters</span><span class="p">):</span>
+            <span class="c"># add all the parameters for a given dataset</span>
+            <span class="c"># the parameters are all given new names:</span>
+            <span class="c"># abc -&gt; abc_d0</span>
+            <span class="c"># parameter `abc` in dataset 0 becomes abc_d0</span>
+            <span class="n">new_names</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">fitter</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">new_name</span> <span class="o">=</span> <span class="n">old_name</span> <span class="o">+</span> <span class="s">&#39;_d</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">i</span>
+                <span class="n">new_names</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_name</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_param_reference</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="n">p</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span>
+                      <span class="n">value</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                      <span class="n">vary</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">vary</span><span class="p">,</span>
+                      <span class="nb">min</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+                      <span class="nb">max</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+                      <span class="n">expr</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
+
+            <span class="c"># if there are any expressions they have to be updated</span>
+            <span class="c"># iterate through all the parameters in the dataset</span>
+            <span class="n">old_names</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">new_names</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">fitter</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">expr</span>
+                <span class="n">new_name</span> <span class="o">=</span> <span class="n">old_names</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="c"># if it&#39;s got an expression you&#39;ll have to update it</span>
+                <span class="k">if</span> <span class="n">expr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># see if any of the old names are in there.</span>
+                    <span class="k">for</span> <span class="n">old_name</span> <span class="ow">in</span> <span class="n">old_names</span><span class="p">:</span>
+                        <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">old_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">regex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+                            <span class="n">new_expr_name</span> <span class="o">=</span> <span class="n">old_names</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span>
+                            <span class="n">new_expr</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_name</span><span class="p">,</span> <span class="n">new_expr_name</span><span class="p">)</span>
+                            <span class="n">p</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="n">new_expr</span>
+
+        <span class="c"># now set constraints/linkages up. They&#39;re specified as</span>
+        <span class="c"># dN:param_name = constraint</span>
+        <span class="n">dp_string</span> <span class="o">=</span> <span class="s">&#39;d([0-9]+):([0-9a-zA-Z_]+)&#39;</span>
+        <span class="n">parameter_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">dp_string</span> <span class="o">+</span> <span class="s">&#39;\s*=\s*(.*)&#39;</span><span class="p">)</span>
+        <span class="n">constraint_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">dp_string</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">parameter_regex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">groups</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                <span class="n">dataset_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">param_name</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">const</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="c"># see if this parameter is in the list of parameters</span>
+                <span class="n">par_to_be_constrained</span> <span class="o">=</span> <span class="n">param_name</span> <span class="o">+</span> <span class="p">(</span><span class="s">&#39;_d</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">dataset_num</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">par_to_be_constrained</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># if it already has a constraint / expr don&#39;t override it</span>
+                <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">par_to_be_constrained</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">warning_msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> already has a constraint within its&quot;</span>
+                                   <span class="s">&quot; individual fitter. The </span><span class="si">%s</span><span class="s"> constraint&quot;</span>
+                                   <span class="s">&quot;is ignored.&quot;</span>
+                                   <span class="o">%</span> <span class="p">(</span><span class="n">par_to_be_constrained</span><span class="p">,</span> <span class="n">constraint</span><span class="p">))</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning_msg</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># now search for fitters mentioned in constraint</span>
+                <span class="n">d_mentioned</span> <span class="o">=</span> <span class="n">constraint_regex</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_mentioned</span><span class="p">:</span>
+                    <span class="n">new_name</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="s">&#39;_d</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="c"># see if the dataset mentioned is actually a parameter</span>
+                    <span class="k">if</span> <span class="n">new_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_param_reference</span><span class="p">:</span>
+                        <span class="c"># if it is, then rename it.</span>
+                        <span class="n">const</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;d&#39;</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                              <span class="n">new_name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">const</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="k">break</span>
+
+                <span class="n">p</span><span class="p">[</span><span class="n">par_to_be_constrained</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="n">const</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">xdata</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">]</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">ydata</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">]</span>
+        <span class="n">edata</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">edata</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">]</span>
+
+        <span class="n">original_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">params</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">]</span>
+        <span class="n">original_userargs</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">userargs</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">]</span>
+        <span class="n">original_kws</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">userkws</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_parallel_global_fitfunc</span><span class="p">,</span>
+                <span class="n">fitfuncs</span><span class="o">=</span><span class="p">[</span><span class="n">fitter</span><span class="o">.</span><span class="n">fitfunc</span> <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="n">fitters</span><span class="p">],</span>
+                <span class="n">new_param_reference</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">new_param_reference</span><span class="p">,</span>
+                <span class="n">original_params</span><span class="o">=</span><span class="n">original_params</span><span class="p">,</span>
+                <span class="n">original_userargs</span><span class="o">=</span><span class="n">original_userargs</span><span class="p">,</span>
+                <span class="n">original_kws</span><span class="o">=</span><span class="n">original_kws</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">GlobalFitter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc</span><span class="p">,</span>
+                                           <span class="n">xdata</span><span class="p">,</span>
+                                           <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">ydata</span><span class="p">),</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+                                           <span class="n">edata</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">edata</span><span class="p">),</span>
+                                           <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span>
+                                           <span class="n">kws</span><span class="o">=</span><span class="n">min_kwds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GlobalFitter.model"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.GlobalFitter.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the model. This method is provided for convenience purposes</span>
+<span class="sd">        and is not used during a fit.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params: lmfit.Parameters</span>
+<span class="sd">            Specifies the entire parameter set, across all the datasets</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model : np.ndarray</span>
+<span class="sd">            The model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GlobalFitter.residuals"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.curvefitter.GlobalFitter.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the difference between the data and the model. Also known as</span>
+<span class="sd">        the objective function.  This is a convenience method. Over-riding it</span>
+<span class="sd">        does not change the fitting process.</span>
+<span class="sd">        residuals = (fitfunc - y) / edata</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params: lmfit.Parameters</span>
+<span class="sd">            Specifies the entire parameter set</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        residuals : np.ndarray</span>
+<span class="sd">            The difference between the data and the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GlobalFitter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+
+<span class="c"># class Calculator(object):</span>
+<span class="c">#     def __init__(self, fitfunc, data_tuple, mask=None, fcn_args=(), fcn_kws=None):</span>
+<span class="c">#         self.fitfunc = fitfunc</span>
+<span class="c">#         self.data_tuple = data_tuple</span>
+<span class="c">#         self.mask = mask</span>
+<span class="c">#         self.fcn_args = fcn_args</span>
+<span class="c">#         self.fcn_kws = {}</span>
+<span class="c">#         if fcn_kws is not None:</span>
+<span class="c">#             self.fcn_kws = fcn_kws</span>
+<span class="c">#</span>
+<span class="c">#     def __call__(self, params, model=False):</span>
+<span class="c">#         x, y, e = self.data_tuple</span>
+<span class="c">#</span>
+<span class="c">#         resid = self.fitfunc(x, params, *self.fcn_args, **self.fcn_kws)</span>
+<span class="c">#         if model:</span>
+<span class="c">#             return resid</span>
+<span class="c">#</span>
+<span class="c">#         resid -= y</span>
+<span class="c">#         resid /= e</span>
+<span class="c">#</span>
+<span class="c">#         if self.mask is not None:</span>
+<span class="c">#             resid_ma = ma.array(resid, mask=self.mask)</span>
+<span class="c">#             return resid_ma[~resid_ma.mask].data</span>
+<span class="c">#         else:</span>
+<span class="c">#             return resid</span>
+
+</div></div>
+<span class="k">def</span> <span class="nf">_parallel_residuals_calculator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">fitfunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_tuple</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                   <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fcn_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">fcn_kws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                   <span class="n">model</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Objective function calculating the residuals for a curvefit. This is a</span>
+<span class="sd">    separate function and not a method in CurveFitter to allow for</span>
+<span class="sd">    multiprocessing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kws</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">fcn_kws</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">kws</span> <span class="o">=</span> <span class="n">fcn_kws</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">data_tuple</span>
+
+    <span class="n">resid</span> <span class="o">=</span> <span class="n">fitfunc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">fcn_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">resid</span>
+
+    <span class="n">resid</span> <span class="o">-=</span> <span class="n">y</span>
+    <span class="n">resid</span> <span class="o">/=</span> <span class="n">e</span>
+
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">resid_ma</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">resid</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resid_ma</span><span class="p">[</span><span class="o">~</span><span class="n">resid_ma</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">resid</span>
+
+
+<span class="k">def</span> <span class="nf">_parallel_global_fitfunc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">fitfuncs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                             <span class="n">new_param_reference</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">original_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                             <span class="n">original_userargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">original_kws</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit function calculating a predictive model for a curvefit. This is a</span>
+<span class="sd">    separate function and not a method in CurveFitter to allow for</span>
+<span class="sd">    multiprocessing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># distribute params</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fitter_i</span><span class="p">,</span> <span class="n">original_name</span> <span class="o">=</span> <span class="n">new_param_reference</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">original_params</span><span class="p">[</span><span class="n">fitter_i</span><span class="p">][</span><span class="n">original_name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">_val</span><span class="c">#_getval()</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fitfunc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fitfuncs</span><span class="p">):</span>
+        <span class="n">model_i</span> <span class="o">=</span> <span class="n">fitfuncs</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                              <span class="n">original_params</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                              <span class="o">*</span><span class="n">original_userargs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                              <span class="o">**</span><span class="n">original_kws</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                          <span class="n">model_i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">lmfit</span> <span class="kn">import</span> <span class="n">fit_report</span>
+
+    <span class="k">def</span> <span class="nf">gauss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates a Gaussian model&quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">valuesdict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)]</span>
+
+    <span class="n">temp_pars</span> <span class="o">=</span> <span class="n">to_parameters</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+    <span class="n">pars</span> <span class="o">=</span> <span class="n">to_parameters</span><span class="p">(</span><span class="n">p0</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+
+    <span class="n">ydata</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span> <span class="n">temp_pars</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">xdata</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">CurveFitter</span><span class="p">(</span><span class="n">gauss</span><span class="p">,</span> <span class="n">xdata</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">fit_report</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">params</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
