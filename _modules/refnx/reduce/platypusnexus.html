@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.platypusnexus &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.reduce.platypusnexus &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -57,6 +57,7 @@
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
 
 <span class="c"># detector y pixel spacing in mm per pixel</span>
@@ -71,6 +72,55 @@
 <span class="n">PIXEL_OFFSET</span> <span class="o">=</span> <span class="mi">1</span>
 
 
+<div class="viewcode-block" id="catalogue"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.catalogue">[docs]</a><span class="k">def</span> <span class="nf">catalogue</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract interesting information from Platypus NeXUS files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : int</span>
+<span class="sd">        start cataloguing from this run number.</span>
+<span class="sd">    stop : int</span>
+<span class="sd">        stop cataloguing at this run number</span>
+<span class="sd">    path : str, optional</span>
+<span class="sd">        path specifying location of NeXUS files</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    catalog : pd.DataFrame</span>
+<span class="sd">        Dataframe containing interesting parameters from Platypus Nexus files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">,</span> <span class="s">&#39;end_time&#39;</span><span class="p">,</span> <span class="s">&#39;sample_name&#39;</span><span class="p">,</span> <span class="s">&#39;ss1vg&#39;</span><span class="p">,</span> <span class="s">&#39;ss2vg&#39;</span><span class="p">,</span> <span class="s">&#39;ss3vg&#39;</span><span class="p">,</span>
+            <span class="s">&#39;ss4vg&#39;</span><span class="p">,</span> <span class="s">&#39;omega&#39;</span><span class="p">,</span> <span class="s">&#39;twotheta&#39;</span><span class="p">,</span> <span class="s">&#39;bm1_counts&#39;</span><span class="p">,</span> <span class="s">&#39;time&#39;</span><span class="p">,</span> <span class="s">&#39;daq_dirname&#39;</span><span class="p">]</span>
+    <span class="n">run_number</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">info</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pn</span> <span class="o">=</span> <span class="n">PlatypusNexus</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">number_datafile</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">cat</span> <span class="o">=</span> <span class="n">pn</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">cat</span>
+        <span class="n">run_number</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cat</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">bytes</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">run_number</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span>
+
+</div>
 <div class="viewcode-block" id="Catalogue"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.Catalogue">[docs]</a><span class="k">class</span> <span class="nc">Catalogue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5data</span><span class="p">):</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
@@ -78,7 +128,7 @@
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="o">.</span><span class="n">filename</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/end_time&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&#39;sample_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/sample/name&#39;</span><span class="p">]</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;sample_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/sample/name&#39;</span><span class="p">][:]</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss1vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/first/vertical/gap&#39;</span><span class="p">][:]</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss2vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/second/vertical/gap&#39;</span><span class="p">][:]</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;ss3vg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5data</span><span class="p">[</span><span class="s">&#39;entry1/instrument/slits/third/vertical/gap&#39;</span><span class="p">][:]</span>
@@ -258,7 +308,7 @@
                 <span class="n">background</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">twotheta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                 <span class="n">rebin_percent</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">wavelength_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                 <span class="n">integrate</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">eventmode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peak_pos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">background_mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                <span class="n">background_mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">normalise_bins</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes the ProcessNexus object to produce a time of flight spectrum.</span>
 <span class="sd">        The processed spectrum is stored in the `processed_spectrum` attribute.</span>
@@ -318,6 +368,10 @@
 <span class="sd">            background subtraction.  Should be the same length as the number of</span>
 <span class="sd">            y pixels in the detector image.  Otherwise an automatic mask is</span>
 <span class="sd">            applied (if background is True).</span>
+<span class="sd">        normalise_bins : bool</span>
+<span class="sd">            Divides the intensity in each wavelength bin by the width of the</span>
+<span class="sd">            bin. This allows one to compare spectra even if they were processed</span>
+<span class="sd">            with different rebin percentages.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
@@ -385,7 +439,7 @@
         <span class="n">n_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c"># Up until this point detector.shape=(N, T, Y,</span>
-        <span class="c">#  pre-average over x, leaving (n, t, y) also convert to dp</span>
+        <span class="c"># pre-average over x, leaving (n, t, y) also convert to dp</span>
         <span class="n">detector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
 
         <span class="c"># detector shape should now be (n, t, y)</span>
@@ -413,10 +467,12 @@
                                  <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
         <span class="n">m_spec_tof_hist</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">TOF</span>
 
-        <span class="c"># chopper to detector distances</span>
-        <span class="c"># note that if eventmode is specified the n_spectra is NOT</span>
-        <span class="c"># equal to the number of entries in e.g. /longitudinal_translation</span>
-        <span class="c"># this means you have to copy values in from the correct scanpoint</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        chopper to detector distances</span>
+<span class="sd">        note that if eventmode is specified the n_spectra is NOT</span>
+<span class="sd">        equal to the number of entries in e.g. /longitudinal_translation</span>
+<span class="sd">        this means you have to copy values in from the correct scanpoint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">flight_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
         <span class="n">d_cx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
         <span class="n">detpositions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float64&#39;</span><span class="p">)</span>
@@ -437,11 +493,13 @@
                                       <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">slit3_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                                        <span class="o">-</span> <span class="n">cat</span><span class="o">.</span><span class="n">slit2_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="c"># work out the total flight length</span>
-            <span class="c"># IMPORTANT: this varies as a function of twotheta. This is</span>
-            <span class="c"># because the Platypus detector does not move on an arc.</span>
-            <span class="c"># At high angles chod can be ~ 0.75% different. This is will</span>
-            <span class="c"># visibly shift fringes.</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            work out the total flight length</span>
+<span class="sd">            IMPORTANT: this varies as a function of twotheta. This is</span>
+<span class="sd">            because the Platypus detector does not move on an arc.</span>
+<span class="sd">            At high angles chod can be ~ 0.75% different. This is will</span>
+<span class="sd">            visibly shift fringes.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">if</span> <span class="n">omega</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">omega</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">omega</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">twotheta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -453,12 +511,14 @@
             <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_angle</span><span class="p">(</span><span class="n">scanpoint</span><span class="p">)</span>
             <span class="n">phase_angle</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">],</span> <span class="n">master_opening</span> <span class="o">=</span> <span class="n">output</span>
 
-            <span class="c"># toffset - the time difference between the magnet pickup on the</span>
-            <span class="c"># choppers (TTL pulse), which is situated in the middle of the</span>
-            <span class="c"># chopper window, and the trailing edge of chopper 1, which is</span>
-            <span class="c"># supposed to be time0.  However, if there is a phase opening this</span>
-            <span class="c"># time offset has to be relocated slightly, as time0 is not at the</span>
-            <span class="c"># trailing edge.</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            toffset - the time difference between the magnet pickup on the</span>
+<span class="sd">            choppers (TTL pulse), which is situated in the middle of the</span>
+<span class="sd">            chopper window, and the trailing edge of chopper 1, which is</span>
+<span class="sd">            supposed to be time0.  However, if there is a phase opening this</span>
+<span class="sd">            time offset has to be relocated slightly, as time0 is not at the</span>
+<span class="sd">            trailing edge.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
             <span class="n">poff</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">chopper1_phase_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">poffset</span> <span class="o">=</span> <span class="mf">1.e6</span> <span class="o">*</span> <span class="n">poff</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="mf">360.</span> <span class="o">*</span> <span class="n">freq</span><span class="p">)</span>
             <span class="n">toffset</span> <span class="o">=</span> <span class="p">(</span><span class="n">poffset</span>
@@ -526,12 +586,12 @@
             <span class="n">rebinning</span> <span class="o">=</span> <span class="n">rebinning</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">rebinning</span><span class="p">,</span> <span class="n">lo_wavelength</span><span class="p">):</span>
                                   <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">rebinning</span><span class="p">,</span> <span class="n">hi_wavelength</span><span class="p">)]</span>
 
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        now do the rebinning for all the N detector images</span>
 <span class="sd">        rebin.rebinND could do all of these at once.  However, m_lambda_hist</span>
 <span class="sd">        could vary across the range of spectra.  If it was the same I could</span>
 <span class="sd">        eliminate the loop.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">output_sd</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spectra</span><span class="p">):</span>
@@ -553,15 +613,16 @@
         <span class="c"># (1, T)</span>
         <span class="n">m_lambda_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">rebinning</span><span class="p">)</span>
 
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Divide the detector intensities by the width of the wavelength bin.</span>
 <span class="sd">        This is so the intensities between different rebinning strategies can</span>
 <span class="sd">        be compared.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">div</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">m_lambda_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-        <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPmulk</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span>
-                                          <span class="n">detector_sd</span><span class="p">,</span>
-                                          <span class="n">div</span><span class="p">)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">normalise_bins</span><span class="p">:</span>
+            <span class="n">div</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">m_lambda_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">detector</span><span class="p">,</span> <span class="n">detector_sd</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPmulk</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span>
+                                              <span class="n">detector_sd</span><span class="p">,</span>
+                                              <span class="n">div</span><span class="p">)</span>
 
         <span class="c"># convert the wavelength base to a timebase</span>
         <span class="n">m_spec_tof_hist</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001</span> <span class="o">*</span> <span class="n">flight_distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
@@ -927,20 +988,21 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        f : file-like object</span>
-<span class="sd">            The file to write the spectrum to</span>
+<span class="sd">        f : file-like or str</span>
+<span class="sd">            The file to write the spectrum to, or a str that specifies the file</span>
+<span class="sd">            name</span>
 <span class="sd">        scanpoint : int</span>
-<span class="sd">            Which scanpoint to write.</span>
+<span class="sd">            Which scanpoint to write</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
 
         <span class="n">m_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
         <span class="n">m_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
-        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
-        <span class="n">m_lambda_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_sd&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec_sd&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
+        <span class="n">m_lambda_fwhm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_fwhm&#39;</span><span class="p">][</span><span class="n">scanpoint</span><span class="p">]</span>
 
-        <span class="n">stacked_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">m_lambda</span><span class="p">,</span> <span class="n">m_spec</span><span class="p">,</span> <span class="n">m_spec_sd</span><span class="p">,</span> <span class="n">m_lambda_sd</span><span class="p">]</span>
+        <span class="n">stacked_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">m_lambda</span><span class="p">,</span> <span class="n">m_spec</span><span class="p">,</span> <span class="n">m_spec_sd</span><span class="p">,</span> <span class="n">m_lambda_fwhm</span><span class="p">]</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">stacked_data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">True</span>
@@ -952,12 +1014,12 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        f : file-like object</span>
-<span class="sd">            The file to write the spectrum to</span>
+<span class="sd">        f : file-like or str</span>
+<span class="sd">            The file to write the spectrum to, or a str that specifies the file</span>
+<span class="sd">            name</span>
 <span class="sd">        scanpoint : int</span>
-<span class="sd">            Which scanpoint to write.</span>
+<span class="sd">            Which scanpoint to write</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">spectrum_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot;?&gt;</span>
 <span class="s">        &lt;REFroot xmlns=&quot;&quot;&gt;</span>
 <span class="s">        &lt;REFentry time=&quot;$time&quot;&gt;</span>
@@ -971,7 +1033,6 @@
 <span class="s">        &lt;/REFdata&gt;</span>
 <span class="s">        &lt;/REFentry&gt;</span>
 <span class="s">        &lt;/REFroot&gt;&quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -982,26 +1043,40 @@
 
         <span class="n">m_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">]</span>
         <span class="n">m_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">]</span>
-        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">]</span>
-        <span class="n">m_lambda_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_sd&#39;</span><span class="p">]</span>
+        <span class="n">m_spec_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec_sd&#39;</span><span class="p">]</span>
+        <span class="n">m_lambda_fwhm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_fwhm&#39;</span><span class="p">]</span>
 
         <span class="c"># sort the data</span>
         <span class="nb">sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_lambda</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="n">r</span> <span class="o">=</span> <span class="n">m_spec</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
         <span class="n">l</span> <span class="o">=</span> <span class="n">m_lambda</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
-        <span class="n">dl</span> <span class="o">=</span> <span class="n">m_lambda_sd</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
+        <span class="n">dl</span> <span class="o">=</span> <span class="n">m_lambda_fwhm</span> <span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
         <span class="n">dr</span> <span class="o">=</span> <span class="n">m_spec_sd</span><span class="p">[:,</span> <span class="nb">sorted</span><span class="p">]</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;n_spectra&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;n_spectra&#39;</span><span class="p">]</span>
         <span class="n">d</span><span class="p">[</span><span class="s">&#39;runnumber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;PLP{:07d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">datafile_number</span><span class="p">)</span>
 
-        <span class="n">d</span><span class="p">[</span><span class="s">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">dr</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&#39;l&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">dl</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">dr</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;l&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;dl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">dl</span><span class="p">[</span><span class="n">scanpoint</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;,[]&#39;</span><span class="p">)</span>
         <span class="n">thefile</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">thefile</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">auto_fh</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">):</span>
+            <span class="n">auto_fh</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">auto_fh</span>
+
+        <span class="k">if</span> <span class="s">&#39;b&#39;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span>
+            <span class="n">thefile</span> <span class="o">=</span> <span class="n">thefile</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">thefile</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">auto_fh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">auto_fh</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="bp">True</span>
 </div>
@@ -1009,8 +1084,8 @@
     <span class="k">def</span> <span class="nf">spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda&#39;</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec&#39;</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_sd&#39;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_spec_sd&#39;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processed_spectrum</span><span class="p">[</span><span class="s">&#39;m_lambda_fwhm&#39;</span><span class="p">])</span>
 
 </div>
 <div class="viewcode-block" id="create_detector_norm"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.platypusnexus.create_detector_norm">[docs]</a><span class="k">def</span> <span class="nf">create_detector_norm</span><span class="p">(</span><span class="n">h5norm</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">):</span>

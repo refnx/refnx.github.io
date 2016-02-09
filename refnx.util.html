@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.util package &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.util package &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -124,20 +124,45 @@
 </div>
 <div class="section" id="module-refnx.util.general">
 <span id="refnx-util-general-module"></span><h2>refnx.util.general module<a class="headerlink" href="#module-refnx.util.general" title="Permalink to this headline">¶</a></h2>
+<p>Functions for various calculations related to reflectometry</p>
 <dl class="function">
 <dt id="refnx.util.general.actual_footprint">
 <code class="descclassname">refnx.util.general.</code><code class="descname">actual_footprint</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>L2S</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#actual_footprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.actual_footprint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the actual footprint on a sample.
-Parameters:</p>
+<dd><p>Calculate the actual footprint on a reflectivity sample.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
 <blockquote>
-<div>d1 - opening of first collimation slit
-d2 - opening of second collimation slit
-L12 - distance between first and second collimation slits
-L2S - distance from second collimation slit to sample</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>(umbra_footprint, penumbra_footprint)</dd>
-</dl>
+<div><p>opening of first collimation slit</p>
+</div></blockquote>
+<p><strong>d2: float</strong></p>
+<blockquote>
+<div><p>opening of second collimation slit</p>
+</div></blockquote>
+<p><strong>L12: float</strong></p>
+<blockquote>
+<div><p>distance between first and second collimation slits</p>
+</div></blockquote>
+<p><strong>L2S: float</strong></p>
+<blockquote>
+<div><p>distance from second collimation slit to sample</p>
+</div></blockquote>
+<p><strong>angle: float</strong></p>
+<blockquote>
+<div><p>angle of incidence of sample (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra_footprint, penumbra_footprint): float, float</p>
+<blockquote class="last">
+<div><p>Footprint of the umbra and penumbra</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -183,11 +208,37 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <dl class="function">
 <dt id="refnx.util.general.beamfrackernel">
 <code class="descclassname">refnx.util.general.</code><code class="descname">beamfrackernel</code><span class="sig-paren">(</span><em>kernelx</em>, <em>kernely</em>, <em>length</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#beamfrackernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.beamfrackernel" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the beam fraction intercepted by a sample of length length at sample
-tilt angle.
-The beam has the shape &#8216;kernel&#8217;, a 2 row array, which gives the PDF for the
-beam intensity as a function of height. The first row is position, the
-second row is probability at that position.</p>
+<dd><p>The beam fraction intercepted by a sample, used for calculating footprints.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>kernelx: array-like</strong></p>
+<blockquote>
+<div><p>x axis for the probability kernel</p>
+</div></blockquote>
+<p><strong>kernely: array-like</strong></p>
+<blockquote>
+<div><p>probability kernel describing the intensity distribution of the beam</p>
+</div></blockquote>
+<p><strong>length: float</strong></p>
+<blockquote>
+<div><p>length of the sample</p>
+</div></blockquote>
+<p><strong>angle: float</strong></p>
+<blockquote>
+<div><p>angle of incidence (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">fraction: float</p>
+<blockquote class="last">
+<div><p>The fraction of the beam intercepted by a sample.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -252,8 +303,15 @@ without getting frame overlap in a chopper spectrometer.</p>
 <div><p>Flight length of instrument (m)</p>
 </div></blockquote>
 <p><strong>N: float, optional</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>number of windows in chopper pair</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">max_freq: float</p>
+<blockquote class="last">
+<div><p>The maximum frequency a double chopper system can use to avoid frame
+overlap.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -264,17 +322,18 @@ without getting frame overlap in a chopper spectrometer.</p>
 <dl class="function">
 <dt id="refnx.util.general.energy_wavelength">
 <code class="descclassname">refnx.util.general.</code><code class="descname">energy_wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#energy_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.energy_wavelength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts wavelength to energy in meV
-Parameters
-&#8212;&#8212;&#8212;-
-energy : float</p>
-<blockquote>
-<div>Energy in meV.</div></blockquote>
+<dd><p>Converts wavelength to energy in meV</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
+<blockquote>
+<div><p>Energy in meV.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
 <blockquote class="last">
 <div><p>Wavelength in Angstrom.</p>
 </div></blockquote>
@@ -290,18 +349,38 @@ energy : float</p>
 <dd><p>Calculate the widths of beam a given distance away from a collimation slit.</p>
 <p>if distance &gt;= 0, then it&#8217;s taken to be the distance after d2.
 if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd>d1 - opening of first collimation slit
-d2 - opening of second collimation slit
-L12 - distance between first and second collimation slits
-distance - distance from first or last slit to a given position</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
+<blockquote>
+<div><p>opening of first collimation slit</p>
+</div></blockquote>
+<p><strong>d2: float</strong></p>
+<blockquote>
+<div><p>opening of second collimation slit</p>
+</div></blockquote>
+<p><strong>L12: float</strong></p>
+<blockquote>
+<div><p>distance between first and second collimation slits</p>
+</div></blockquote>
+<p><strong>distance: float</strong></p>
+<blockquote>
+<div><p>distance from first or last slit to a given position</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra, penumbra): float, float</p>
+<blockquote class="last">
+<div><p>height of umbra and penumbra</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>Units - equivalent distances (inches, mm, light years)</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>(umbra, penumbra)</dd>
-</dl>
 </dd></dl>
 
 <dl class="function">
@@ -332,17 +411,57 @@ distance - distance from first or last slit to a given position</dd>
 <dl class="function">
 <dt id="refnx.util.general.q">
 <code class="descclassname">refnx.util.general.</code><code class="descname">q</code><span class="sig-paren">(</span><em>angle</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.q" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate Q given angle of incidence and wavelength
-angle - angle of incidence (degrees)
-wavelength -  wavelength of radiation (Angstrom)</p>
+<dd><p>Calculate Q given angle of incidence and wavelength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>angle: float</strong></p>
+<blockquote>
+<div><p>angle of incidence (degrees)</p>
+</div></blockquote>
+<p><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength of radiation (Angstrom)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Q: float</p>
+<blockquote class="last">
+<div><p>Momentum transfer (A**-1)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="refnx.util.general.qcrit">
 <code class="descclassname">refnx.util.general.</code><code class="descname">qcrit</code><span class="sig-paren">(</span><em>SLD1</em>, <em>SLD2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#qcrit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.qcrit" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate critical Q vector given SLD of super and subphases
-SLD1 - SLD of superphase (10^-6 A^-2)
-SLD2 - SLD of subphase (10^-6 A^-2)</p>
+<dd><p>calculate critical Q vector given SLD of super and subphases</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>SLD1: float</strong></p>
+<blockquote>
+<div><p>SLD of superphase (10^-6 A^-2)</p>
+</div></blockquote>
+<p><strong>SLD2: float</strong></p>
+<blockquote>
+<div><p>SLD of subphase (10^-6 A^-2)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">qc: float</p>
+<blockquote class="last">
+<div><p>Critical Q vector for a reflectivity system.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -386,8 +505,14 @@ SLD2 - SLD of subphase (10^-6 A^-2)</p>
 <div><p>Flight length of instrument (m)</p>
 </div></blockquote>
 <p><strong>tau_da</strong> : float</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Width of timebin (s)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">res: float</p>
+<blockquote class="last">
+<div><p>Fractional wavelength resolution of a double chopper system.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -428,8 +553,14 @@ SLD2 - SLD of subphase (10^-6 A^-2)</p>
 <div><p>angular opening of chopper window (degrees)</p>
 </div></blockquote>
 <p><strong>L: float</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
+<blockquote class="last">
+<div><p>Transmission of a single chopper system.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -472,8 +603,14 @@ SLD2 - SLD of subphase (10^-6 A^-2)</p>
 <div><p>rotation frequency of choppers (Hz)</p>
 </div></blockquote>
 <p><strong>xsi: float</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tauC: float</p>
+<blockquote class="last">
+<div><p>The burst time of a double chopper pair (s)</p>
 </div></blockquote>
 </td>
 </tr>
@@ -520,8 +657,14 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <div><p>height of beam (m)</p>
 </div></blockquote>
 <p><strong>xsi: float</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
+<blockquote class="last">
+<div><p>The transmission of a double chopper system.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -720,7 +863,7 @@ first.</div></blockquote>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points):</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points): float, float, array-like</p>
 <blockquote>
 <div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
 They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
@@ -738,9 +881,28 @@ in the overlap region.</p>
 <div class="section" id="module-refnx.util.quickplot">
 <span id="refnx-util-quickplot-module"></span><h2>refnx.util.quickplot module<a class="headerlink" href="#module-refnx.util.quickplot" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="refnx.util.quickplot.the_ref_plot">
-<code class="descclassname">refnx.util.quickplot.</code><code class="descname">the_ref_plot</code><span class="sig-paren">(</span><em>name</em>, <em>xdata</em>, <em>ydata</em>, <em>yerr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/quickplot.html#the_ref_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.quickplot.the_ref_plot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="refnx.util.quickplot.ref_plot">
+<code class="descclassname">refnx.util.quickplot.</code><code class="descname">ref_plot</code><span class="sig-paren">(</span><em>datasets</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/quickplot.html#ref_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.quickplot.ref_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quickly plot a lot of datasets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>datasets</strong> : iterable</p>
+<blockquote>
+<div><p>strings or files identifying the datasets to plot</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fig</strong> : matplotlib.figure.Figure</p>
+<blockquote class="last">
+<div><p>The figure. Use fig.show() to display</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 <div class="section" id="module-refnx.util">
@@ -825,17 +987,41 @@ in the overlap region.</p>
 <dl class="function">
 <dt id="refnx.util.actual_footprint">
 <code class="descclassname">refnx.util.</code><code class="descname">actual_footprint</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>L2S</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#actual_footprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.actual_footprint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the actual footprint on a sample.
-Parameters:</p>
+<dd><p>Calculate the actual footprint on a reflectivity sample.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
 <blockquote>
-<div>d1 - opening of first collimation slit
-d2 - opening of second collimation slit
-L12 - distance between first and second collimation slits
-L2S - distance from second collimation slit to sample</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>(umbra_footprint, penumbra_footprint)</dd>
-</dl>
+<div><p>opening of first collimation slit</p>
+</div></blockquote>
+<p><strong>d2: float</strong></p>
+<blockquote>
+<div><p>opening of second collimation slit</p>
+</div></blockquote>
+<p><strong>L12: float</strong></p>
+<blockquote>
+<div><p>distance between first and second collimation slits</p>
+</div></blockquote>
+<p><strong>L2S: float</strong></p>
+<blockquote>
+<div><p>distance from second collimation slit to sample</p>
+</div></blockquote>
+<p><strong>angle: float</strong></p>
+<blockquote>
+<div><p>angle of incidence of sample (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra_footprint, penumbra_footprint): float, float</p>
+<blockquote class="last">
+<div><p>Footprint of the umbra and penumbra</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -881,11 +1067,37 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <dl class="function">
 <dt id="refnx.util.beamfrackernel">
 <code class="descclassname">refnx.util.</code><code class="descname">beamfrackernel</code><span class="sig-paren">(</span><em>kernelx</em>, <em>kernely</em>, <em>length</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#beamfrackernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.beamfrackernel" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the beam fraction intercepted by a sample of length length at sample
-tilt angle.
-The beam has the shape &#8216;kernel&#8217;, a 2 row array, which gives the PDF for the
-beam intensity as a function of height. The first row is position, the
-second row is probability at that position.</p>
+<dd><p>The beam fraction intercepted by a sample, used for calculating footprints.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>kernelx: array-like</strong></p>
+<blockquote>
+<div><p>x axis for the probability kernel</p>
+</div></blockquote>
+<p><strong>kernely: array-like</strong></p>
+<blockquote>
+<div><p>probability kernel describing the intensity distribution of the beam</p>
+</div></blockquote>
+<p><strong>length: float</strong></p>
+<blockquote>
+<div><p>length of the sample</p>
+</div></blockquote>
+<p><strong>angle: float</strong></p>
+<blockquote>
+<div><p>angle of incidence (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">fraction: float</p>
+<blockquote class="last">
+<div><p>The fraction of the beam intercepted by a sample.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -950,8 +1162,15 @@ without getting frame overlap in a chopper spectrometer.</p>
 <div><p>Flight length of instrument (m)</p>
 </div></blockquote>
 <p><strong>N: float, optional</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>number of windows in chopper pair</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">max_freq: float</p>
+<blockquote class="last">
+<div><p>The maximum frequency a double chopper system can use to avoid frame
+overlap.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -962,17 +1181,18 @@ without getting frame overlap in a chopper spectrometer.</p>
 <dl class="function">
 <dt id="refnx.util.energy_wavelength">
 <code class="descclassname">refnx.util.</code><code class="descname">energy_wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#energy_wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.energy_wavelength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts wavelength to energy in meV
-Parameters
-&#8212;&#8212;&#8212;-
-energy : float</p>
-<blockquote>
-<div>Energy in meV.</div></blockquote>
+<dd><p>Converts wavelength to energy in meV</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
+<blockquote>
+<div><p>Energy in meV.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
 <blockquote class="last">
 <div><p>Wavelength in Angstrom.</p>
 </div></blockquote>
@@ -1017,7 +1237,7 @@ first.</div></blockquote>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points):</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points): float, float, array-like</p>
 <blockquote>
 <div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
 They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
@@ -1037,18 +1257,38 @@ in the overlap region.</p>
 <dd><p>Calculate the widths of beam a given distance away from a collimation slit.</p>
 <p>if distance &gt;= 0, then it&#8217;s taken to be the distance after d2.
 if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd>d1 - opening of first collimation slit
-d2 - opening of second collimation slit
-L12 - distance between first and second collimation slits
-distance - distance from first or last slit to a given position</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
+<blockquote>
+<div><p>opening of first collimation slit</p>
+</div></blockquote>
+<p><strong>d2: float</strong></p>
+<blockquote>
+<div><p>opening of second collimation slit</p>
+</div></blockquote>
+<p><strong>L12: float</strong></p>
+<blockquote>
+<div><p>distance between first and second collimation slits</p>
+</div></blockquote>
+<p><strong>distance: float</strong></p>
+<blockquote>
+<div><p>distance from first or last slit to a given position</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra, penumbra): float, float</p>
+<blockquote class="last">
+<div><p>height of umbra and penumbra</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <p>Units - equivalent distances (inches, mm, light years)</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>(umbra, penumbra)</dd>
-</dl>
 </dd></dl>
 
 <dl class="function">
@@ -1079,17 +1319,57 @@ distance - distance from first or last slit to a given position</dd>
 <dl class="function">
 <dt id="refnx.util.q">
 <code class="descclassname">refnx.util.</code><code class="descname">q</code><span class="sig-paren">(</span><em>angle</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.q" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate Q given angle of incidence and wavelength
-angle - angle of incidence (degrees)
-wavelength -  wavelength of radiation (Angstrom)</p>
+<dd><p>Calculate Q given angle of incidence and wavelength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>angle: float</strong></p>
+<blockquote>
+<div><p>angle of incidence (degrees)</p>
+</div></blockquote>
+<p><strong>wavelength: float</strong></p>
+<blockquote>
+<div><p>wavelength of radiation (Angstrom)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Q: float</p>
+<blockquote class="last">
+<div><p>Momentum transfer (A**-1)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="refnx.util.qcrit">
 <code class="descclassname">refnx.util.</code><code class="descname">qcrit</code><span class="sig-paren">(</span><em>SLD1</em>, <em>SLD2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#qcrit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.qcrit" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate critical Q vector given SLD of super and subphases
-SLD1 - SLD of superphase (10^-6 A^-2)
-SLD2 - SLD of subphase (10^-6 A^-2)</p>
+<dd><p>calculate critical Q vector given SLD of super and subphases</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>SLD1: float</strong></p>
+<blockquote>
+<div><p>SLD of superphase (10^-6 A^-2)</p>
+</div></blockquote>
+<p><strong>SLD2: float</strong></p>
+<blockquote>
+<div><p>SLD of subphase (10^-6 A^-2)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">qc: float</p>
+<blockquote class="last">
+<div><p>Critical Q vector for a reflectivity system.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -1133,8 +1413,14 @@ SLD2 - SLD of subphase (10^-6 A^-2)</p>
 <div><p>Flight length of instrument (m)</p>
 </div></blockquote>
 <p><strong>tau_da</strong> : float</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Width of timebin (s)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">res: float</p>
+<blockquote class="last">
+<div><p>Fractional wavelength resolution of a double chopper system.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1175,8 +1461,14 @@ SLD2 - SLD of subphase (10^-6 A^-2)</p>
 <div><p>angular opening of chopper window (degrees)</p>
 </div></blockquote>
 <p><strong>L: float</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>Flight length of instrument (m)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
+<blockquote class="last">
+<div><p>Transmission of a single chopper system.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1219,8 +1511,14 @@ SLD2 - SLD of subphase (10^-6 A^-2)</p>
 <div><p>rotation frequency of choppers (Hz)</p>
 </div></blockquote>
 <p><strong>xsi: float</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tauC: float</p>
+<blockquote class="last">
+<div><p>The burst time of a double chopper pair (s)</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1267,8 +1565,14 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <div><p>height of beam (m)</p>
 </div></blockquote>
 <p><strong>xsi: float</strong></p>
-<blockquote class="last">
+<blockquote>
 <div><p>phase opening of chopper pair (degrees)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
+<blockquote class="last">
+<div><p>The transmission of a double chopper system.</p>
 </div></blockquote>
 </td>
 </tr>

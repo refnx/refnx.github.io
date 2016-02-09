@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.util.general &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.util.general &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -40,6 +40,9 @@
             
   <h1>Source code for refnx.util.general</h1><div class="highlight"><pre>
 <span class="c">#!/usr/bin/python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for various calculations related to reflectometry</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -47,6 +50,7 @@
 
 <span class="c">#h / m = 3956</span>
 <span class="n">K</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">h</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">m_n</span> <span class="o">*</span> <span class="mf">1.e10</span>
+
 
 <div class="viewcode-block" id="div"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.div">[docs]</a><span class="k">def</span> <span class="nf">div</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span> <span class="o">=</span> <span class="mi">2859</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -88,8 +92,18 @@
 <div class="viewcode-block" id="q"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.q">[docs]</a><span class="k">def</span> <span class="nf">q</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate Q given angle of incidence and wavelength</span>
-<span class="sd">    angle - angle of incidence (degrees)</span>
-<span class="sd">    wavelength -  wavelength of radiation (Angstrom)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    angle: float</span>
+<span class="sd">        angle of incidence (degrees)</span>
+<span class="sd">    wavelength: float</span>
+<span class="sd">        wavelength of radiation (Angstrom)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Q: float</span>
+<span class="sd">        Momentum transfer (A**-1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">))</span> <span class="o">/</span> <span class="n">wavelength</span>
 
@@ -152,7 +166,7 @@
 <span class="sd">    wavelength : float</span>
 <span class="sd">        Wavelength of radiation (A)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span>  <span class="mf">4.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span><span class="p">)</span><span class="o">/</span><span class="n">q</span>
+    <span class="k">return</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span><span class="p">)</span><span class="o">/</span><span class="n">q</span>
 
 </div>
 <div class="viewcode-block" id="angle"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.angle">[docs]</a><span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">):</span>
@@ -167,8 +181,18 @@
 <div class="viewcode-block" id="qcrit"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.qcrit">[docs]</a><span class="k">def</span> <span class="nf">qcrit</span><span class="p">(</span><span class="n">SLD1</span><span class="p">,</span> <span class="n">SLD2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    calculate critical Q vector given SLD of super and subphases</span>
-<span class="sd">    SLD1 - SLD of superphase (10^-6 A^-2)</span>
-<span class="sd">    SLD2 - SLD of subphase (10^-6 A^-2)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    SLD1: float</span>
+<span class="sd">        SLD of superphase (10^-6 A^-2)</span>
+<span class="sd">    SLD2: float</span>
+<span class="sd">        SLD of subphase (10^-6 A^-2)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    qc: float</span>
+<span class="sd">        Critical Q vector for a reflectivity system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">16.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">SLD2</span> <span class="o">-</span> <span class="n">SLD1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.e-6</span><span class="p">)</span>
 
@@ -187,6 +211,11 @@
 <span class="sd">        rotation frequency of choppers (Hz)</span>
 <span class="sd">    xsi: float</span>
 <span class="sd">        phase opening of chopper pair (degrees)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tauC: float</span>
+<span class="sd">        The burst time of a double chopper pair (s)</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -256,6 +285,7 @@
 <div class="viewcode-block" id="energy_wavelength"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.energy_wavelength">[docs]</a><span class="k">def</span> <span class="nf">energy_wavelength</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts wavelength to energy in meV</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    energy : float</span>
@@ -285,6 +315,12 @@
 <span class="sd">        Flight length of instrument (m)</span>
 <span class="sd">    N: float, optional</span>
 <span class="sd">        number of windows in chopper pair</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    max_freq: float</span>
+<span class="sd">        The maximum frequency a double chopper system can use to avoid frame</span>
+<span class="sd">        overlap.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">K</span> <span class="o">/</span> <span class="p">((</span><span class="n">max_wavelength</span> <span class="o">-</span> <span class="n">min_wavelength</span><span class="p">)</span> <span class="o">*</span> <span class="n">L</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>
 
@@ -314,6 +350,11 @@
 <span class="sd">        Flight length of instrument (m)</span>
 <span class="sd">    tau_da : float</span>
 <span class="sd">        Width of timebin (s)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    res: float</span>
+<span class="sd">        Fractional wavelength resolution of a double chopper system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">TOF</span> <span class="o">=</span> <span class="n">L</span> <span class="o">/</span> <span class="n">wavelength_velocity</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
     <span class="n">tc</span> <span class="o">=</span> <span class="n">tauC</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">xsi</span><span class="o">=</span><span class="n">xsi</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="n">z0</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
@@ -342,6 +383,11 @@
 <span class="sd">        angular opening of chopper window (degrees)</span>
 <span class="sd">    L: float</span>
 <span class="sd">        Flight length of instrument (m)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transmission: float</span>
+<span class="sd">        Transmission of a single chopper system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">TOF</span> <span class="o">=</span> <span class="n">L</span> <span class="o">/</span> <span class="n">wavelength_velocity</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
     <span class="n">tauH</span> <span class="o">=</span> <span class="n">H</span> <span class="o">/</span> <span class="n">R</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span><span class="p">)</span>
@@ -370,6 +416,11 @@
 <span class="sd">        height of beam (m)</span>
 <span class="sd">    xsi: float</span>
 <span class="sd">        phase opening of chopper pair (degrees)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transmission: float</span>
+<span class="sd">        The transmission of a double chopper system.</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -471,11 +522,23 @@
 </div>
 <div class="viewcode-block" id="beamfrackernel"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.beamfrackernel">[docs]</a><span class="k">def</span> <span class="nf">beamfrackernel</span><span class="p">(</span><span class="n">kernelx</span><span class="p">,</span> <span class="n">kernely</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    return the beam fraction intercepted by a sample of length length at sample</span>
-<span class="sd">    tilt angle.</span>
-<span class="sd">    The beam has the shape &#39;kernel&#39;, a 2 row array, which gives the PDF for the</span>
-<span class="sd">    beam intensity as a function of height. The first row is position, the</span>
-<span class="sd">    second row is probability at that position.</span>
+<span class="sd">    The beam fraction intercepted by a sample, used for calculating footprints.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    kernelx: array-like</span>
+<span class="sd">        x axis for the probability kernel</span>
+<span class="sd">    kernely: array-like</span>
+<span class="sd">        probability kernel describing the intensity distribution of the beam</span>
+<span class="sd">    length: float</span>
+<span class="sd">        length of the sample</span>
+<span class="sd">    angle: float</span>
+<span class="sd">        angle of incidence (degrees)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fraction: float</span>
+<span class="sd">        The fraction of the beam intercepted by a sample.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">height_of_sample</span> <span class="o">=</span> <span class="n">length</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">))</span>
     <span class="n">total</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">kernely</span><span class="p">,</span> <span class="n">kernelx</span><span class="p">)</span>
@@ -494,15 +557,25 @@
 <span class="sd">    if distance &gt;= 0, then it&#39;s taken to be the distance after d2.</span>
 <span class="sd">    if distance &lt; 0, then it&#39;s taken to be the distance before d1.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">        d1 - opening of first collimation slit</span>
-<span class="sd">        d2 - opening of second collimation slit</span>
-<span class="sd">        L12 - distance between first and second collimation slits</span>
-<span class="sd">        distance - distance from first or last slit to a given position</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d1: float</span>
+<span class="sd">        opening of first collimation slit</span>
+<span class="sd">    d2: float</span>
+<span class="sd">        opening of second collimation slit</span>
+<span class="sd">    L12: float</span>
+<span class="sd">        distance between first and second collimation slits</span>
+<span class="sd">    distance: float</span>
+<span class="sd">        distance from first or last slit to a given position</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
 <span class="sd">    Units - equivalent distances (inches, mm, light years)</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        (umbra, penumbra)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (umbra, penumbra): float, float</span>
+<span class="sd">        height of umbra and penumbra</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -516,15 +589,25 @@
 </div>
 <div class="viewcode-block" id="actual_footprint"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.actual_footprint">[docs]</a><span class="k">def</span> <span class="nf">actual_footprint</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span><span class="p">,</span> <span class="n">L2S</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the actual footprint on a sample.</span>
-<span class="sd">    Parameters:</span>
-<span class="sd">        d1 - opening of first collimation slit</span>
-<span class="sd">        d2 - opening of second collimation slit</span>
-<span class="sd">        L12 - distance between first and second collimation slits</span>
-<span class="sd">        L2S - distance from second collimation slit to sample</span>
+<span class="sd">    Calculate the actual footprint on a reflectivity sample.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        (umbra_footprint, penumbra_footprint)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d1: float</span>
+<span class="sd">        opening of first collimation slit</span>
+<span class="sd">    d2: float</span>
+<span class="sd">        opening of second collimation slit</span>
+<span class="sd">    L12: float</span>
+<span class="sd">        distance between first and second collimation slits</span>
+<span class="sd">    L2S: float</span>
+<span class="sd">        distance from second collimation slit to sample</span>
+<span class="sd">    angle: float</span>
+<span class="sd">        angle of incidence of sample (degrees)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (umbra_footprint, penumbra_footprint): float, float</span>
+<span class="sd">        Footprint of the umbra and penumbra</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">umbra</span><span class="p">,</span> <span class="n">penumbra</span> <span class="o">=</span> <span class="n">height_of_beam_after_dx</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span><span class="p">,</span> <span class="n">L2S</span><span class="p">)</span>

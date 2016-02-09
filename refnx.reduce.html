@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce package &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.reduce package &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -106,36 +106,36 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 </div>
 <div class="section" id="module-refnx.reduce.event">
 <span id="refnx-reduce-event-module"></span><h2>refnx.reduce.event module<a class="headerlink" href="#module-refnx.reduce.event" title="Permalink to this headline">¶</a></h2>
-<p>unpack streaming file
-&#64;author: andrew</p>
+<p>Unpack event files</p>
 <dl class="function">
 <dt id="refnx.reduce.event.events">
-<code class="descclassname">refnx.reduce.event.</code><code class="descname">events</code><span class="sig-paren">(</span><em>f</em>, <em>endoflastevent=127</em>, <em>max_frames=inf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/event.html#events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.event.events" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">refnx.reduce.event.</code><code class="descname">events</code><span class="sig-paren">(</span><em>f</em>, <em>end_last_event=127</em>, <em>max_frames=inf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/event.html#events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.event.events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unpacks event data from packedbinary format for the ANSTO Platypus
 instrument</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like or str</p>
 <blockquote>
-<div><p>The file to read the data from.</p>
+<div><p>The file to read the data from. If <cite>f</cite> is not file-like then f is
+assumed to be a path pointing to the event file.</p>
 </div></blockquote>
-<p><strong>endoflastevent</strong> : uint</p>
+<p><strong>end_last_event</strong> : uint</p>
 <blockquote>
-<div><p>The file position to start the read from. The data starts from byte
-127.</p>
+<div><p>The reading of event data starts from <cite>end_last_event + 1</cite>. The default
+of 127 corresponds to a file header that is 128 bytes long.</p>
 </div></blockquote>
 <p><strong>max_frames</strong> : int</p>
 <blockquote>
-<div><p>Stop reading the event file when you get to this many frames.</p>
+<div><p>Stop reading the event file when have read this many frames.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(f_events, t_events, y_events, x_events), endoflastevent:</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(f_events, t_events, y_events, x_events), end_last_event:</p>
 <blockquote class="last">
 <div><p>x_events, y_events, t_events and f_events are numpy arrays containing
-the events. endoflastevent is a byte offset to the end of the last
+the events. end_last_event is a byte offset to the end of the last
 successful event read from the file. Use this value to extract more
 events from the same file at a future date.</p>
 </div></blockquote>
@@ -165,13 +165,13 @@ events from the same file at a future date.</p>
 <blockquote>
 <div><p>specifies the time bins required in the image</p>
 </div></blockquote>
-<p><strong>x_bins</strong> : array_like</p>
-<blockquote>
-<div><p>specifies the x bins required in the image</p>
-</div></blockquote>
 <p><strong>y_bins</strong> : array_like</p>
 <blockquote>
 <div><p>specifies the y bins required in the image</p>
+</div></blockquote>
+<p><strong>x_bins</strong> : array_like</p>
+<blockquote>
+<div><p>specifies the x bins required in the image</p>
 </div></blockquote>
 </td>
 </tr>
@@ -449,7 +449,7 @@ chopper</p>
 
 <dl class="method">
 <dt id="refnx.reduce.platypusnexus.PlatypusNexus.process">
-<code class="descname">process</code><span class="sig-paren">(</span><em>h5norm=None</em>, <em>lo_wavelength=2.5</em>, <em>hi_wavelength=19.0</em>, <em>background=True</em>, <em>direct=False</em>, <em>omega=None</em>, <em>twotheta=None</em>, <em>rebin_percent=1.0</em>, <em>wavelength_bins=None</em>, <em>normalise=True</em>, <em>integrate=-1</em>, <em>eventmode=None</em>, <em>peak_pos=None</em>, <em>background_mask=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.process" title="Permalink to this definition">¶</a></dt>
+<code class="descname">process</code><span class="sig-paren">(</span><em>h5norm=None</em>, <em>lo_wavelength=2.5</em>, <em>hi_wavelength=19.0</em>, <em>background=True</em>, <em>direct=False</em>, <em>omega=None</em>, <em>twotheta=None</em>, <em>rebin_percent=1.0</em>, <em>wavelength_bins=None</em>, <em>normalise=True</em>, <em>integrate=-1</em>, <em>eventmode=None</em>, <em>peak_pos=None</em>, <em>background_mask=None</em>, <em>normalise_bins=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.PlatypusNexus.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes the ProcessNexus object to produce a time of flight spectrum.
 The processed spectrum is stored in the <cite>processed_spectrum</cite> attribute.
 The specular spectrum is also returned from this function.</p>
@@ -544,6 +544,12 @@ NeXUS file.</p>
 background subtraction.  Should be the same length as the number of
 y pixels in the detector image.  Otherwise an automatic mask is
 applied (if background is True).</p>
+</div></blockquote>
+<p><strong>normalise_bins</strong> : bool</p>
+<blockquote>
+<div><p>Divides the intensity in each wavelength bin by the width of the
+bin. This allows one to compare spectra even if they were processed
+with different rebin percentages.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -652,13 +658,14 @@ file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like or str</p>
 <blockquote>
-<div><p>The file to write the spectrum to</p>
+<div><p>The file to write the spectrum to, or a str that specifies the file
+name</p>
 </div></blockquote>
 <p><strong>scanpoint</strong> : int</p>
 <blockquote class="last">
-<div><p>Which scanpoint to write.</p>
+<div><p>Which scanpoint to write</p>
 </div></blockquote>
 </td>
 </tr>
@@ -675,13 +682,14 @@ file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like or str</p>
 <blockquote>
-<div><p>The file to write the spectrum to</p>
+<div><p>The file to write the spectrum to, or a str that specifies the file
+name</p>
 </div></blockquote>
 <p><strong>scanpoint</strong> : int</p>
 <blockquote class="last">
-<div><p>Which scanpoint to write.</p>
+<div><p>Which scanpoint to write</p>
 </div></blockquote>
 </td>
 </tr>
@@ -778,6 +786,38 @@ bins are equal size in log10 space, but they may not be exactly be
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>wavelength_bins</strong> : np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.platypusnexus.catalogue">
+<code class="descclassname">refnx.reduce.platypusnexus.</code><code class="descname">catalogue</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#catalogue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.platypusnexus.catalogue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract interesting information from Platypus NeXUS files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>start</strong> : int</p>
+<blockquote>
+<div><p>start cataloguing from this run number.</p>
+</div></blockquote>
+<p><strong>stop</strong> : int</p>
+<blockquote>
+<div><p>stop cataloguing at this run number</p>
+</div></blockquote>
+<p><strong>path</strong> : str, optional</p>
+<blockquote>
+<div><p>path specifying location of NeXUS files</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>catalog</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Dataframe containing interesting parameters from Platypus Nexus files</p>
+</div></blockquote>
 </td>
 </tr>
 </tbody>
@@ -1434,14 +1474,28 @@ footprint of the sample (mm).</p>
 <div class="section" id="module-refnx.reduce">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-refnx.reduce" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="refnx.reduce.Catalogue">
-<em class="property">class </em><code class="descclassname">refnx.reduce.</code><code class="descname">Catalogue</code><span class="sig-paren">(</span><em>h5data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#Catalogue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.Catalogue" title="Permalink to this definition">¶</a></dt>
+<dt id="refnx.reduce.BatchReducer">
+<em class="property">class </em><code class="descclassname">refnx.reduce.</code><code class="descname">BatchReducer</code><span class="sig-paren">(</span><em>filename</em>, <em>data_folder=None</em>, <em>verbose=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/batchreduction.html#BatchReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.BatchReducer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p class="rubric">Attributes</p>
-<dl class="attribute">
-<dt id="refnx.reduce.Catalogue.datafile_number">
-<code class="descname">datafile_number</code><a class="headerlink" href="#refnx.reduce.Catalogue.datafile_number" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<p>Batch reduction of reflectometry data based on spreadsheet metadata.</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.reduce.BatchReducer.reduce">
+<code class="descname">reduce</code><span class="sig-paren">(</span><em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/batchreduction.html#BatchReducer.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.BatchReducer.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Batch reduce data based on metadata from a spreadsheet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>show</strong> : bool (optional, default=True)</p>
+<blockquote class="last">
+<div><p>display a summary table of the rows that were reduced</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -1525,7 +1579,7 @@ chopper</p>
 
 <dl class="method">
 <dt id="refnx.reduce.PlatypusNexus.process">
-<code class="descname">process</code><span class="sig-paren">(</span><em>h5norm=None</em>, <em>lo_wavelength=2.5</em>, <em>hi_wavelength=19.0</em>, <em>background=True</em>, <em>direct=False</em>, <em>omega=None</em>, <em>twotheta=None</em>, <em>rebin_percent=1.0</em>, <em>wavelength_bins=None</em>, <em>normalise=True</em>, <em>integrate=-1</em>, <em>eventmode=None</em>, <em>peak_pos=None</em>, <em>background_mask=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.process" title="Permalink to this definition">¶</a></dt>
+<code class="descname">process</code><span class="sig-paren">(</span><em>h5norm=None</em>, <em>lo_wavelength=2.5</em>, <em>hi_wavelength=19.0</em>, <em>background=True</em>, <em>direct=False</em>, <em>omega=None</em>, <em>twotheta=None</em>, <em>rebin_percent=1.0</em>, <em>wavelength_bins=None</em>, <em>normalise=True</em>, <em>integrate=-1</em>, <em>eventmode=None</em>, <em>peak_pos=None</em>, <em>background_mask=None</em>, <em>normalise_bins=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#PlatypusNexus.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.PlatypusNexus.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes the ProcessNexus object to produce a time of flight spectrum.
 The processed spectrum is stored in the <cite>processed_spectrum</cite> attribute.
 The specular spectrum is also returned from this function.</p>
@@ -1620,6 +1674,12 @@ NeXUS file.</p>
 background subtraction.  Should be the same length as the number of
 y pixels in the detector image.  Otherwise an automatic mask is
 applied (if background is True).</p>
+</div></blockquote>
+<p><strong>normalise_bins</strong> : bool</p>
+<blockquote>
+<div><p>Divides the intensity in each wavelength bin by the width of the
+bin. This allows one to compare spectra even if they were processed
+with different rebin percentages.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1728,13 +1788,14 @@ file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like or str</p>
 <blockquote>
-<div><p>The file to write the spectrum to</p>
+<div><p>The file to write the spectrum to, or a str that specifies the file
+name</p>
 </div></blockquote>
 <p><strong>scanpoint</strong> : int</p>
 <blockquote class="last">
-<div><p>Which scanpoint to write.</p>
+<div><p>Which scanpoint to write</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1751,13 +1812,14 @@ file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like object</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like or str</p>
 <blockquote>
-<div><p>The file to write the spectrum to</p>
+<div><p>The file to write the spectrum to, or a str that specifies the file
+name</p>
 </div></blockquote>
 <p><strong>scanpoint</strong> : int</p>
 <blockquote class="last">
-<div><p>Which scanpoint to write.</p>
+<div><p>Which scanpoint to write</p>
 </div></blockquote>
 </td>
 </tr>
@@ -2001,6 +2063,38 @@ attributes for this object.</p>
 <code class="descname">write_offspecular</code><span class="sig-paren">(</span><em>f</em>, <em>scanpoint=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/reduce.html#ReducePlatypus.write_offspecular"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.ReducePlatypus.write_offspecular" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.reduce.catalogue">
+<code class="descclassname">refnx.reduce.</code><code class="descname">catalogue</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/reduce/platypusnexus.html#catalogue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.reduce.catalogue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract interesting information from Platypus NeXUS files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>start</strong> : int</p>
+<blockquote>
+<div><p>start cataloguing from this run number.</p>
+</div></blockquote>
+<p><strong>stop</strong> : int</p>
+<blockquote>
+<div><p>stop cataloguing at this run number</p>
+</div></blockquote>
+<p><strong>path</strong> : str, optional</p>
+<blockquote>
+<div><p>path specifying location of NeXUS files</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>catalog</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Dataframe containing interesting parameters from Platypus Nexus files</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

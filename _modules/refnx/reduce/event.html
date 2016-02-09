@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.event &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.reduce.event &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -41,8 +41,7 @@
   <h1>Source code for refnx.reduce.event</h1><div class="highlight"><pre>
 <span class="c"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">unpack streaming file</span>
-<span class="sd">@author: andrew</span>
+<span class="sd">Unpack event files</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
@@ -59,10 +58,10 @@
 <span class="sd">        specifies the frame bins required in the image.</span>
 <span class="sd">    t_bins : array_like</span>
 <span class="sd">        specifies the time bins required in the image</span>
-<span class="sd">    x_bins : array_like</span>
-<span class="sd">        specifies the x bins required in the image</span>
 <span class="sd">    y_bins : array_like</span>
 <span class="sd">        specifies the y bins required in the image</span>
+<span class="sd">    x_bins : array_like</span>
+<span class="sd">        specifies the x bins required in the image</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -111,7 +110,7 @@
     <span class="k">return</span> <span class="n">detector</span><span class="p">,</span> <span class="n">localframe_bins</span>
 
 </div>
-<div class="viewcode-block" id="events"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.event.events">[docs]</a><span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">endoflastevent</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="n">max_frames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+<div class="viewcode-block" id="events"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.event.events">[docs]</a><span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">end_last_event</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="n">max_frames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unpacks event data from packedbinary format for the ANSTO Platypus</span>
 <span class="sd">    instrument</span>
@@ -119,27 +118,29 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    </span>
-<span class="sd">    f : file</span>
-<span class="sd">        The file to read the data from.</span>
-<span class="sd">    endoflastevent : uint</span>
-<span class="sd">        The file position to start the read from. The data starts from byte</span>
-<span class="sd">        127.</span>
+<span class="sd">    f : file-like or str</span>
+<span class="sd">        The file to read the data from. If `f` is not file-like then f is</span>
+<span class="sd">        assumed to be a path pointing to the event file.</span>
+<span class="sd">    end_last_event : uint</span>
+<span class="sd">        The reading of event data starts from `end_last_event + 1`. The default</span>
+<span class="sd">        of 127 corresponds to a file header that is 128 bytes long.</span>
 <span class="sd">    max_frames : int</span>
-<span class="sd">        Stop reading the event file when you get to this many frames.</span>
+<span class="sd">        Stop reading the event file when have read this many frames.</span>
 <span class="sd">        </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    (f_events, t_events, y_events, x_events), endoflastevent:</span>
+<span class="sd">    (f_events, t_events, y_events, x_events), end_last_event:</span>
 <span class="sd">        x_events, y_events, t_events and f_events are numpy arrays containing</span>
-<span class="sd">        the events. endoflastevent is a byte offset to the end of the last</span>
+<span class="sd">        the events. end_last_event is a byte offset to the end of the last</span>
 <span class="sd">        successful event read from the file. Use this value to extract more</span>
 <span class="sd">        events from the same file at a future date.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">fi</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="n">auto_f</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fi</span><span class="p">,</span> <span class="s">&#39;read&#39;</span><span class="p">):</span>
+        <span class="n">auto_f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">fi</span> <span class="o">=</span> <span class="n">auto_f</span>
 
-    <span class="n">state</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">event_ended</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">frame_number</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">dt</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
@@ -151,7 +152,7 @@
     <span class="n">t_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint32&#39;</span><span class="p">)</span>
     <span class="n">f_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;int32&#39;</span><span class="p">)</span>
 
-    <span class="n">BUFSIZE</span> <span class="o">=</span> <span class="mi">32768</span>
+    <span class="n">bufsize</span> <span class="o">=</span> <span class="mi">32768</span>
 
     <span class="k">while</span> <span class="bp">True</span> <span class="ow">and</span> <span class="n">frame_number</span> <span class="o">&lt;</span> <span class="n">max_frames</span><span class="p">:</span>
         <span class="n">x_neutrons</span> <span class="o">=</span> <span class="p">[]</span>
@@ -159,10 +160,10 @@
         <span class="n">t_neutrons</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">f_neutrons</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">endoflastevent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">BUFSIZE</span><span class="p">)</span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">end_last_event</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">bufsize</span><span class="p">)</span>
 
-        <span class="n">filepos</span> <span class="o">=</span> <span class="n">endoflastevent</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">filepos</span> <span class="o">=</span> <span class="n">end_last_event</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">):</span>
             <span class="k">break</span>
@@ -183,7 +184,7 @@
                 <span class="n">state</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">|</span> <span class="p">((</span><span class="n">c</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">)</span> <span class="o">*</span> <span class="mi">64</span><span class="p">)</span>
+                    <span class="n">y</span> <span class="o">|=</span> <span class="p">(</span><span class="n">c</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">)</span> <span class="o">*</span> <span class="mi">64</span>
 
                     <span class="k">if</span> <span class="n">y</span> <span class="o">&amp;</span> <span class="mh">0x200</span><span class="p">:</span>
                         <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mh">0x100000000</span> <span class="o">-</span> <span class="p">(</span><span class="n">y</span> <span class="o">|</span> <span class="mh">0xFFFFFC00</span><span class="p">))</span>
@@ -194,14 +195,14 @@
                 <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">dt</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dt</span> <span class="o">|=</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">state</span> <span class="o">-</span> <span class="mi">3</span><span class="p">))</span>
+                    <span class="n">dt</span> <span class="o">|=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">state</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">event_ended</span><span class="p">:</span>
                     <span class="n">state</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c">#print &quot;got to state&quot;, state, event_ended, x, y, frame_number, t, dt</span>
+                    <span class="c"># print &quot;got to state&quot;, state, event_ended, x, y, frame_number, t, dt</span>
                     <span class="n">state</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="n">endoflastevent</span> <span class="o">=</span> <span class="n">filepos</span> <span class="o">+</span> <span class="n">i</span>
+                    <span class="n">end_last_event</span> <span class="o">=</span> <span class="n">filepos</span> <span class="o">+</span> <span class="n">i</span>
                     <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">dt</span> <span class="o">==</span> <span class="mh">0xFFFFFFFF</span><span class="p">:</span>
                         <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="n">frame_number</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -222,8 +223,12 @@
             <span class="n">t_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t_events</span><span class="p">,</span> <span class="n">t_neutrons</span><span class="p">)</span>
             <span class="n">f_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_events</span><span class="p">,</span> <span class="n">f_neutrons</span><span class="p">)</span>
     
-    <span class="n">t_events</span> <span class="o">=</span> <span class="n">t_events</span> <span class="o">//</span> <span class="mi">1000</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">f_events</span><span class="p">,</span> <span class="n">t_events</span><span class="p">,</span> <span class="n">y_events</span><span class="p">,</span> <span class="n">x_events</span><span class="p">),</span> <span class="n">endoflastevent</span></div>
+    <span class="n">t_events</span> <span class="o">//=</span> <span class="mi">1000</span>
+
+    <span class="k">if</span> <span class="n">auto_f</span><span class="p">:</span>
+        <span class="n">auto_f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">f_events</span><span class="p">,</span> <span class="n">t_events</span><span class="p">,</span> <span class="n">y_events</span><span class="p">,</span> <span class="n">x_events</span><span class="p">),</span> <span class="n">end_last_event</span></div>
 </pre></div>
 
           </div>

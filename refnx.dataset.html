@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.dataset package &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.dataset package &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -48,10 +48,55 @@
 A basic representation of a 1D dataset</p>
 <dl class="class">
 <dt id="refnx.dataset.data1d.Data1D">
-<em class="property">class </em><code class="descclassname">refnx.dataset.data1d.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data_tuple=None</em>, <em>curvefitter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.data1d.Data1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.dataset.data1d.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.data1d.Data1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>A basic representation of a 1D dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : str, file-like or tuple of np.ndarray, optional</p>
+<blockquote class="last">
+<div><p><cite>data</cite> can be a string or file-like object referring to a File to load
+the dataset from.</p>
+<p>Alternatively it is a tuple containing the data from which the dataset
+will be constructed. The tuple should have between 2 and 4 members.</p>
+<blockquote>
+<div><p>data[0] - x
+data[1] - y
+data[2] - standard deviation of y, y_sd
+data[3] - standard deviation of x, x_sd</p>
+</div></blockquote>
+<p><cite>data</cite> must be at least two long, <cite>x</cite> and <cite>y</cite>.
+If the tuple is at least 3 long then the third member is <cite>y_sd</cite>.
+If the tuple is 4 long then the fourth member is <cite>x_sd</cite>.
+All arrays must have the same shape.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="6%" />
+<col width="94%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>x</td>
+<td>(np.ndarray) x data</td>
+</tr>
+<tr class="row-even"><td>y</td>
+<td>(np.ndarray) y data</td>
+</tr>
+<tr class="row-odd"><td>y_sd</td>
+<td>(np.ndarray) uncertainties (1 standard deviation) on the y data</td>
+</tr>
+<tr class="row-even"><td>x_sd</td>
+<td>(np.ndarray) uncertainties on the x data</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="refnx.dataset.data1d.Data1D.add_data">
@@ -217,7 +262,7 @@ finite.</p>
 <span id="refnx-dataset-reflectdataset-module"></span><h2>refnx.dataset.reflectdataset module<a class="headerlink" href="#module-refnx.dataset.reflectdataset" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="refnx.dataset.reflectdataset.ReflectDataset">
-<em class="property">class </em><code class="descclassname">refnx.dataset.reflectdataset.</code><code class="descname">ReflectDataset</code><span class="sig-paren">(</span><em>data_tuple=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/reflectdataset.html#ReflectDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.reflectdataset.ReflectDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.dataset.reflectdataset.</code><code class="descname">ReflectDataset</code><span class="sig-paren">(</span><em>data=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/reflectdataset.html#ReflectDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.reflectdataset.ReflectDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refnx.dataset.data1d.Data1D" title="refnx.dataset.data1d.Data1D"><code class="xref py py-class docutils literal"><span class="pre">refnx.dataset.data1d.Data1D</span></code></a></p>
 <p>A 1D Reflectivity dataset.</p>
 <p class="rubric">Attributes</p>
@@ -232,7 +277,8 @@ finite.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
 <blockquote class="last">
-<div><p>File to load reflectivity data from.</p>
+<div><p>The file to load the spectrum from, or a str that specifies the file
+name</p>
 </div></blockquote>
 </td>
 </tr>
@@ -248,9 +294,10 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
 <blockquote class="last">
-<div><p>The file to save the data to.</p>
+<div><p>The file to write the spectrum to, or a str that specifies the file
+name</p>
 </div></blockquote>
 </td>
 </tr>
@@ -265,10 +312,55 @@ finite.</p>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-refnx.dataset" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="refnx.dataset.Data1D">
-<em class="property">class </em><code class="descclassname">refnx.dataset.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data_tuple=None</em>, <em>curvefitter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.Data1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.dataset.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.Data1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>A basic representation of a 1D dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : str, file-like or tuple of np.ndarray, optional</p>
+<blockquote class="last">
+<div><p><cite>data</cite> can be a string or file-like object referring to a File to load
+the dataset from.</p>
+<p>Alternatively it is a tuple containing the data from which the dataset
+will be constructed. The tuple should have between 2 and 4 members.</p>
+<blockquote>
+<div><p>data[0] - x
+data[1] - y
+data[2] - standard deviation of y, y_sd
+data[3] - standard deviation of x, x_sd</p>
+</div></blockquote>
+<p><cite>data</cite> must be at least two long, <cite>x</cite> and <cite>y</cite>.
+If the tuple is at least 3 long then the third member is <cite>y_sd</cite>.
+If the tuple is 4 long then the fourth member is <cite>x_sd</cite>.
+All arrays must have the same shape.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="6%" />
+<col width="94%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>x</td>
+<td>(np.ndarray) x data</td>
+</tr>
+<tr class="row-even"><td>y</td>
+<td>(np.ndarray) y data</td>
+</tr>
+<tr class="row-odd"><td>y_sd</td>
+<td>(np.ndarray) uncertainties (1 standard deviation) on the y data</td>
+</tr>
+<tr class="row-even"><td>x_sd</td>
+<td>(np.ndarray) uncertainties on the x data</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="refnx.dataset.Data1D.add_data">
@@ -431,7 +523,7 @@ finite.</p>
 
 <dl class="class">
 <dt id="refnx.dataset.ReflectDataset">
-<em class="property">class </em><code class="descclassname">refnx.dataset.</code><code class="descname">ReflectDataset</code><span class="sig-paren">(</span><em>data_tuple=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/reflectdataset.html#ReflectDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.ReflectDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.dataset.</code><code class="descname">ReflectDataset</code><span class="sig-paren">(</span><em>data=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/reflectdataset.html#ReflectDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.ReflectDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refnx.dataset.data1d.Data1D" title="refnx.dataset.data1d.Data1D"><code class="xref py py-class docutils literal"><span class="pre">refnx.dataset.data1d.Data1D</span></code></a></p>
 <p>A 1D Reflectivity dataset.</p>
 <p class="rubric">Attributes</p>
@@ -446,7 +538,8 @@ finite.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
 <blockquote class="last">
-<div><p>File to load reflectivity data from.</p>
+<div><p>The file to load the spectrum from, or a str that specifies the file
+name</p>
 </div></blockquote>
 </td>
 </tr>
@@ -462,9 +555,10 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-like</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
 <blockquote class="last">
-<div><p>The file to save the data to.</p>
+<div><p>The file to write the spectrum to, or a str that specifies the file
+name</p>
 </div></blockquote>
 </td>
 </tr>
@@ -472,41 +566,6 @@ finite.</p>
 </table>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="function">
-<dt id="refnx.dataset.gmtime">
-<code class="descclassname">refnx.dataset.</code><code class="descname">gmtime</code><span class="sig-paren">(</span><em>[seconds]) -&gt; (tm_year, tm_mon, tm_mday, tm_hour, tm_min, tm_sec, tm_wday, tm_yday, tm_isdst</em><span class="sig-paren">)</span><a class="headerlink" href="#refnx.dataset.gmtime" title="Permalink to this definition">¶</a></dt>
-<dd><p>tm_sec, tm_wday, tm_yday, tm_isdst)</p>
-<p>Convert seconds since the Epoch to a time tuple expressing UTC (a.k.a.
-GMT).  When &#8216;seconds&#8217; is not passed in, convert the current time instead.</p>
-<p>If the platform supports the tm_gmtoff and tm_zone, they are available as
-attributes only.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="refnx.dataset.strftime">
-<code class="descclassname">refnx.dataset.</code><code class="descname">strftime</code><span class="sig-paren">(</span><em>format</em><span class="optional">[</span>, <em>tuple</em><span class="optional">]</span><span class="sig-paren">)</span> &rarr; string<a class="headerlink" href="#refnx.dataset.strftime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a time tuple to a string according to a format specification.
-See the library reference manual for formatting codes. When the time tuple
-is not present, current time as returned by localtime() is used.</p>
-<p>Commonly used format codes:</p>
-<p>%Y  Year with century as a decimal number.
-%m  Month as a decimal number [01,12].
-%d  Day of the month as a decimal number [01,31].
-%H  Hour (24-hour clock) as a decimal number [00,23].
-%M  Minute as a decimal number [00,59].
-%S  Second as a decimal number [00,61].
-%z  Time zone offset from UTC.
-%a  Locale&#8217;s abbreviated weekday name.
-%A  Locale&#8217;s full weekday name.
-%b  Locale&#8217;s abbreviated month name.
-%B  Locale&#8217;s full month name.
-%c  Locale&#8217;s appropriate date and time representation.
-%I  Hour (12-hour clock) as a decimal number [01,12].
-%p  Locale&#8217;s equivalent of either AM or PM.</p>
-<p>Other codes may be available on your platform.  See documentation for
-the C library strftime function.</p>
 </dd></dl>
 
 </div>

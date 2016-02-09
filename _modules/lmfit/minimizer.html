@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lmfit.minimizer &mdash; refnx 0.0.1 documentation</title>
+    <title>lmfit.minimizer &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="../../index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   
@@ -62,7 +62,6 @@
 
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">leastsq</span> <span class="k">as</span> <span class="n">scipy_leastsq</span>
 
-
 <span class="c"># differential_evolution is only present in scipy &gt;= 0.15</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">differential_evolution</span> <span class="k">as</span> <span class="n">scipy_diffev</span>
@@ -77,7 +76,7 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="c">#check for pandas</span>
+<span class="c"># check for pandas</span>
 <span class="n">HAS_PANDAS</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
@@ -93,7 +92,6 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="kn">from</span> <span class="nn">.asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="kn">from</span> <span class="nn">.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
 
 <span class="c"># use locally modified version of uncertainties package</span>
@@ -111,7 +109,7 @@
     <span class="n">_pars</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;_pars&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
     <span class="n">_names</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;_names&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
     <span class="n">_asteval</span> <span class="o">=</span> <span class="n">_pars</span><span class="o">.</span><span class="n">_asteval</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">_obj</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span>  <span class="n">_pars</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">_names</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">_obj</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">_pars</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">_names</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span>
         <span class="n">_asteval</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">_obj</span><span class="o">.</span><span class="n">_expr_ast</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">_names</span><span class="p">):</span>
@@ -119,6 +117,7 @@
     <span class="k">return</span> <span class="n">_asteval</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">_obj</span><span class="o">.</span><span class="n">_expr_ast</span><span class="p">)</span>
 
 <span class="n">wrap_ueval</span> <span class="o">=</span> <span class="n">uncertainties</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">asteval_with_uncertainties</span><span class="p">)</span>
+
 
 <span class="k">def</span> <span class="nf">eval_stderr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">uvars</span><span class="p">,</span> <span class="n">_names</span><span class="p">,</span> <span class="n">_pars</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;evaluate uncertainty and set .stderr for a parameter `obj`</span>
@@ -145,7 +144,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>
 
 
 <span class="k">def</span> <span class="nf">_differential_evolution</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
@@ -169,7 +168,7 @@
                   <span class="s">&#39;bfgs&#39;</span><span class="p">:</span> <span class="s">&#39;BFGS&#39;</span><span class="p">,</span>
                   <span class="s">&#39;newton&#39;</span><span class="p">:</span> <span class="s">&#39;Newton-CG&#39;</span><span class="p">,</span>
                   <span class="s">&#39;lbfgsb&#39;</span><span class="p">:</span> <span class="s">&#39;L-BFGS-B&#39;</span><span class="p">,</span>
-                  <span class="s">&#39;l-bfgsb&#39;</span> <span class="p">:</span><span class="s">&#39;L-BFGS-B&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;l-bfgsb&#39;</span><span class="p">:</span> <span class="s">&#39;L-BFGS-B&#39;</span><span class="p">,</span>
                   <span class="s">&#39;tnc&#39;</span><span class="p">:</span> <span class="s">&#39;TNC&#39;</span><span class="p">,</span>
                   <span class="s">&#39;cobyla&#39;</span><span class="p">:</span> <span class="s">&#39;COBYLA&#39;</span><span class="p">,</span>
                   <span class="s">&#39;slsqp&#39;</span><span class="p">:</span> <span class="s">&#39;SLSQP&#39;</span><span class="p">,</span>
@@ -193,7 +192,7 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    additional attributes not listed above depending of the</span>
+<span class="sd">    Additional attributes not listed above may be present, depending on the</span>
 <span class="sd">    specific solver. Since this class is essentially a subclass of dict</span>
 <span class="sd">    with attribute accessors, one can see which attributes are available</span>
 <span class="sd">    using the `keys()` method.</span>
@@ -325,7 +324,7 @@
         <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">params</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">,</span> <span class="n">fvars</span><span class="p">):</span>
             <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">from_internal</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">params</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userfcn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">)</span>
@@ -344,14 +343,14 @@
 <span class="sd">        modified 06-29-2015 M Newville to apply gradient scaling</span>
 <span class="sd">               for bounded variables (thanks to JJ Helmus, N Mayorov)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pars</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">params</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">params</span>
         <span class="n">grad_scale</span> <span class="o">=</span> <span class="n">ones_like</span><span class="p">(</span><span class="n">fvars</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ivar</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">fvars</span><span class="p">[</span><span class="n">ivar</span><span class="p">]</span>
             <span class="n">pars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">pars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">from_internal</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
             <span class="n">grad_scale</span><span class="p">[</span><span class="n">ivar</span><span class="p">]</span> <span class="o">=</span> <span class="n">pars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">scale_gradient</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">pars</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
         <span class="c"># compute the jacobian for &quot;internal&quot; unbounded variables,</span>
         <span class="c"># the rescale for bounded &quot;external&quot; variables.</span>
@@ -359,7 +358,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_deriv</span><span class="p">:</span>
             <span class="n">jac</span> <span class="o">=</span> <span class="p">(</span><span class="n">jac</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">*</span><span class="n">grad_scale</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">jac</span> <span class="o">=</span> <span class="n">jac</span><span class="o">*</span><span class="n">grad_scale</span>
+            <span class="n">jac</span> <span class="o">*=</span> <span class="n">grad_scale</span>
         <span class="k">return</span> <span class="n">jac</span>
 
 <div class="viewcode-block" id="Minimizer.penalty"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Minimizer.penalty">[docs]</a>    <span class="k">def</span> <span class="nf">penalty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fvars</span><span class="p">):</span>
@@ -406,7 +405,7 @@
         <span class="c"># determine which parameters are actually variables</span>
         <span class="c"># and which are defined expressions.</span>
 
-        <span class="n">result</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># note that this *does* belong to self...</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># note that this *does* belong to self...</span>
         <span class="n">result</span><span class="o">.</span><span class="n">init_vals</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
         <span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="mi">0</span>
@@ -450,7 +449,6 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;use scalar_minimize(method=&#39;L-BFGS-B&#39;)&quot;</span><span class="p">)</span>
-
 
     <span class="nd">@deprecate</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s">&#39;    Deprecated in lmfit 0.8.2, use scalar_minimize &#39;</span>
                        <span class="s">&#39;and method=</span><span class="se">\&#39;</span><span class="s">Nelder-Mead</span><span class="se">\&#39;</span><span class="s"> instead&#39;</span><span class="p">)</span>
@@ -512,7 +510,7 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_fit</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
-        <span class="nb">vars</span>   <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">init_vals</span>
+        <span class="nb">vars</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">init_vals</span>
         <span class="n">params</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">params</span>
 
         <span class="n">fmin_kws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
@@ -553,12 +551,16 @@
 
         <span class="n">result</span><span class="o">.</span><span class="n">aborted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
-
-        <span class="n">result</span><span class="o">.</span><span class="n">chisqr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__residual</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">chisqr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__residual</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
         <span class="n">result</span><span class="o">.</span><span class="n">nvarys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
         <span class="n">result</span><span class="o">.</span><span class="n">ndata</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">result</span><span class="o">.</span><span class="n">nfree</span> <span class="o">=</span> <span class="mi">1</span>
@@ -574,7 +576,8 @@
         <span class="k">return</span> <span class="n">result</span>
 </div>
 <div class="viewcode-block" id="Minimizer.emcee"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Minimizer.emcee">[docs]</a>    <span class="k">def</span> <span class="nf">emcee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nwalkers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-              <span class="n">ntemps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">reuse_sampler</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+              <span class="n">ntemps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">reuse_sampler</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+              <span class="n">float_behavior</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">,</span> <span class="n">is_weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bayesian sampling of the posterior distribution for the parameters</span>
 <span class="sd">        using the `emcee` Markov Chain Monte Carlo package. The method assumes</span>
@@ -608,14 +611,16 @@
 <span class="sd">            then `pos.shape` should be `(nwalkers, nvarys)`. Otherwise,</span>
 <span class="sd">            `(ntemps, nwalkers, nvarys)`. You can also initialise using a</span>
 <span class="sd">            previous chain that had the same `ntemps`, `nwalkers` and</span>
-<span class="sd">            `nvarys`.</span>
+<span class="sd">            `nvarys`. Note that `nvarys` may be one larger than you expect it</span>
+<span class="sd">            to be if your `userfcn` returns an array and `is_weighted is</span>
+<span class="sd">            False`.</span>
 <span class="sd">        reuse_sampler : bool, optional</span>
 <span class="sd">            If you have already run `emcee` on a given `Minimizer` object then</span>
-<span class="sd">            it possesses an internal sampler attribute. You can continue to</span>
+<span class="sd">            it possesses an internal ``sampler`` attribute. You can continue to</span>
 <span class="sd">            draw from the same sampler (retaining the chain history) if you set</span>
 <span class="sd">            this option to `True`. Otherwise a new sampler is created. The</span>
-<span class="sd">            `nwalkers`, `ntemps` and `params` keywords are ignored with this</span>
-<span class="sd">            option.</span>
+<span class="sd">            `nwalkers`, `ntemps`, `pos`, and `params` keywords are ignored with</span>
+<span class="sd">            this option.</span>
 <span class="sd">            **Important**: the Parameters used to create the sampler must not</span>
 <span class="sd">            change in-between calls to `emcee`. Alteration of Parameters</span>
 <span class="sd">            would include changed ``min``, ``max``, ``vary`` and ``expr``</span>
@@ -625,7 +630,7 @@
 <span class="sd">        workers : Pool-like or int, optional</span>
 <span class="sd">            For parallelization of sampling.  It can be any Pool-like object</span>
 <span class="sd">            with a map method that follows the same calling sequence as the</span>
-<span class="sd">            built-in map function. If int is given as the argument, then a</span>
+<span class="sd">            built-in `map` function. If int is given as the argument, then a</span>
 <span class="sd">            multiprocessing-based pool is spawned internally with the</span>
 <span class="sd">            corresponding number of parallel processes. &#39;mpi4py&#39;-based</span>
 <span class="sd">            parallelization and &#39;joblib&#39;-based parallelization pools can also</span>
@@ -633,6 +638,29 @@
 <span class="sd">            only be worth parallelising if the objective function is expensive</span>
 <span class="sd">            to calculate, or if there are a large number of objective</span>
 <span class="sd">            evaluations per step (`ntemps * nwalkers * nvarys`).</span>
+<span class="sd">        float_behavior : str, optional</span>
+<span class="sd">            Specifies meaning of the objective function output if it returns a</span>
+<span class="sd">            float. One of:</span>
+
+<span class="sd">                &#39;posterior&#39; - objective function returns a log-posterior</span>
+<span class="sd">                               probability</span>
+<span class="sd">                &#39;chi2&#39; - objective function returns :math:`\chi^2`.</span>
+
+<span class="sd">            See Notes for further details.</span>
+<span class="sd">        is_weighted : bool, optional</span>
+<span class="sd">            Has your objective function been weighted by measurement</span>
+<span class="sd">            uncertainties? If `is_weighted is True` then your objective</span>
+<span class="sd">            function is assumed to return residuals that have been divided by</span>
+<span class="sd">            the true measurement uncertainty `(data - model) / sigma`. If</span>
+<span class="sd">            `is_weighted is False` then the objective function is assumed to</span>
+<span class="sd">            return unweighted residuals, `data - model`. In this case `emcee`</span>
+<span class="sd">            will employ a positive measurement uncertainty during the sampling.</span>
+<span class="sd">            This measurement uncertainty will be present in the output params</span>
+<span class="sd">            and output chain with the name `__lnsigma`. A side effect of this</span>
+<span class="sd">            is that you cannot use this parameter name yourself.</span>
+<span class="sd">            **Important** this parameter only has any effect if your objective</span>
+<span class="sd">            function returns an array. If your objective function returns a</span>
+<span class="sd">            float, then this parameter is ignored. See Notes for more details.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -677,56 +705,75 @@
 <span class="sd">        \ln p(D|F_{true}) = -\frac{1}{2}\sum_n \left[\frac{\left(g_n(F_{true}) - D_n \right)^2}{s_n^2}+\ln (2\pi s_n^2)\right]</span>
 
 <span class="sd">        The first summand in the square brackets represents the residual for a</span>
-<span class="sd">        given datapoint. This term represents :math:`\chi^2` when summed over</span>
-<span class="sd">        all datapoints.</span>
-<span class="sd">        The objective function used to create `lmfit.Minimizer` should return</span>
-<span class="sd">        :math:`\ln p(F_{true} | D)`. However, since the in-built log-prior term</span>
-<span class="sd">        is zero, the objective function can just return the log-likelihood</span>
-<span class="sd">        (unless you wish to create a non-uniform prior). If a negative float</span>
-<span class="sd">        value is returned by the objective function it&#39;s assumed to be</span>
-<span class="sd">        :math:`\ln p(F_{true} | D)`, the posterior probability. If a positive</span>
-<span class="sd">        float value is returned then the value is assumed to be :math:`\chi^2`.</span>
-<span class="sd">        The posterior probability is then calculated as :math:`-0.5 * \chi^2`.</span>
+<span class="sd">        given datapoint (:math:`g` being the generative model) . This term</span>
+<span class="sd">        represents :math:`\chi^2` when summed over all datapoints.</span>
+<span class="sd">        Ideally the objective function used to create `lmfit.Minimizer` should</span>
+<span class="sd">        return the log-posterior probability, :math:`\ln p(F_{true} | D)`.</span>
+<span class="sd">        However, since the in-built log-prior term is zero, the objective</span>
+<span class="sd">        function can also just return the log-likelihood, unless you wish to</span>
+<span class="sd">        create a non-uniform prior.</span>
 
-<span class="sd">        However, the default behaviour of most objective functions is to return</span>
-<span class="sd">        a vector of residuals. Therefore, if your objective function, `fcn`,</span>
-<span class="sd">        returns a vector, `res`, then the vector is assumed to contain the</span>
-<span class="sd">        residuals. The log-likelihood (and log-posterior probability) is then</span>
-<span class="sd">        calculated as: `-0.5 * np.sum(res **2)`. However, this ignores the</span>
-<span class="sd">        second summand in the square brackets. Consequently, in order to</span>
-<span class="sd">        calculate a fully correct log-posterior probability value your objective</span>
-<span class="sd">        function should return a single value.</span>
-<span class="sd">        Marginalisation over a nuisance parameter (such as incorrectly</span>
-<span class="sd">        estimated data uncertainties, `s_n`) can be achieved by including such</span>
-<span class="sd">        parameters in a `Parameters` instance and suitable inclusion in the</span>
-<span class="sd">        objective function.</span>
+<span class="sd">        If a float value is returned by the objective function then this value</span>
+<span class="sd">        is assumed by default to be the log-posterior probability, i.e.</span>
+<span class="sd">        `float_behavior is &#39;posterior&#39;`. If your objective function returns</span>
+<span class="sd">        :math:`\chi^2`, then you should use a value of `&#39;chi2&#39;` for</span>
+<span class="sd">        `float_behavior`. `emcee` will then multiply your :math:`\chi^2` value</span>
+<span class="sd">        by -0.5 to obtain the posterior probability.</span>
+
+<span class="sd">        However, the default behaviour of many objective functions is to return</span>
+<span class="sd">        a vector of (possibly weighted) residuals. Therefore, if your objective</span>
+<span class="sd">        function returns a vector, `res`, then the vector is assumed to contain</span>
+<span class="sd">        the residuals. If `is_weighted is True` then your residuals are assumed</span>
+<span class="sd">        to be correctly weighted by the standard deviation of the data points</span>
+<span class="sd">        (`res = (data - model) / sigma`) and the log-likelihood (and</span>
+<span class="sd">        log-posterior probability) is calculated as: `-0.5 * np.sum(res **2)`.</span>
+<span class="sd">        This ignores the second summand in the square brackets. Consequently,</span>
+<span class="sd">        in order to calculate a fully correct log-posterior probability value</span>
+<span class="sd">        your objective function should return a single value. If</span>
+<span class="sd">        `is_weighted is False` then the data uncertainty, `s_n`, will be</span>
+<span class="sd">        treated as a nuisance parameter and will be marginalised out. This is</span>
+<span class="sd">        achieved by employing a strictly positive uncertainty</span>
+<span class="sd">        (homoscedasticity) for each data point, :math:`s_n = exp(__lnsigma)`.</span>
+<span class="sd">        `__lnsigma` will be present in `MinimizerResult.params`, as well as</span>
+<span class="sd">        `Minimizer.chain`, `nvarys` will also be increased by one.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
 <span class="sd">        .. [1] http://dan.iel.fm/emcee/current/user/line/</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_EMCEE</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;You must have emcee to use&#39;</span>
                                       <span class="s">&#39; the emcee method&#39;</span><span class="p">)</span>
-
+        <span class="n">tparams</span> <span class="o">=</span> <span class="n">params</span>
         <span class="c"># if you&#39;re reusing the sampler then ntemps, nwalkers have to be</span>
         <span class="c"># determined from the previous sampling</span>
-        <span class="n">tparams</span> <span class="o">=</span> <span class="n">params</span>
         <span class="k">if</span> <span class="n">reuse_sampler</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;sampler&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;sampler&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_lastpos&#39;</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;You wanted to use an existing sampler, but&quot;</span>
                                  <span class="s">&quot;it hasn&#39;t been created yet&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">ntemps</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">nwalkers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">ntemps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">nwalkers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">nwalkers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">ntemps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nwalkers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">tparams</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_fit</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">tparams</span><span class="p">)</span>
         <span class="n">params</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">params</span>
+
+        <span class="c"># check if the userfcn returns a vector of residuals</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userfcn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">is_weighted</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="c"># we need to marginalise over a constant data uncertainty</span>
+            <span class="k">if</span> <span class="s">&#39;__lnsigma&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                <span class="c"># __lnsigma should already be in params if is_weighted was</span>
+                <span class="c"># previously set to True.</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;__lnsigma&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="c"># have to re-prepare the fit</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_fit</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">params</span>
 
         <span class="c"># Removing internal parameter scaling. We could possibly keep it,</span>
         <span class="c"># but I don&#39;t know how this affects the emcee sampling.</span>
@@ -755,10 +802,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
 
-        <span class="c"># function arguments for the log-probability functions</span>
-        <span class="n">lnprob_args</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">userfcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
-        <span class="n">lnprob_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;userargs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span> <span class="s">&#39;userkws&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">}</span>
-
         <span class="c"># set up multiprocessing options for the samplers</span>
         <span class="n">auto_pool</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">sampler_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -768,12 +811,19 @@
         <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">workers</span><span class="p">,</span> <span class="s">&#39;map&#39;</span><span class="p">):</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;pool&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workers</span>
 
+        <span class="c"># function arguments for the log-probability functions</span>
         <span class="c"># these values are sent to the log-probability functions by the sampler.</span>
+        <span class="n">lnprob_args</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">userfcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+        <span class="n">lnprob_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;is_weighted&#39;</span><span class="p">:</span> <span class="n">is_weighted</span><span class="p">,</span>
+                         <span class="s">&#39;float_behavior&#39;</span><span class="p">:</span> <span class="n">float_behavior</span><span class="p">,</span>
+                         <span class="s">&#39;userargs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span>
+                         <span class="s">&#39;userkws&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">}</span>
+
         <span class="k">if</span> <span class="n">ntemps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># the prior and likelihood function args and kwargs are the same</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;loglargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_args</span>
-            <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;logpargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_args</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;loglkwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_kwargs</span>
-            <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;logpkwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_kwargs</span>
+            <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;logpargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">bounds</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_args</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_kwargs</span>
@@ -783,8 +833,12 @@
             <span class="k">if</span> <span class="n">auto_pool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">auto_pool</span>
 
-            <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span>
+            <span class="k">if</span> <span class="n">p0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;You cannot reuse the sampler if the number&quot;</span>
+                                 <span class="s">&quot;of varying parameters has changed&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">ntemps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># Parallel Tempering</span>
             <span class="c"># jitter the starting position by scaled Gaussian noise</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">ntemps</span><span class="p">,</span> <span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.e-4</span>
             <span class="n">p0</span> <span class="o">*=</span> <span class="n">var_arr</span>
@@ -798,14 +852,16 @@
 
         <span class="c"># user supplies an initialisation position for the chain</span>
         <span class="c"># If you try to run the sampler with p0 of a wrong size then you&#39;ll get</span>
-        <span class="c"># a ValueError.</span>
-        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># a ValueError. Note, you can&#39;t initialise with a position if you are</span>
+        <span class="c"># reusing the sampler.</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reuse_sampler</span><span class="p">:</span>
             <span class="n">tpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">p0</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">tpos</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="c"># trying to initialise with a previous chain</span>
             <span class="k">elif</span> <span class="p">(</span><span class="n">tpos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">)):</span>
                 <span class="n">tpos</span> <span class="o">=</span> <span class="n">tpos</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="c"># initialising with a PTsampler chain.</span>
             <span class="k">elif</span> <span class="n">ntemps</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">tpos</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
                 <span class="n">tpos_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tpos</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
                 <span class="n">tpos_shape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -818,6 +874,7 @@
 
         <span class="c"># now do a production run, sampling all the time</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lastpos</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c"># discard the burn samples and thin</span>
         <span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">burn</span><span class="p">::</span><span class="n">thin</span><span class="p">,</span> <span class="p">:]</span>
@@ -825,12 +882,11 @@
 
         <span class="n">flatchain</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">))</span>
 
-        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">flatchain</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">quantiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">flatchain</span><span class="p">,</span> <span class="p">[</span><span class="mf">15.8</span><span class="p">,</span> <span class="mf">84.2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">quantiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">flatchain</span><span class="p">,</span> <span class="p">[</span><span class="mf">15.87</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mf">84.13</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">):</span>
-            <span class="n">std_l</span><span class="p">,</span> <span class="n">std_u</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
-            <span class="n">params</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">mean</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">std_l</span><span class="p">,</span> <span class="n">median</span><span class="p">,</span> <span class="n">std_u</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">median</span>
             <span class="n">params</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">std_u</span> <span class="o">-</span> <span class="n">std_l</span><span class="p">)</span>
             <span class="n">params</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">correl</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -880,7 +936,7 @@
 <span class="sd">            True if fit was successful, False if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_fit</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
-        <span class="nb">vars</span>   <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">init_vals</span>
+        <span class="nb">vars</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">init_vals</span>
         <span class="n">nvars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
         <span class="n">lskws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">full_output</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1.e-7</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1.e-7</span><span class="p">,</span> <span class="n">col_deriv</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                      <span class="n">gtol</span><span class="o">=</span><span class="mf">1.e-7</span><span class="p">,</span> <span class="n">maxfev</span><span class="o">=</span><span class="mi">2000</span><span class="o">*</span><span class="p">(</span><span class="n">nvars</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">Dfun</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
@@ -982,7 +1038,6 @@
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">result</span><span class="o">.</span><span class="n">errorbars</span> <span class="o">=</span> <span class="bp">False</span>
 
-            <span class="n">uvars</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="k">if</span> <span class="n">has_expr</span><span class="p">:</span>
                 <span class="c"># uncertainties on constrained parameters:</span>
                 <span class="c">#   get values with uncertainties (including correlations),</span>
@@ -1001,7 +1056,7 @@
                         <span class="n">params</span><span class="p">[</span><span class="n">nam</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">nominal_value</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">errorbars</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">. Could not estimate error-bars&#39;</span><span class="o">%</span> <span class="n">result</span><span class="o">.</span><span class="n">message</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">. Could not estimate error-bars&#39;</span> <span class="o">%</span> <span class="n">result</span><span class="o">.</span><span class="n">message</span>
 
         <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="o">**</span><span class="n">orig_warn_settings</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
@@ -1060,8 +1115,7 @@
         <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 </div></div>
-<span class="k">def</span> <span class="nf">_lnprior</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">userfcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">var_names</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">userargs</span><span class="o">=</span><span class="p">(),</span>
-            <span class="n">userkws</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_lnprior</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates an improper uniform log-prior probability</span>
 
@@ -1069,18 +1123,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    theta : sequence</span>
 <span class="sd">        float parameter values (only those being varied)</span>
-<span class="sd">    userfcn : callable</span>
-<span class="sd">        User objective function</span>
-<span class="sd">    params : lmfit.Parameters</span>
-<span class="sd">        The entire set of Parameters</span>
-<span class="sd">    var_names : list</span>
-<span class="sd">        The names of the parameters that are varying</span>
 <span class="sd">    bounds : np.ndarray</span>
-<span class="sd">        Lower and upper bounds of parameters. Has shape (nvarys, 2).</span>
-<span class="sd">    userargs : tuple, optional</span>
-<span class="sd">        Extra positional arguments required for user objective function</span>
-<span class="sd">    userkws : dict, optional</span>
-<span class="sd">        Extra keyword arguments required for user objective function</span>
+<span class="sd">        Lower and upper bounds of parameters that are varying.</span>
+<span class="sd">        Has shape (nvarys, 2).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1095,7 +1140,7 @@
 
 
 <span class="k">def</span> <span class="nf">_lnpost</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">userfcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">var_names</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">userargs</span><span class="o">=</span><span class="p">(),</span>
-            <span class="n">userkws</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="n">userkws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">float_behavior</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">,</span> <span class="n">is_weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the log-posterior probability. See the `Minimizer.emcee` method</span>
 <span class="sd">    for more details</span>
@@ -1116,6 +1161,16 @@
 <span class="sd">        Extra positional arguments required for user objective function</span>
 <span class="sd">    userkws : dict, optional</span>
 <span class="sd">        Extra keyword arguments required for user objective function</span>
+<span class="sd">    float_behavior : str, optional</span>
+<span class="sd">        Specifies meaning of objective when it returns a float. One of:</span>
+
+<span class="sd">        &#39;posterior&#39; - objective function returnins a log-posterior</span>
+<span class="sd">                      probability.</span>
+<span class="sd">        &#39;chi2&#39; - objective function returns a chi2 value.</span>
+
+<span class="sd">    is_weighted : bool</span>
+<span class="sd">        If `userfcn` returns a vector of residuals then `is_weighted`</span>
+<span class="sd">        specifies if the residuals have been weighted by data uncertainties.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1136,22 +1191,32 @@
     <span class="k">if</span> <span class="n">userkws</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">userkwargs</span> <span class="o">=</span> <span class="n">userkws</span>
 
+    <span class="c"># update the constraints</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
+
     <span class="c"># now calculate the log-likelihood</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">userfcn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="n">userkwargs</span><span class="p">)</span>
     <span class="n">lnprob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">lnprob</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c"># objective function returns a vector of residuals</span>
-        <span class="n">lnprob</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">lnprob</span> <span class="o">*</span> <span class="n">lnprob</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;__lnsigma&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_weighted</span><span class="p">:</span>
+            <span class="c"># marginalise over a constant data uncertainty</span>
+            <span class="n">__lnsigma</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s">&#39;__lnsigma&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">__lnsigma</span>
+            <span class="n">lnprob</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lnprob</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">__lnsigma</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lnprob</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">lnprob</span> <span class="o">*</span> <span class="n">lnprob</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c"># objective function returns a single value.</span>
-        <span class="c"># If lnprob &gt; 0, assume that lnprob is chi**2</span>
-        <span class="k">if</span> <span class="n">lnprob</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># use float_behaviour to figure out if the value is posterior or chi2</span>
+        <span class="k">if</span> <span class="n">float_behavior</span> <span class="o">==</span> <span class="s">&#39;posterior&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">float_behavior</span> <span class="o">==</span> <span class="s">&#39;chi2&#39;</span><span class="p">:</span>
             <span class="n">lnprob</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">0.5</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c"># If it&#39;s negative assume that it&#39;s the true log-posterior</span>
-            <span class="c"># probability.</span>
-            <span class="k">pass</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;float_behaviour must be either &#39;posterior&#39; or&quot;</span>
+                             <span class="s">&quot; &#39;chi2&#39; &quot;</span> <span class="o">+</span> <span class="n">float_behavior</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">lnprob</span>
 

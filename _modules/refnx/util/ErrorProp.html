@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.util.ErrorProp &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.util.ErrorProp &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="../../../index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -41,8 +41,13 @@
   <h1>Source code for refnx.util.ErrorProp</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A simple propagation of uncertainty module.</span>
+<span class="sd"># http://en.wikipedia.org/wiki/Propagation_of_uncertainty</span>
 
-<span class="c"># http://en.wikipedia.org/wiki/Propagation_of_uncertainty</span>
+<span class="sd">For more sophisticated handling of uncertainties use the `uncertainties`</span>
+<span class="sd">package.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="EPadd"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.ErrorProp.EPadd">[docs]</a><span class="k">def</span> <span class="nf">EPadd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">da</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>

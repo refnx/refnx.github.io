@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.analysis package &mdash; refnx 0.0.1 documentation</title>
+    <title>refnx.analysis package &mdash; refnx 0.0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.1 documentation" href="index.html" />
+    <link rel="top" title="refnx 0.0.3 documentation" href="index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -48,7 +48,7 @@
 <p>&#64;author: Andrew Nelson</p>
 <dl class="class">
 <dt id="refnx.analysis.curvefitter.CurveFitter">
-<em class="property">class </em><code class="descclassname">refnx.analysis.curvefitter.</code><code class="descname">CurveFitter</code><span class="sig-paren">(</span><em>fitfunc</em>, <em>xdata</em>, <em>ydata</em>, <em>params</em>, <em>edata=None</em>, <em>mask=None</em>, <em>fcn_args=()</em>, <em>fcn_kws=None</em>, <em>kws=None</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.analysis.curvefitter.</code><code class="descname">CurveFitter</code><span class="sig-paren">(</span><em>fitfunc</em>, <em>data</em>, <em>params</em>, <em>mask=None</em>, <em>fcn_args=()</em>, <em>fcn_kws=None</em>, <em>kws=None</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lmfit.minimizer.Minimizer</span></code></p>
 <p>A curvefitting class that extends <cite>lmfit.Minimize</cite></p>
 <dl class="docutils">
@@ -56,17 +56,34 @@
 <dd>Function calculating the generative model for the fit.  Should have
 the signature: <code class="docutils literal"><span class="pre">fitfunc(x,</span> <span class="pre">params,</span> <span class="pre">*fcn_args,</span> <span class="pre">**fcn_kws)</span></code>. You
 can also supply a <code class="docutils literal"><span class="pre">FitFunction</span></code> instance.</dd>
-<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd>The independent variables</dd>
-<dt>y <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd>The dependent (observed) variable</dd>
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">sequence, refnx.dataset.Data1D instance, str or file-like object</span></dt>
+<dd><p class="first">A sequence containing the data to be analysed.
+If <cite>data</cite> is a sequence then:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">data[0] - the independent variable (x-data)</p>
+</li>
+<li><p class="first">data[1] - the dependent (observed) variable (y-data)</p>
+</li>
+<li><dl class="first docutils">
+<dt>data[2] - measured uncertainty in the dependent variable, expressed</dt>
+<dd><p class="first last">as a standard deviation.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Only data[0] and data[1] are required, data[2] is optional. If data[2]
+is not specified then the measured uncertainty is set to unity.</p>
+<p class="last"><cite>data</cite> can also be a Data1D instance containing the data.
+If <cite>data</cite> is a string, or file-like object then the string or file-like
+object refers to a file containing the data. The data will be loaded
+through the <cite>refnx.dataset.Data1D</cite> constructor.</p>
+</dd>
 <dt>params <span class="classifier-delimiter">:</span> <span class="classifier">lmfit.Parameters instance</span></dt>
 <dd>Specifies the parameter set for the fit</dd>
-<dt>edata <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray, optional</span></dt>
-<dd>The measured uncertainty in the dependent variable, expressed as
-sd.  If this array is not specified, then edata is set to unity.</dd>
 <dt>mask <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray, optional</span></dt>
-<dd>A boolean array with the same shape as y.  If mask is True
+<dd>A boolean array with the same shape as <cite>y</cite>.  If <cite>mask is True</cite>
 then that point is excluded from the residuals calculation.</dd>
 <dt>fcn_args <span class="classifier-delimiter">:</span> <span class="classifier">tuple, optional</span></dt>
 <dd>Extra parameters required to fully specify fitfunc.</dd>
@@ -123,9 +140,9 @@ One of:</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>success</strong> : bool</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>result</strong> : lmfit.MinimizerResult</p>
 <blockquote class="last">
-<div><p>Whether the fit succeeded.</p>
+<div><p>Result object.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -135,7 +152,7 @@ One of:</p>
 
 <dl class="method">
 <dt id="refnx.analysis.curvefitter.CurveFitter.model">
-<code class="descname">model</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">model</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the model. This is a convenience method. Over-riding it will
 not change a fit.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -160,7 +177,7 @@ not change a fit.</p>
 
 <dl class="method">
 <dt id="refnx.analysis.curvefitter.CurveFitter.residuals">
-<code class="descname">residuals</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.residuals" title="Permalink to this definition">¶</a></dt>
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.residuals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the difference between the data and the model. Also known as
 the objective function. This is a convenience method. Over-riding it
 will not change a fit.</p>
@@ -257,11 +274,31 @@ constructed.</p>
 <em class="property">class </em><code class="descclassname">refnx.analysis.curvefitter.</code><code class="descname">GlobalFitter</code><span class="sig-paren">(</span><em>fitters</em>, <em>constraints=()</em>, <em>kws=None</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.GlobalFitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refnx.analysis.curvefitter.CurveFitter" title="refnx.analysis.curvefitter.CurveFitter"><code class="xref py py-class docutils literal"><span class="pre">refnx.analysis.curvefitter.CurveFitter</span></code></a></p>
 <p>Simultaneous curvefitting of multiple datasets</p>
+<dl class="docutils">
+<dt>fitters: sequence of CurveFitter instances</dt>
+<dd>Contains all the fitters and fitfunctions for the global fit.</dd>
+<dt>constraints: str sequence, optional</dt>
+<dd>Of the type &#8216;dN:param_name = constraint&#8217;. Sets a constraint
+expression for the parameter <cite>param_name</cite> in dataset N. The
+constraint &#8216;d2:scale = 2 * d0:back&#8217; constrains the <cite>scale</cite>
+parameter in dataset 2 to be twice the <cite>back</cite> parameter in
+dataset 0.
+<strong>Important</strong> For a parameter (<cite>d2:scale</cite> in this example) to be
+constrained by this mechanism it must not have any pre-existing
+constraints within its individual fitter. If there are pre-existing
+constraints then those are honoured, and constraints specified here are
+ignored.</dd>
+<dt>kws: dict, optional</dt>
+<dd>Extra minimization keywords to be passed to the minimizer of choice.</dd>
+<dt>callback: callable, optional</dt>
+<dd>Function called at each step of the minimization. Has the signature
+<code class="docutils literal"><span class="pre">callback(params,</span> <span class="pre">iter,</span> <span class="pre">resid)</span></code></dd>
+</dl>
 <p class="rubric">Attributes</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="refnx.analysis.curvefitter.GlobalFitter.model">
-<code class="descname">model</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.GlobalFitter.model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">model</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.GlobalFitter.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the model. This method is provided for convenience purposes
 and is not used during a fit.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -286,7 +323,7 @@ and is not used during a fit.</p>
 
 <dl class="method">
 <dt id="refnx.analysis.curvefitter.GlobalFitter.residuals">
-<code class="descname">residuals</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.GlobalFitter.residuals" title="Permalink to this definition">¶</a></dt>
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.GlobalFitter.residuals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the difference between the data and the model. Also known as
 the objective function.  This is a convenience method. Over-riding it
 does not change the fitting process.
@@ -393,7 +430,7 @@ each parameter</p>
 <dt id="refnx.analysis.curvefitter.values">
 <code class="descclassname">refnx.analysis.curvefitter.</code><code class="descname">values</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.values" title="Permalink to this definition">¶</a></dt>
 <dd><p>A convenience function that takes an lmfit.Parameters instance and returns
-the the values</p>
+the values</p>
 </dd></dl>
 
 <dl class="function">
@@ -488,6 +525,40 @@ ignored if using the pure python calculator, <code class="docutils literal"><spa
 <div><p>Contains the parameters that are required for reflectivity
 calculation.</p>
 </div></blockquote>
+<p><strong>kwds[&#8216;dqvals&#8217;] - float or np.ndarray, optional</strong></p>
+<blockquote>
+<div><p>If dqvals is a float, then a constant dQ/Q resolution smearing is
+employed.  For 5% resolution smearing supply 5.
+If <cite>dqvals</cite> is the same shape as q, then the array contains the
+FWHM of a Gaussian approximated resolution kernel. Point by point
+resolution smearing is employed.  Use this option if dQ/Q varies
+across your dataset.
+If <cite>dqvals.ndim == q.ndim + 2</cite> and
+<cite>q.shape == dqvals[..., -3].shape</cite> then an individual resolution
+kernel is applied to each measurement point.  This resolution kernel
+is a probability distribution function (PDF). <cite>dqvals</cite> will have the
+shape (qvals.shape, M, 2).  There are <cite>M</cite> points in the kernel.
+<cite>dqvals[..., 0]</cite> holds the q values for the kernel, <cite>dqvals[..., 1]</cite>
+gives the corresponding probability.</p>
+</div></blockquote>
+<p><strong>kwds[&#8216;quad_order&#8217;] - int, optional</strong></p>
+<blockquote>
+<div><p>the order of the Gaussian quadrature polynomial for doing the
+resolution smearing. default = 17. Don&#8217;t choose less than 13. If
+quad_order == &#8216;ultimate&#8217; then adaptive quadrature is used. Adaptive
+quadrature will always work, but takes a _long_ time (2 or 3 orders
+of magnitude longer). Fixed quadrature will always take a lot less
+time. BUT it won&#8217;t necessarily work across all samples. For example,
+13 points may be fine for a thin layer, but will be atrocious at
+describing a multilayer with bragg peaks.</p>
+</div></blockquote>
+<p><strong>kwds[&#8216;parallel&#8217;]: bool, optional</strong></p>
+<blockquote>
+<div><p>Do you want to calculate in parallel? This option is only
+applicable if you are using the <code class="docutils literal"><span class="pre">_creflect</span></code> module. The option is
+ignored if using the pure python calculator, <code class="docutils literal"><span class="pre">_reflect</span></code>. The
+default is <cite>True</cite>.</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>yvals</strong> : np.ndarray</p>
@@ -504,7 +575,7 @@ reflectivity(x, parameters, <a href="#id1"><span class="problematic" id="id2">*<
 <dl class="staticmethod">
 <dt id="refnx.analysis.reflect.ReflectivityFitFunction.parameter_names">
 <em class="property">static </em><code class="descname">parameter_names</code><span class="sig-paren">(</span><em>nparams=8</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#ReflectivityFitFunction.parameter_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.ReflectivityFitFunction.parameter_names" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parameter names for a default reflecitivty calculation</p>
+<dd><p>Parameter names for a default reflectivity calculation</p>
 </dd></dl>
 
 <dl class="method">
@@ -638,8 +709,8 @@ the pure python calculator, <code class="docutils literal"><span class="pre">_re
 </dd></dl>
 
 <dl class="function">
-<dt id="refnx.analysis.reflect.convert_coefs_to_layer_format">
-<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">convert_coefs_to_layer_format</code><span class="sig-paren">(</span><em>coefs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#convert_coefs_to_layer_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.convert_coefs_to_layer_format" title="Permalink to this definition">¶</a></dt>
+<dt id="refnx.analysis.reflect.coefs_to_layer">
+<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">coefs_to_layer</code><span class="sig-paren">(</span><em>coefs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#coefs_to_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.coefs_to_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts &#8216;coefs&#8217; format array to a &#8216;layer&#8217; format array .
 The &#8216;layer&#8217; format is used by the <cite>abeles</cite> function, the &#8216;coefs&#8217; format
 is used by the <cite>reflectivity</cite> function.
@@ -694,8 +765,20 @@ vector form is required for fitting purposes.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="refnx.analysis.reflect.convert_layer_format_to_coefs">
-<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">convert_layer_format_to_coefs</code><span class="sig-paren">(</span><em>layers</em>, <em>scale=1</em>, <em>bkg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#convert_layer_format_to_coefs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.convert_layer_format_to_coefs" title="Permalink to this definition">¶</a></dt>
+<dt id="refnx.analysis.reflect.gauss_legendre">
+<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">gauss_legendre</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#gauss_legendre"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.gauss_legendre" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="refnx.analysis.reflect.is_proper_abeles_input">
+<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">is_proper_abeles_input</code><span class="sig-paren">(</span><em>coefs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#is_proper_abeles_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.is_proper_abeles_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test to see if the coefs array is suitable input for the <cite>reflectivity</cite>
+function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.analysis.reflect.layer_to_coefs">
+<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">layer_to_coefs</code><span class="sig-paren">(</span><em>layers</em>, <em>scale=1</em>, <em>bkg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#layer_to_coefs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.layer_to_coefs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts &#8216;layer&#8217; format array to a &#8216;coefs&#8217; format array .
 The &#8216;layer&#8217; format is used by the <cite>abeles</cite> function, the &#8216;coefs&#8217; format
 is used by the <cite>reflectivity</cite> function.
@@ -747,18 +830,6 @@ vector form is required for fitting purposes.</p>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="refnx.analysis.reflect.gauss_legendre">
-<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">gauss_legendre</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#gauss_legendre"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.gauss_legendre" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="refnx.analysis.reflect.is_proper_abeles_input">
-<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">is_proper_abeles_input</code><span class="sig-paren">(</span><em>coefs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#is_proper_abeles_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.is_proper_abeles_input" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test to see if the coefs array is suitable input for the <cite>reflectivity</cite>
-function</p>
 </dd></dl>
 
 <dl class="function">
@@ -838,22 +909,22 @@ default is <cite>True</cite>.</p>
 
 <dl class="function">
 <dt id="refnx.analysis.reflect.sld_profile">
-<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">sld_profile</code><span class="sig-paren">(</span><em>coefs</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#sld_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.sld_profile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">refnx.analysis.reflect.</code><code class="descname">sld_profile</code><span class="sig-paren">(</span><em>z</em>, <em>coefs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#sld_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.reflect.sld_profile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates an SLD profile, as a function of distance through the
 interface.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>coefs</strong> : np.ndarray</p>
-<blockquote>
-<div><p>The reflectivity model parameters in &#8216;layer&#8217; form. (See
-<cite>reflectivity</cite>)</p>
-</div></blockquote>
-<p><strong>z</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>z</strong> : float</p>
 <blockquote>
 <div><p>Interfacial distance (Angstrom) measured from interface between the
 fronting medium and the first layer.</p>
+</div></blockquote>
+<p><strong>coefs</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The reflectivity model parameters in &#8216;layer&#8217; form. (See
+<cite>reflectivity</cite>)</p>
 </div></blockquote>
 </td>
 </tr>
@@ -874,7 +945,7 @@ fronting medium and the first layer.</p>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-refnx.analysis" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="refnx.analysis.CurveFitter">
-<em class="property">class </em><code class="descclassname">refnx.analysis.</code><code class="descname">CurveFitter</code><span class="sig-paren">(</span><em>fitfunc</em>, <em>xdata</em>, <em>ydata</em>, <em>params</em>, <em>edata=None</em>, <em>mask=None</em>, <em>fcn_args=()</em>, <em>fcn_kws=None</em>, <em>kws=None</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.analysis.</code><code class="descname">CurveFitter</code><span class="sig-paren">(</span><em>fitfunc</em>, <em>data</em>, <em>params</em>, <em>mask=None</em>, <em>fcn_args=()</em>, <em>fcn_kws=None</em>, <em>kws=None</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lmfit.minimizer.Minimizer</span></code></p>
 <p>A curvefitting class that extends <cite>lmfit.Minimize</cite></p>
 <dl class="docutils">
@@ -882,17 +953,34 @@ fronting medium and the first layer.</p>
 <dd>Function calculating the generative model for the fit.  Should have
 the signature: <code class="docutils literal"><span class="pre">fitfunc(x,</span> <span class="pre">params,</span> <span class="pre">*fcn_args,</span> <span class="pre">**fcn_kws)</span></code>. You
 can also supply a <code class="docutils literal"><span class="pre">FitFunction</span></code> instance.</dd>
-<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd>The independent variables</dd>
-<dt>y <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd>The dependent (observed) variable</dd>
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">sequence, refnx.dataset.Data1D instance, str or file-like object</span></dt>
+<dd><p class="first">A sequence containing the data to be analysed.
+If <cite>data</cite> is a sequence then:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">data[0] - the independent variable (x-data)</p>
+</li>
+<li><p class="first">data[1] - the dependent (observed) variable (y-data)</p>
+</li>
+<li><dl class="first docutils">
+<dt>data[2] - measured uncertainty in the dependent variable, expressed</dt>
+<dd><p class="first last">as a standard deviation.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Only data[0] and data[1] are required, data[2] is optional. If data[2]
+is not specified then the measured uncertainty is set to unity.</p>
+<p class="last"><cite>data</cite> can also be a Data1D instance containing the data.
+If <cite>data</cite> is a string, or file-like object then the string or file-like
+object refers to a file containing the data. The data will be loaded
+through the <cite>refnx.dataset.Data1D</cite> constructor.</p>
+</dd>
 <dt>params <span class="classifier-delimiter">:</span> <span class="classifier">lmfit.Parameters instance</span></dt>
 <dd>Specifies the parameter set for the fit</dd>
-<dt>edata <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray, optional</span></dt>
-<dd>The measured uncertainty in the dependent variable, expressed as
-sd.  If this array is not specified, then edata is set to unity.</dd>
 <dt>mask <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray, optional</span></dt>
-<dd>A boolean array with the same shape as y.  If mask is True
+<dd>A boolean array with the same shape as <cite>y</cite>.  If <cite>mask is True</cite>
 then that point is excluded from the residuals calculation.</dd>
 <dt>fcn_args <span class="classifier-delimiter">:</span> <span class="classifier">tuple, optional</span></dt>
 <dd>Extra parameters required to fully specify fitfunc.</dd>
@@ -949,9 +1037,9 @@ One of:</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>success</strong> : bool</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>result</strong> : lmfit.MinimizerResult</p>
 <blockquote class="last">
-<div><p>Whether the fit succeeded.</p>
+<div><p>Result object.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -961,7 +1049,7 @@ One of:</p>
 
 <dl class="method">
 <dt id="refnx.analysis.CurveFitter.model">
-<code class="descname">model</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">model</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the model. This is a convenience method. Over-riding it will
 not change a fit.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -986,7 +1074,7 @@ not change a fit.</p>
 
 <dl class="method">
 <dt id="refnx.analysis.CurveFitter.residuals">
-<code class="descname">residuals</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.residuals" title="Permalink to this definition">¶</a></dt>
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.residuals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the difference between the data and the model. Also known as
 the objective function. This is a convenience method. Over-riding it
 will not change a fit.</p>
@@ -1009,6 +1097,217 @@ will not change a fit.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="refnx.analysis.Data1D">
+<em class="property">class </em><code class="descclassname">refnx.analysis.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A basic representation of a 1D dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : str, file-like or tuple of np.ndarray, optional</p>
+<blockquote class="last">
+<div><p><cite>data</cite> can be a string or file-like object referring to a File to load
+the dataset from.</p>
+<p>Alternatively it is a tuple containing the data from which the dataset
+will be constructed. The tuple should have between 2 and 4 members.</p>
+<blockquote>
+<div><p>data[0] - x
+data[1] - y
+data[2] - standard deviation of y, y_sd
+data[3] - standard deviation of x, x_sd</p>
+</div></blockquote>
+<p><cite>data</cite> must be at least two long, <cite>x</cite> and <cite>y</cite>.
+If the tuple is at least 3 long then the third member is <cite>y_sd</cite>.
+If the tuple is 4 long then the fourth member is <cite>x_sd</cite>.
+All arrays must have the same shape.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="6%" />
+<col width="94%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>x</td>
+<td>(np.ndarray) x data</td>
+</tr>
+<tr class="row-even"><td>y</td>
+<td>(np.ndarray) y data</td>
+</tr>
+<tr class="row-odd"><td>y_sd</td>
+<td>(np.ndarray) uncertainties (1 standard deviation) on the y data</td>
+</tr>
+<tr class="row-even"><td>x_sd</td>
+<td>(np.ndarray) uncertainties on the x data</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="refnx.analysis.Data1D.add_data">
+<code class="descname">add_data</code><span class="sig-paren">(</span><em>data_tuple</em>, <em>requires_splice=False</em>, <em>trim_trailing=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.add_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.add_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds more data to the dataset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data_tuple</strong> : tuple</p>
+<blockquote>
+<div><p>2 to 4 member tuple containing the (x, y, y_sd, x_sd) data to add
+to the dataset. <cite>y_sd</cite> and <cite>x_sd</cite> are optional.</p>
+</div></blockquote>
+<p><strong>requires_splice</strong> : bool, optional</p>
+<blockquote>
+<div><p>When the new data is added to the dataset do you want to scale it
+vertically so that it overlaps with the existing data? <cite>y</cite> and
+<cite>y_sd</cite> in <cite>data_tuple</cite> are both multiplied by the scaling factor.</p>
+</div></blockquote>
+<p><strong>trim_trailing</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>When the new data is concatenated do you want to remove points from
+the existing data that are in the overlap region? This might be
+done because the datapoints in the <cite>data_tuple</cite> you are adding have
+have lower <cite>y_sd</cite> than the preceding data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.analysis.Data1D.data">
+<code class="descname">data</code><a class="headerlink" href="#refnx.analysis.Data1D.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The data contained within this object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>data_tuple</strong> : tuple</p>
+<blockquote class="last">
+<div><p>4-tuple containing the (x, y, y_sd, x_sd) data</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.analysis.Data1D.finite_data">
+<code class="descname">finite_data</code><a class="headerlink" href="#refnx.analysis.Data1D.finite_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataTuple</strong> : tuple</p>
+<blockquote class="last">
+<div><p>4-tuple containing the (x, y, y_sd, x_sd) datapoints that are
+finite.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.analysis.Data1D.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a dataset from file. Must be 2 to 4 column ASCII.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-handle or string</p>
+<blockquote class="last">
+<div><p>File to load the dataset from.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.analysis.Data1D.npoints">
+<code class="descname">npoints</code><a class="headerlink" href="#refnx.analysis.Data1D.npoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of points in the dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>npoints</strong> : int</p>
+<blockquote class="last">
+<div><p>How many points in the dataset</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.analysis.Data1D.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refreshes a previously loaded dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.analysis.Data1D.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the data to file. Saves the data as 4 column ASCII.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-handle or string</p>
+<blockquote class="last">
+<div><p>File to save the dataset to.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.analysis.Data1D.save_fit">
+<code class="descname">save_fit</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.save_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.save_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="refnx.analysis.Data1D.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>scalefactor=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales the y and y_sd data by dividing by <cite>scalefactor</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scalefactor</strong> : float</p>
+<blockquote class="last">
+<div><p>The scalefactor to divide by.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="refnx.analysis.Data1D.sort">
+<code class="descname">sort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Data1D.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the data in ascending order</p>
 </dd></dl>
 
 </dd></dl>
@@ -1083,11 +1382,31 @@ constructed.</p>
 <em class="property">class </em><code class="descclassname">refnx.analysis.</code><code class="descname">GlobalFitter</code><span class="sig-paren">(</span><em>fitters</em>, <em>constraints=()</em>, <em>kws=None</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.GlobalFitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refnx.analysis.curvefitter.CurveFitter" title="refnx.analysis.curvefitter.CurveFitter"><code class="xref py py-class docutils literal"><span class="pre">refnx.analysis.curvefitter.CurveFitter</span></code></a></p>
 <p>Simultaneous curvefitting of multiple datasets</p>
+<dl class="docutils">
+<dt>fitters: sequence of CurveFitter instances</dt>
+<dd>Contains all the fitters and fitfunctions for the global fit.</dd>
+<dt>constraints: str sequence, optional</dt>
+<dd>Of the type &#8216;dN:param_name = constraint&#8217;. Sets a constraint
+expression for the parameter <cite>param_name</cite> in dataset N. The
+constraint &#8216;d2:scale = 2 * d0:back&#8217; constrains the <cite>scale</cite>
+parameter in dataset 2 to be twice the <cite>back</cite> parameter in
+dataset 0.
+<strong>Important</strong> For a parameter (<cite>d2:scale</cite> in this example) to be
+constrained by this mechanism it must not have any pre-existing
+constraints within its individual fitter. If there are pre-existing
+constraints then those are honoured, and constraints specified here are
+ignored.</dd>
+<dt>kws: dict, optional</dt>
+<dd>Extra minimization keywords to be passed to the minimizer of choice.</dd>
+<dt>callback: callable, optional</dt>
+<dd>Function called at each step of the minimization. Has the signature
+<code class="docutils literal"><span class="pre">callback(params,</span> <span class="pre">iter,</span> <span class="pre">resid)</span></code></dd>
+</dl>
 <p class="rubric">Attributes</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="refnx.analysis.GlobalFitter.model">
-<code class="descname">model</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.GlobalFitter.model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">model</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.GlobalFitter.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the model. This method is provided for convenience purposes
 and is not used during a fit.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1112,7 +1431,7 @@ and is not used during a fit.</p>
 
 <dl class="method">
 <dt id="refnx.analysis.GlobalFitter.residuals">
-<code class="descname">residuals</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.GlobalFitter.residuals" title="Permalink to this definition">¶</a></dt>
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#GlobalFitter.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.GlobalFitter.residuals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the difference between the data and the model. Also known as
 the objective function.  This is a convenience method. Over-riding it
 does not change the fitting process.
@@ -1148,7 +1467,7 @@ residuals = (fitfunc - y) / edata</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="refnx.analysis.Minimizer.emcee">
-<code class="descname">emcee</code><span class="sig-paren">(</span><em>params=None</em>, <em>steps=1000</em>, <em>nwalkers=100</em>, <em>burn=0</em>, <em>thin=1</em>, <em>ntemps=1</em>, <em>pos=None</em>, <em>reuse_sampler=False</em>, <em>workers=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lmfit/minimizer.html#Minimizer.emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Minimizer.emcee" title="Permalink to this definition">¶</a></dt>
+<code class="descname">emcee</code><span class="sig-paren">(</span><em>params=None</em>, <em>steps=1000</em>, <em>nwalkers=100</em>, <em>burn=0</em>, <em>thin=1</em>, <em>ntemps=1</em>, <em>pos=None</em>, <em>reuse_sampler=False</em>, <em>workers=1</em>, <em>float_behavior='posterior'</em>, <em>is_weighted=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lmfit/minimizer.html#Minimizer.emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Minimizer.emcee" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div>Bayesian sampling of the posterior distribution for the parameters
 using the <cite>emcee</cite> Markov Chain Monte Carlo package. The method assumes
@@ -1192,15 +1511,17 @@ the other walkers in the ensemble.&#8221; - from the <cite>emcee</cite> webpage.
 then <cite>pos.shape</cite> should be <cite>(nwalkers, nvarys)</cite>. Otherwise,
 <cite>(ntemps, nwalkers, nvarys)</cite>. You can also initialise using a
 previous chain that had the same <cite>ntemps</cite>, <cite>nwalkers</cite> and
-<cite>nvarys</cite>.</p>
+<cite>nvarys</cite>. Note that <cite>nvarys</cite> may be one larger than you expect it
+to be if your <cite>userfcn</cite> returns an array and <cite>is_weighted is
+False</cite>.</p>
 </dd>
 <dt>reuse_sampler <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
 <dd><p class="first last">If you have already run <cite>emcee</cite> on a given <cite>Minimizer</cite> object then
-it possesses an internal sampler attribute. You can continue to
+it possesses an internal <code class="docutils literal"><span class="pre">sampler</span></code> attribute. You can continue to
 draw from the same sampler (retaining the chain history) if you set
 this option to <cite>True</cite>. Otherwise a new sampler is created. The
-<cite>nwalkers</cite>, <cite>ntemps</cite> and <cite>params</cite> keywords are ignored with this
-option.
+<cite>nwalkers</cite>, <cite>ntemps</cite>, <cite>pos</cite>, and <cite>params</cite> keywords are ignored with
+this option.
 <strong>Important</strong>: the Parameters used to create the sampler must not
 change in-between calls to <cite>emcee</cite>. Alteration of Parameters
 would include changed <code class="docutils literal"><span class="pre">min</span></code>, <code class="docutils literal"><span class="pre">max</span></code>, <code class="docutils literal"><span class="pre">vary</span></code> and <code class="docutils literal"><span class="pre">expr</span></code>
@@ -1211,7 +1532,7 @@ to <cite>emcee</cite>.</p>
 <dt>workers <span class="classifier-delimiter">:</span> <span class="classifier">Pool-like or int, optional</span></dt>
 <dd><p class="first last">For parallelization of sampling.  It can be any Pool-like object
 with a map method that follows the same calling sequence as the
-built-in map function. If int is given as the argument, then a
+built-in <cite>map</cite> function. If int is given as the argument, then a
 multiprocessing-based pool is spawned internally with the
 corresponding number of parallel processes. &#8216;mpi4py&#8217;-based
 parallelization and &#8216;joblib&#8217;-based parallelization pools can also
@@ -1219,6 +1540,34 @@ be used here. <strong>Note</strong>: because of multiprocessing overhead it may
 only be worth parallelising if the objective function is expensive
 to calculate, or if there are a large number of objective
 evaluations per step (<cite>ntemps * nwalkers * nvarys</cite>).</p>
+</dd>
+<dt>float_behavior <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd><p class="first">Specifies meaning of the objective function output if it returns a
+float. One of:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>&#8216;posterior&#8217; - objective function returns a log-posterior</dt>
+<dd><p class="first last">probability</p>
+</dd>
+</dl>
+<p>&#8216;chi2&#8217; - objective function returns <span class="math">\(\chi^2\)</span>.</p>
+</div></blockquote>
+<p class="last">See Notes for further details.</p>
+</dd>
+<dt>is_weighted <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd><p class="first last">Has your objective function been weighted by measurement
+uncertainties? If <cite>is_weighted is True</cite> then your objective
+function is assumed to return residuals that have been divided by
+the true measurement uncertainty <cite>(data - model) / sigma</cite>. If
+<cite>is_weighted is False</cite> then the objective function is assumed to
+return unweighted residuals, <cite>data - model</cite>. In this case <cite>emcee</cite>
+will employ a positive measurement uncertainty during the sampling.
+This measurement uncertainty will be present in the output params
+and output chain with the name <cite>__lnsigma</cite>. A side effect of this
+is that you cannot use this parameter name yourself.
+<strong>Important</strong> this parameter only has any effect if your objective
+function returns an array. If your objective function returns a
+float, then this parameter is ignored. See Notes for more details.</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -1251,28 +1600,35 @@ ight)^2}{s_n^2}+ln (2pi s_n^2)
 ight]</p>
 <blockquote>
 <div><p>The first summand in the square brackets represents the residual for a
-given datapoint. This term represents <span class="math">\(\chi^2\)</span> when summed over
-all datapoints.
-The objective function used to create <cite>lmfit.Minimizer</cite> should return
-<span class="math">\(\ln p(F_{true} | D)\)</span>. However, since the in-built log-prior term
-is zero, the objective function can just return the log-likelihood
-(unless you wish to create a non-uniform prior). If a negative float
-value is returned by the objective function it&#8217;s assumed to be
-<span class="math">\(\ln p(F_{true} | D)\)</span>, the posterior probability. If a positive
-float value is returned then the value is assumed to be <span class="math">\(\chi^2\)</span>.
-The posterior probability is then calculated as <span class="math">\(-0.5 * \chi^2\)</span>.</p>
-<p>However, the default behaviour of most objective functions is to return
-a vector of residuals. Therefore, if your objective function, <cite>fcn</cite>,
-returns a vector, <cite>res</cite>, then the vector is assumed to contain the
-residuals. The log-likelihood (and log-posterior probability) is then
-calculated as: <cite>-0.5 * np.sum(res **2)</cite>. However, this ignores the
-second summand in the square brackets. Consequently, in order to
-calculate a fully correct log-posterior probability value your objective
-function should return a single value.
-Marginalisation over a nuisance parameter (such as incorrectly
-estimated data uncertainties, <cite>s_n</cite>) can be achieved by including such
-parameters in a <cite>Parameters</cite> instance and suitable inclusion in the
-objective function.</p>
+given datapoint (<span class="math">\(g\)</span> being the generative model) . This term
+represents <span class="math">\(\chi^2\)</span> when summed over all datapoints.
+Ideally the objective function used to create <cite>lmfit.Minimizer</cite> should
+return the log-posterior probability, <span class="math">\(\ln p(F_{true} | D)\)</span>.
+However, since the in-built log-prior term is zero, the objective
+function can also just return the log-likelihood, unless you wish to
+create a non-uniform prior.</p>
+<p>If a float value is returned by the objective function then this value
+is assumed by default to be the log-posterior probability, i.e.
+<cite>float_behavior is &#8216;posterior&#8217;</cite>. If your objective function returns
+<span class="math">\(\chi^2\)</span>, then you should use a value of <cite>&#8216;chi2&#8217;</cite> for
+<cite>float_behavior</cite>. <cite>emcee</cite> will then multiply your <span class="math">\(\chi^2\)</span> value
+by -0.5 to obtain the posterior probability.</p>
+<p>However, the default behaviour of many objective functions is to return
+a vector of (possibly weighted) residuals. Therefore, if your objective
+function returns a vector, <cite>res</cite>, then the vector is assumed to contain
+the residuals. If <cite>is_weighted is True</cite> then your residuals are assumed
+to be correctly weighted by the standard deviation of the data points
+(<cite>res = (data - model) / sigma</cite>) and the log-likelihood (and
+log-posterior probability) is calculated as: <cite>-0.5 * np.sum(res **2)</cite>.
+This ignores the second summand in the square brackets. Consequently,
+in order to calculate a fully correct log-posterior probability value
+your objective function should return a single value. If
+<cite>is_weighted is False</cite> then the data uncertainty, <cite>s_n</cite>, will be
+treated as a nuisance parameter and will be marginalised out. This is
+achieved by employing a strictly positive uncertainty
+(homoscedasticity) for each data point, <span class="math">\(s_n = exp(__lnsigma)\)</span>.
+<cite>__lnsigma</cite> will be present in <cite>MinimizerResult.params</cite>, as well as
+<cite>Minimizer.chain</cite>, <cite>nvarys</cite> will also be increased by one.</p>
 </div></blockquote>
 </dd></dl>
 
@@ -1731,6 +2087,40 @@ ignored if using the pure python calculator, <code class="docutils literal"><spa
 <div><p>Contains the parameters that are required for reflectivity
 calculation.</p>
 </div></blockquote>
+<p><strong>kwds[&#8216;dqvals&#8217;] - float or np.ndarray, optional</strong></p>
+<blockquote>
+<div><p>If dqvals is a float, then a constant dQ/Q resolution smearing is
+employed.  For 5% resolution smearing supply 5.
+If <cite>dqvals</cite> is the same shape as q, then the array contains the
+FWHM of a Gaussian approximated resolution kernel. Point by point
+resolution smearing is employed.  Use this option if dQ/Q varies
+across your dataset.
+If <cite>dqvals.ndim == q.ndim + 2</cite> and
+<cite>q.shape == dqvals[..., -3].shape</cite> then an individual resolution
+kernel is applied to each measurement point.  This resolution kernel
+is a probability distribution function (PDF). <cite>dqvals</cite> will have the
+shape (qvals.shape, M, 2).  There are <cite>M</cite> points in the kernel.
+<cite>dqvals[..., 0]</cite> holds the q values for the kernel, <cite>dqvals[..., 1]</cite>
+gives the corresponding probability.</p>
+</div></blockquote>
+<p><strong>kwds[&#8216;quad_order&#8217;] - int, optional</strong></p>
+<blockquote>
+<div><p>the order of the Gaussian quadrature polynomial for doing the
+resolution smearing. default = 17. Don&#8217;t choose less than 13. If
+quad_order == &#8216;ultimate&#8217; then adaptive quadrature is used. Adaptive
+quadrature will always work, but takes a _long_ time (2 or 3 orders
+of magnitude longer). Fixed quadrature will always take a lot less
+time. BUT it won&#8217;t necessarily work across all samples. For example,
+13 points may be fine for a thin layer, but will be atrocious at
+describing a multilayer with bragg peaks.</p>
+</div></blockquote>
+<p><strong>kwds[&#8216;parallel&#8217;]: bool, optional</strong></p>
+<blockquote>
+<div><p>Do you want to calculate in parallel? This option is only
+applicable if you are using the <code class="docutils literal"><span class="pre">_creflect</span></code> module. The option is
+ignored if using the pure python calculator, <code class="docutils literal"><span class="pre">_reflect</span></code>. The
+default is <cite>True</cite>.</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>yvals</strong> : np.ndarray</p>
@@ -1747,7 +2137,7 @@ reflectivity(x, parameters, <a href="#id5"><span class="problematic" id="id6">*<
 <dl class="staticmethod">
 <dt id="refnx.analysis.ReflectivityFitFunction.parameter_names">
 <em class="property">static </em><code class="descname">parameter_names</code><span class="sig-paren">(</span><em>nparams=8</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/reflect.html#ReflectivityFitFunction.parameter_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.ReflectivityFitFunction.parameter_names" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parameter names for a default reflecitivty calculation</p>
+<dd><p>Parameter names for a default reflectivity calculation</p>
 </dd></dl>
 
 <dl class="method">
@@ -2062,7 +2452,7 @@ each parameter</p>
 <dt id="refnx.analysis.values">
 <code class="descclassname">refnx.analysis.</code><code class="descname">values</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.values" title="Permalink to this definition">¶</a></dt>
 <dd><p>A convenience function that takes an lmfit.Parameters instance and returns
-the the values</p>
+the values</p>
 </dd></dl>
 
 <dl class="function">
