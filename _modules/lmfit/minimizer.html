@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lmfit.minimizer &mdash; refnx 0.0.3 documentation</title>
+    <title>lmfit.minimizer &mdash; refnx 0.0.4.dev0+679868c documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.3',
+        VERSION:     '0.0.4.dev0+679868c',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.3 documentation" href="../../index.html" />
+    <link rel="top" title="refnx 0.0.4.dev0+679868c documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   
@@ -59,6 +59,7 @@
 <span class="kn">from</span> <span class="nn">numpy.dual</span> <span class="kn">import</span> <span class="n">inv</span>
 <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">LinAlgError</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
 
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">leastsq</span> <span class="k">as</span> <span class="n">scipy_leastsq</span>
 
@@ -89,6 +90,14 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span> <span class="k">as</span> <span class="n">scipy_minimize</span>
     <span class="n">HAS_SCALAR_MIN</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c"># check for scipy.opitimize.least_squares</span>
+<span class="n">HAS_LEAST_SQUARES</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span>
+    <span class="n">HAS_LEAST_SQUARES</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
@@ -226,7 +235,8 @@
                   <span class="s">&quot;or set leastsq_kws[&#39;maxfev&#39;]  to increase this maximum.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userfcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">fcn_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fcn_kws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">iter_cb</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scale_covar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+                 <span class="n">iter_cb</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scale_covar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s">&#39;raise&#39;</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialization of the Minimzer class</span>
 
@@ -253,6 +263,14 @@
 <span class="sd">        scale_covar : bool, optional</span>
 <span class="sd">            Whether to automatically scale the covariance matrix (leastsq</span>
 <span class="sd">            only).</span>
+<span class="sd">        nan_policy : str, optional</span>
+<span class="sd">            Specifies action if `userfcn` (or a Jacobian) returns nan</span>
+<span class="sd">            values. One of:</span>
+
+<span class="sd">                &#39;raise&#39; - a `ValueError` is raised</span>
+<span class="sd">                &#39;propagate&#39; - the values returned from `userfcn` are un-altered</span>
+<span class="sd">                &#39;omit&#39; - the non-finite values are filtered.</span>
+
 <span class="sd">        kws : dict, optional</span>
 <span class="sd">            Options to pass to the minimizer being used.</span>
 
@@ -264,7 +282,9 @@
 <span class="sd">        fitting variables in the model. For the other methods, the return value</span>
 <span class="sd">        can either be a scalar or an array. If an array is returned, the sum of</span>
 <span class="sd">        squares of the array will be sent to the underlying fitting method,</span>
-<span class="sd">        effectively doing a least-squares optimization of the return values.</span>
+<span class="sd">        effectively doing a least-squares optimization of the return values. If</span>
+<span class="sd">        the objective function returns non-finite values then a `ValueError`</span>
+<span class="sd">        will be raised because the underlying solvers cannot deal with them.</span>
 
 <span class="sd">        A common use for the fcn_args and fcn_kwds would be to pass in other</span>
 <span class="sd">        data needed to calculate the residual, including such things as the</span>
@@ -298,6 +318,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jacfcn</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nan_policy</span> <span class="o">=</span> <span class="n">nan_policy</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -310,28 +331,51 @@
 
         <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 
-    <span class="k">def</span> <span class="nf">__residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fvars</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fvars</span><span class="p">,</span> <span class="n">apply_bounds_transformation</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Residual function used for least-squares fit.</span>
 <span class="sd">        With the new, candidate values of fvars (the fitting variables), this</span>
 <span class="sd">        evaluates all parameters, including setting bounds and evaluating</span>
 <span class="sd">        constraints, and then passes those to the user-supplied function to</span>
 <span class="sd">        calculate the residual.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        fvars : np.ndarray</span>
+<span class="sd">            Array of new parameter values suggested by the minimizer.</span>
+<span class="sd">        apply_bounds_transformation : bool, optional</span>
+<span class="sd">            If true, apply lmfits parameter transformation to constrain</span>
+<span class="sd">            parameters. This is needed for solvers without inbuilt support for</span>
+<span class="sd">            bounds.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -----------</span>
+<span class="sd">        residuals : np.ndarray</span>
+<span class="sd">             The evaluated function values for given fvars.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># set parameter values</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
         <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">params</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">,</span> <span class="n">fvars</span><span class="p">):</span>
-            <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">from_internal</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">apply_bounds_transformation</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">,</span> <span class="n">fvars</span><span class="p">):</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">from_internal</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">,</span> <span class="n">fvars</span><span class="p">):</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">params</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userfcn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">_nan_policy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nan_policy</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter_cb</span><span class="p">):</span>
             <span class="n">abort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_cb</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span>
                                  <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span> <span class="ow">or</span> <span class="n">abort</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">fvars</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
@@ -352,9 +396,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">pars</span><span class="o">.</span><span class="n">update_constraints</span><span class="p">()</span>
+
         <span class="c"># compute the jacobian for &quot;internal&quot; unbounded variables,</span>
-        <span class="c"># the rescale for bounded &quot;external&quot; variables.</span>
+        <span class="c"># then rescale for bounded &quot;external&quot; variables.</span>
         <span class="n">jac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacfcn</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">)</span>
+        <span class="n">jac</span> <span class="o">=</span> <span class="n">_nan_policy</span><span class="p">(</span><span class="n">jac</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nan_policy</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_deriv</span><span class="p">:</span>
             <span class="n">jac</span> <span class="o">=</span> <span class="p">(</span><span class="n">jac</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">*</span><span class="n">grad_scale</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -387,7 +434,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># determine which parameters are actually variables</span>
         <span class="c"># and which are defined expressions.</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">MinimizerResult</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">MinimizerResult</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
         <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
@@ -435,34 +483,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </div>
-    <span class="nd">@deprecate</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s">&#39;    Deprecated in lmfit 0.8.2, use scalar_minimize &#39;</span>
-                       <span class="s">&#39;and method=</span><span class="se">\&#39;</span><span class="s">L-BFGS-B</span><span class="se">\&#39;</span><span class="s"> instead&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">lbfgsb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Use l-bfgs-b minimization</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        kws : dict</span>
-<span class="sd">            Minimizer options to pass to the</span>
-<span class="sd">            scipy.optimize.lbfgsb.fmin_l_bfgs_b function.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;use scalar_minimize(method=&#39;L-BFGS-B&#39;)&quot;</span><span class="p">)</span>
-
-    <span class="nd">@deprecate</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s">&#39;    Deprecated in lmfit 0.8.2, use scalar_minimize &#39;</span>
-                       <span class="s">&#39;and method=</span><span class="se">\&#39;</span><span class="s">Nelder-Mead</span><span class="se">\&#39;</span><span class="s"> instead&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">fmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Use Nelder-Mead (simplex) minimization</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        kws : dict</span>
-<span class="sd">            Minimizer options to pass to the scipy.optimize.fmin minimizer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;use scalar_minimize(method=&#39;Nelder-Mead&#39;)&quot;</span><span class="p">)</span>
-
 <div class="viewcode-block" id="Minimizer.scalar_minimize"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Minimizer.scalar_minimize">[docs]</a>    <span class="k">def</span> <span class="nf">scalar_minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;Nelder-Mead&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use one of the scalar minimization methods from</span>
@@ -535,10 +555,13 @@
 
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;differential_evolution&#39;</span><span class="p">:</span>
             <span class="n">fmin_kws</span><span class="p">[</span><span class="s">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_differential_evolution</span>
-            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="n">par</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">par</span><span class="o">.</span><span class="n">max</span><span class="p">)</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">bounds</span><span class="p">)):</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([(</span><span class="n">par</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">par</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                                 <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+            <span class="n">varying</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">par</span><span class="o">.</span><span class="n">vary</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">varying</span><span class="p">])):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;With differential evolution finite bounds &#39;</span>
-                                 <span class="s">&#39;are required for each parameter&#39;</span><span class="p">)</span>
+                                 <span class="s">&#39;are required for each varying parameter&#39;</span><span class="p">)</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
             <span class="n">fmin_kws</span><span class="p">[</span><span class="s">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bounds</span>
 
@@ -577,7 +600,7 @@
 </div>
 <div class="viewcode-block" id="Minimizer.emcee"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Minimizer.emcee">[docs]</a>    <span class="k">def</span> <span class="nf">emcee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nwalkers</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
               <span class="n">ntemps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">reuse_sampler</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-              <span class="n">float_behavior</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">,</span> <span class="n">is_weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+              <span class="n">float_behavior</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">,</span> <span class="n">is_weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bayesian sampling of the posterior distribution for the parameters</span>
 <span class="sd">        using the `emcee` Markov Chain Monte Carlo package. The method assumes</span>
@@ -661,6 +684,12 @@
 <span class="sd">            **Important** this parameter only has any effect if your objective</span>
 <span class="sd">            function returns an array. If your objective function returns a</span>
 <span class="sd">            float, then this parameter is ignored. See Notes for more details.</span>
+<span class="sd">        seed : int or `np.random.RandomState`, optional</span>
+<span class="sd">            If `seed` is an int, a new `np.random.RandomState` instance is used,</span>
+<span class="sd">            seeded with `seed`.</span>
+<span class="sd">            If `seed` is already a `np.random.RandomState` instance, then that</span>
+<span class="sd">            `np.random.RandomState` instance is used.</span>
+<span class="sd">            Specify `seed` for repeatable minimizations.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -817,7 +846,8 @@
         <span class="n">lnprob_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;is_weighted&#39;</span><span class="p">:</span> <span class="n">is_weighted</span><span class="p">,</span>
                          <span class="s">&#39;float_behavior&#39;</span><span class="p">:</span> <span class="n">float_behavior</span><span class="p">,</span>
                          <span class="s">&#39;userargs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userargs</span><span class="p">,</span>
-                         <span class="s">&#39;userkws&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">}</span>
+                         <span class="s">&#39;userkws&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">userkws</span><span class="p">,</span>
+                         <span class="s">&#39;nan_policy&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nan_policy</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">ntemps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c"># the prior and likelihood function args and kwargs are the same</span>
@@ -827,6 +857,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_args</span>
             <span class="n">sampler_kwargs</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnprob_kwargs</span>
+
+        <span class="c"># set up the random number generator</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">_make_random_gen</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="c"># now initialise the samplers</span>
         <span class="k">if</span> <span class="n">reuse_sampler</span><span class="p">:</span>
@@ -840,12 +873,12 @@
         <span class="k">elif</span> <span class="n">ntemps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c"># Parallel Tempering</span>
             <span class="c"># jitter the starting position by scaled Gaussian noise</span>
-            <span class="n">p0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">ntemps</span><span class="p">,</span> <span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.e-4</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">ntemps</span><span class="p">,</span> <span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.e-4</span>
             <span class="n">p0</span> <span class="o">*=</span> <span class="n">var_arr</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">PTSampler</span><span class="p">(</span><span class="n">ntemps</span><span class="p">,</span> <span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">,</span>
                                            <span class="n">_lnpost</span><span class="p">,</span> <span class="n">_lnprior</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">p0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.e-4</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.e-4</span>
             <span class="n">p0</span> <span class="o">*=</span> <span class="n">var_arr</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nvarys</span><span class="p">,</span>
                                                  <span class="n">_lnpost</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_kwargs</span><span class="p">)</span>
@@ -871,6 +904,10 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;pos should have shape (nwalkers, nvarys)&#39;</span>
                                  <span class="s">&#39;or (ntemps, nwalkers, nvarys) if ntemps &gt; 1&#39;</span><span class="p">)</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="n">tpos</span>
+
+        <span class="c"># if you specified a seed then you also need to seed the sampler</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
 
         <span class="c"># now do a production run, sampling all the time</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
@@ -910,10 +947,63 @@
 
         <span class="k">return</span> <span class="n">result</span>
 </div>
+<div class="viewcode-block" id="Minimizer.least_squares"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Minimizer.least_squares">[docs]</a>    <span class="k">def</span> <span class="nf">least_squares</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use the least_squares (new in scipy 0.17) function to perform a fit.</span>
+<span class="sd">        This assumes that Parameters have been stored, and a function to</span>
+<span class="sd">        minimize has been properly set up.</span>
+
+<span class="sd">        This wraps scipy.optimize.least_squares, which has inbuilt support</span>
+<span class="sd">        for bounds and robust loss functions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : Parameters, optional</span>
+<span class="sd">           Parameters to use as starting points.</span>
+<span class="sd">        kws : dict, optional</span>
+<span class="sd">            Minimizer options to pass to scipy.optimize.least_squares.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_LEAST_SQUARES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Scipy with a version higher than 0.17 &quot;</span>
+                                      <span class="s">&quot;is needed for this method.&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_fit</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="n">replace_none</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">sign</span><span class="p">:</span> <span class="n">sign</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">x</span>
+        <span class="n">upper_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">replace_none</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">lower_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">replace_none</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">start_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__residual</span><span class="p">,</span>
+                            <span class="n">start_vals</span><span class="p">,</span>
+                            <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">),</span>
+                            <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">apply_bounds_transformation</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                            <span class="o">**</span><span class="n">kws</span>
+                            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="n">attr</span><span class="p">])</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">chisqr</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__residual</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">nvarys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">start_vals</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">ndata</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">nfree</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">chisqr</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">chisqr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">residual</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">nfree</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">ndata</span> <span class="o">-</span> <span class="n">result</span><span class="o">.</span><span class="n">nvarys</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">redchi</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">chisqr</span> <span class="o">/</span> <span class="n">result</span><span class="o">.</span><span class="n">nfree</span>
+        <span class="n">_log_likelihood</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">ndata</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">redchi</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">aic</span> <span class="o">=</span> <span class="n">_log_likelihood</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">result</span><span class="o">.</span><span class="n">nvarys</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">bic</span> <span class="o">=</span> <span class="n">_log_likelihood</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">ndata</span><span class="p">)</span> <span class="o">*</span> <span class="n">result</span><span class="o">.</span><span class="n">nvarys</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
 <div class="viewcode-block" id="Minimizer.leastsq"><a class="viewcode-back" href="../../refnx.analysis.html#refnx.analysis.Minimizer.leastsq">[docs]</a>    <span class="k">def</span> <span class="nf">leastsq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use Levenberg-Marquardt minimization to perform a fit.</span>
-<span class="sd">        This assumes that ModelParameters have been stored, and a function to</span>
+<span class="sd">        This assumes that Parameters have been stored, and a function to</span>
 <span class="sd">        minimize has been properly set up.</span>
 
 <span class="sd">        This wraps scipy.optimize.leastsq.</span>
@@ -1140,7 +1230,8 @@
 
 
 <span class="k">def</span> <span class="nf">_lnpost</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">userfcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">var_names</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">userargs</span><span class="o">=</span><span class="p">(),</span>
-            <span class="n">userkws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">float_behavior</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">,</span> <span class="n">is_weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="n">userkws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">float_behavior</span><span class="o">=</span><span class="s">&#39;posterior&#39;</span><span class="p">,</span> <span class="n">is_weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">nan_policy</span><span class="o">=</span><span class="s">&#39;raise&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the log-posterior probability. See the `Minimizer.emcee` method</span>
 <span class="sd">    for more details</span>
@@ -1171,6 +1262,14 @@
 <span class="sd">    is_weighted : bool</span>
 <span class="sd">        If `userfcn` returns a vector of residuals then `is_weighted`</span>
 <span class="sd">        specifies if the residuals have been weighted by data uncertainties.</span>
+<span class="sd">    nan_policy : str, optional</span>
+<span class="sd">        Specifies action if `userfcn` returns nan</span>
+<span class="sd">        values. One of:</span>
+
+<span class="sd">            &#39;raise&#39; - a `ValueError` is raised</span>
+<span class="sd">            &#39;propagate&#39; - the values returned from `userfcn` are un-altered</span>
+<span class="sd">            &#39;omit&#39; - the non-finite values are filtered.</span>
+
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1196,6 +1295,8 @@
 
     <span class="c"># now calculate the log-likelihood</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">userfcn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">userargs</span><span class="p">,</span> <span class="o">**</span><span class="n">userkwargs</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">_nan_policy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span> <span class="n">handle_inf</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
     <span class="n">lnprob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">lnprob</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1219,6 +1320,83 @@
                              <span class="s">&quot; &#39;chi2&#39; &quot;</span> <span class="o">+</span> <span class="n">float_behavior</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">lnprob</span>
+
+
+<span class="k">def</span> <span class="nf">_make_random_gen</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Turn seed into a np.random.RandomState instance</span>
+
+<span class="sd">    If seed is None, return the RandomState singleton used by np.random.</span>
+<span class="sd">    If seed is an int, return a new RandomState instance seeded with seed.</span>
+<span class="sd">    If seed is already a RandomState instance, return it.</span>
+<span class="sd">    Otherwise raise ValueError.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">seed</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">mtrand</span><span class="o">.</span><span class="n">_rand</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">seed</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%r</span><span class="s"> cannot be used to seed a numpy.random.RandomState&#39;</span>
+                     <span class="s">&#39; instance&#39;</span> <span class="o">%</span> <span class="n">seed</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_nan_policy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s">&#39;raise&#39;</span><span class="p">,</span> <span class="n">handle_inf</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifies behaviour when an array contains np.nan or np.inf</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array_like</span>
+<span class="sd">        Input array to consider</span>
+<span class="sd">    nan_policy : str, optional</span>
+<span class="sd">        One of:</span>
+
+<span class="sd">        &#39;raise&#39; - raise a `ValueError` if `a` contains NaN.</span>
+<span class="sd">        &#39;propagate&#39; - propagate NaN</span>
+<span class="sd">        &#39;omit&#39; - filter NaN from input array</span>
+<span class="sd">    handle_inf : bool, optional</span>
+<span class="sd">        As well as nan consider +/- inf</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    filtered_array : array_like</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">policies</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;propagate&#39;</span><span class="p">,</span> <span class="s">&#39;raise&#39;</span><span class="p">,</span> <span class="s">&#39;omit&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">nan_policy</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">policies</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;nan_policy must be one of {</span><span class="si">%s</span><span class="s">}&quot;</span> <span class="o">%</span>
+                         <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">policies</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">handle_inf</span><span class="p">:</span>
+        <span class="n">handler_func</span> <span class="o">=</span>  <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">handler_func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span>
+
+    <span class="k">if</span> <span class="n">nan_policy</span> <span class="o">==</span> <span class="s">&#39;propagate&#39;</span><span class="p">:</span>
+        <span class="c"># nan values are ignored.</span>
+        <span class="k">return</span> <span class="n">a</span>
+    <span class="k">elif</span> <span class="n">nan_policy</span> <span class="o">==</span> <span class="s">&#39;raise&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># Calling np.sum to avoid creating a huge array into memory</span>
+            <span class="c"># e.g. np.isnan(a).any()</span>
+            <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s">&#39;ignore&#39;</span><span class="p">):</span>
+                <span class="n">contains_nan</span> <span class="o">=</span> <span class="n">handler_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c"># If the check cannot be properly performed we fallback to omiting</span>
+            <span class="c"># nan values and raising a warning. This can happen when attempting to</span>
+            <span class="c"># sum things that are not numbers (e.g. as in the function `mode`).</span>
+            <span class="n">contains_nan</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;The input array could not be properly checked for nan &quot;</span>
+                          <span class="s">&quot;values. nan values will be ignored.&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">contains_nan</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The input contains nan values&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+    <span class="k">elif</span> <span class="n">nan_policy</span> <span class="o">==</span> <span class="s">&#39;omit&#39;</span><span class="p">:</span>
+        <span class="c"># nans are filtered</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">handler_func</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;leastsq&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>

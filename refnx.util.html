@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.util package &mdash; refnx 0.0.3 documentation</title>
+    <title>refnx.util package &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.3',
+        VERSION:     '0.0.5.dev0+ad01c85',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,13 +24,15 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.3 documentation" href="index.html" />
+    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="index.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -249,29 +251,37 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1</strong> : float</p>
 <blockquote>
 <div><p>slit 1 opening</p>
 </div></blockquote>
-<p><strong>d2: float</strong></p>
+<p><strong>d2</strong> : float</p>
 <blockquote>
 <div><p>slit 2 opening</p>
 </div></blockquote>
-<p><strong>L12: float</strong></p>
+<p><strong>L12</strong> : float</p>
 <blockquote>
 <div><p>distance between slits</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(dtheta, alpha, beta)</p>
-<p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal</p>
-<p>resolution function</p>
-<p>alpha is the angular divergence of the penumbra</p>
-<p>beta is the angular divergence of the umbra</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dtheta, alpha, beta</p>
+<blockquote>
+<div><p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal
+resolution function
+alpha is the angular divergence of the penumbra
+beta is the angular divergence of the umbra</p>
+</div></blockquote>
 <p>When calculating dtheta / theta values for resolution, then dtheta is the</p>
 <p>value you need to use.</p>
-<p>See equations 11-14 in:</p>
-<p>[1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
+<p>See equations 11-14 in <a class="reference internal" href="#r3" id="id1">[R3]</a>.</p>
+<table class="docutils citation" frame="void" id="r3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[R3]</a></td><td><p class="first last">de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
+</td></tr>
+</tbody>
+</table>
 <p>Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</p>
 <p>reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</p>
 <p class="last">Research A, 1995, 362, 434-453</p>
@@ -769,17 +779,18 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <dl class="function">
 <dt id="refnx.util.general.wavelength_energy">
 <code class="descclassname">refnx.util.general.</code><code class="descname">wavelength_energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.wavelength_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts wavelength to energy in meV
-Parameters
-&#8212;&#8212;&#8212;-
-wavelength : float</p>
-<blockquote>
-<div>Wavelength in Angstrom.</div></blockquote>
+<dd><p>Converts wavelength to energy in meV</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<blockquote>
+<div><p>Wavelength in Angstrom.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
 <blockquote class="last">
 <div><p>Energy in meV.</p>
 </div></blockquote>
@@ -831,46 +842,45 @@ wavelength : float</p>
 <dl class="function">
 <dt id="refnx.util.nsplice.get_scaling_in_overlap">
 <code class="descclassname">refnx.util.nsplice.</code><code class="descname">get_scaling_in_overlap</code><span class="sig-paren">(</span><em>x0</em>, <em>y0</em>, <em>dy0</em>, <em>x1</em>, <em>y1</em>, <em>dy1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/nsplice.html#get_scaling_in_overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.nsplice.get_scaling_in_overlap" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Obtain vertical scaling factor that splices the second dataset onto the
-first.</div></blockquote>
+<dd><p>Obtain vertical scaling factor that splices the second dataset onto the
+first.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x0: np.ndarray</strong></p>
 <blockquote>
-<div><blockquote>
 <div><p>abscissae for the first dataset</p>
 </div></blockquote>
-<dl class="docutils">
-<dt>y0: np.ndarray</dt>
-<dd><p class="first last">y values for the first dataset</p>
-</dd>
-<dt>dy0: np.ndarray</dt>
-<dd><p class="first last">dy (standard deviation) values for the first dataset</p>
-</dd>
-<dt>x1: np.ndarray</dt>
-<dd><p class="first last">abscissae values for the second dataset</p>
-</dd>
-<dt>y1: np.ndarray</dt>
-<dd><p class="first last">y values for the second dataset</p>
-</dd>
-<dt>dy1: np.ndarray</dt>
-<dd><p class="first last">dy (standard deviation) values for the second dataset</p>
-</dd>
-</dl>
+<p><strong>y0: np.ndarray</strong></p>
+<blockquote>
+<div><p>y values for the first dataset</p>
+</div></blockquote>
+<p><strong>dy0: np.ndarray</strong></p>
+<blockquote>
+<div><p>dy (standard deviation) values for the first dataset</p>
+</div></blockquote>
+<p><strong>x1: np.ndarray</strong></p>
+<blockquote>
+<div><p>abscissae values for the second dataset</p>
+</div></blockquote>
+<p><strong>y1: np.ndarray</strong></p>
+<blockquote>
+<div><p>y values for the second dataset</p>
+</div></blockquote>
+<p><strong>dy1: np.ndarray</strong></p>
+<blockquote>
+<div><p>dy (standard deviation) values for the second dataset</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points): float, float, array-like</p>
-<blockquote>
+<blockquote class="last">
 <div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
 They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
 <cite>overlap_points</cite> indicates the points in the <em>first</em> dataset that are
 in the overlap region.</p>
 </div></blockquote>
-<p class="last"></p>
 </td>
 </tr>
 </tbody>
@@ -1108,29 +1118,37 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1</strong> : float</p>
 <blockquote>
 <div><p>slit 1 opening</p>
 </div></blockquote>
-<p><strong>d2: float</strong></p>
+<p><strong>d2</strong> : float</p>
 <blockquote>
 <div><p>slit 2 opening</p>
 </div></blockquote>
-<p><strong>L12: float</strong></p>
+<p><strong>L12</strong> : float</p>
 <blockquote>
 <div><p>distance between slits</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(dtheta, alpha, beta)</p>
-<p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal</p>
-<p>resolution function</p>
-<p>alpha is the angular divergence of the penumbra</p>
-<p>beta is the angular divergence of the umbra</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dtheta, alpha, beta</p>
+<blockquote>
+<div><p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal
+resolution function
+alpha is the angular divergence of the penumbra
+beta is the angular divergence of the umbra</p>
+</div></blockquote>
 <p>When calculating dtheta / theta values for resolution, then dtheta is the</p>
 <p>value you need to use.</p>
-<p>See equations 11-14 in:</p>
-<p>[1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
+<p>See equations 11-14 in <a class="reference internal" href="#r4" id="id2">[R4]</a>.</p>
+<table class="docutils citation" frame="void" id="r4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[R4]</a></td><td><p class="first last">de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
+</td></tr>
+</tbody>
+</table>
 <p>Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</p>
 <p>reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</p>
 <p class="last">Research A, 1995, 362, 434-453</p>
@@ -1205,46 +1223,45 @@ overlap.</p>
 <dl class="function">
 <dt id="refnx.util.get_scaling_in_overlap">
 <code class="descclassname">refnx.util.</code><code class="descname">get_scaling_in_overlap</code><span class="sig-paren">(</span><em>x0</em>, <em>y0</em>, <em>dy0</em>, <em>x1</em>, <em>y1</em>, <em>dy1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/nsplice.html#get_scaling_in_overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.get_scaling_in_overlap" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Obtain vertical scaling factor that splices the second dataset onto the
-first.</div></blockquote>
+<dd><p>Obtain vertical scaling factor that splices the second dataset onto the
+first.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x0: np.ndarray</strong></p>
 <blockquote>
-<div><blockquote>
 <div><p>abscissae for the first dataset</p>
 </div></blockquote>
-<dl class="docutils">
-<dt>y0: np.ndarray</dt>
-<dd><p class="first last">y values for the first dataset</p>
-</dd>
-<dt>dy0: np.ndarray</dt>
-<dd><p class="first last">dy (standard deviation) values for the first dataset</p>
-</dd>
-<dt>x1: np.ndarray</dt>
-<dd><p class="first last">abscissae values for the second dataset</p>
-</dd>
-<dt>y1: np.ndarray</dt>
-<dd><p class="first last">y values for the second dataset</p>
-</dd>
-<dt>dy1: np.ndarray</dt>
-<dd><p class="first last">dy (standard deviation) values for the second dataset</p>
-</dd>
-</dl>
+<p><strong>y0: np.ndarray</strong></p>
+<blockquote>
+<div><p>y values for the first dataset</p>
+</div></blockquote>
+<p><strong>dy0: np.ndarray</strong></p>
+<blockquote>
+<div><p>dy (standard deviation) values for the first dataset</p>
+</div></blockquote>
+<p><strong>x1: np.ndarray</strong></p>
+<blockquote>
+<div><p>abscissae values for the second dataset</p>
+</div></blockquote>
+<p><strong>y1: np.ndarray</strong></p>
+<blockquote>
+<div><p>y values for the second dataset</p>
+</div></blockquote>
+<p><strong>dy1: np.ndarray</strong></p>
+<blockquote>
+<div><p>dy (standard deviation) values for the second dataset</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points): float, float, array-like</p>
-<blockquote>
+<blockquote class="last">
 <div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
 They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
 <cite>overlap_points</cite> indicates the points in the <em>first</em> dataset that are
 in the overlap region.</p>
 </div></blockquote>
-<p class="last"></p>
 </td>
 </tr>
 </tbody>
@@ -1677,17 +1694,18 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <dl class="function">
 <dt id="refnx.util.wavelength_energy">
 <code class="descclassname">refnx.util.</code><code class="descname">wavelength_energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#wavelength_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.wavelength_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts wavelength to energy in meV
-Parameters
-&#8212;&#8212;&#8212;-
-wavelength : float</p>
-<blockquote>
-<div>Wavelength in Angstrom.</div></blockquote>
+<dd><p>Converts wavelength to energy in meV</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
+<blockquote>
+<div><p>Wavelength in Angstrom.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
 <blockquote class="last">
 <div><p>Energy in meV.</p>
 </div></blockquote>
@@ -1776,9 +1794,6 @@ wavelength : float</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1789,8 +1804,8 @@ wavelength : float</p>
       &copy;2015, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
       |
       <a href="_sources/refnx.util.txt"

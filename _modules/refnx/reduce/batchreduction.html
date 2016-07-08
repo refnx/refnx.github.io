@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.batchreduction &mdash; refnx 0.0.3 documentation</title>
+    <title>refnx.reduce.batchreduction &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.3',
+        VERSION:     '0.0.5.dev0+ad01c85',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,14 +24,16 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.3 documentation" href="../../../index.html" />
+    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -39,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for refnx.reduce.batchreduction</h1><div class="highlight"><pre>
-<span class="c"># coding: utf-8</span>
+<span></span><span class="c1"># coding: utf-8</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Batch reduction of reflectometry data based on a spreadsheet</span>
@@ -64,12 +66,12 @@
 <span class="kn">from</span> <span class="nn">refnx.reduce</span> <span class="kn">import</span> <span class="n">reduce_stitch</span>
 
 
-<span class="n">ReductionEntryTuple</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;ReductionEntry&#39;</span><span class="p">,</span>
-                                             <span class="p">[</span><span class="s">&#39;row&#39;</span><span class="p">,</span>
-                                              <span class="s">&#39;ds&#39;</span><span class="p">,</span>
-                                              <span class="s">&#39;name&#39;</span><span class="p">,</span>
-                                              <span class="s">&#39;fname&#39;</span><span class="p">,</span>
-                                              <span class="s">&#39;entry&#39;</span><span class="p">,])</span>
+<span class="n">ReductionEntryTuple</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ReductionEntry&#39;</span><span class="p">,</span>
+                                             <span class="p">[</span><span class="s1">&#39;row&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;ds&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;name&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;fname&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;entry&#39;</span><span class="p">,])</span>
 
 
 <span class="k">class</span> <span class="nc">ReductionEntry</span><span class="p">(</span><span class="n">ReductionEntryTuple</span><span class="p">):</span>
@@ -77,7 +79,7 @@
     <span class="k">def</span> <span class="nf">rescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">save_xml</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 
 
@@ -140,7 +142,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">ReductionEntry</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
 
-        <span class="c"># if the data is already in the cache, update it</span>
+        <span class="c1"># if the data is already in the cache, update it</span>
         <span class="k">if</span> <span class="n">update</span> <span class="ow">and</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span><span class="p">:</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
@@ -151,8 +153,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span><span class="p">[</span><span class="n">row</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
 
-        <span class="c"># also cache the runs that made up the reduction, which may be</span>
-        <span class="c"># several since they can be stitched together</span>
+        <span class="c1"># also cache the runs that made up the reduction, which may be</span>
+        <span class="c1"># several since they can be stitched together</span>
         <span class="n">runs</span> <span class="o">=</span> <span class="n">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">run_cache</span><span class="p">[</span><span class="n">run</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
@@ -269,11 +271,11 @@
 
     <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_dataframe</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s">&quot;&lt;b&gt;Summary of reduced data&lt;/b&gt;&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;b&gt;Summary of reduced data&lt;/b&gt;&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_dataframe</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s">&quot;Summary of reduced data</span><span class="se">\n\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;Summary of reduced data</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BatchReducer"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.BatchReducer">[docs]</a><span class="k">class</span> <span class="nc">BatchReducer</span><span class="p">:</span>
@@ -321,7 +323,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span> <span class="o">=</span> <span class="n">kwds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;data_folder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;data_folder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
     <span class="k">def</span> <span class="nf">_reduce_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">):</span>
@@ -332,31 +334,31 @@
 <span class="sd">        entry : pandas.Series</span>
 <span class="sd">            Spreadsheet row for this data set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c"># Identify the runs to be used for reduction</span>
-        <span class="n">runs</span> <span class="o">=</span> <span class="n">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="s">&#39;refl&#39;</span><span class="p">)</span>
-        <span class="n">directs</span> <span class="o">=</span> <span class="n">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="s">&#39;directs&#39;</span><span class="p">)</span>
+        <span class="c1"># Identify the runs to be used for reduction</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="n">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="s1">&#39;refl&#39;</span><span class="p">)</span>
+        <span class="n">directs</span> <span class="o">=</span> <span class="n">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="s1">&#39;directs&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="n">fmt</span> <span class="o">=</span> <span class="s">&quot;Reducing </span><span class="si">%s</span><span class="s"> [</span><span class="si">%s</span><span class="s">]/[</span><span class="si">%s</span><span class="s">]&quot;</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;Reducing </span><span class="si">%s</span><span class="s2"> [</span><span class="si">%s</span><span class="s2">]/[</span><span class="si">%s</span><span class="s2">]&quot;</span>
 
-            <span class="k">print</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
-                  <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">),</span>
-                  <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">directs</span><span class="p">)))</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>   <span class="c"># keep progress updated</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                  <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">),</span>
+                  <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">directs</span><span class="p">)))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>   <span class="c1"># keep progress updated</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">runs</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Row </span><span class="si">%d</span><span class="s"> (</span><span class="si">%s</span><span class="s">) has no reflection runs&quot;</span> <span class="o">%</span>
-                          <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]))</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has no reflection runs&quot;</span> <span class="o">%</span>
+                          <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
             <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">directs</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Row </span><span class="si">%d</span><span class="s"> (</span><span class="si">%s</span><span class="s">) has no direct beam runs&quot;</span> <span class="o">%</span>
-                          <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]))</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has no direct beam runs&quot;</span> <span class="o">%</span>
+                          <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
             <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">directs</span><span class="p">):</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-              <span class="s">&quot;Row </span><span class="si">%d</span><span class="s"> (</span><span class="si">%s</span><span class="s">) has differing numbers of direct &amp; refln runs&quot;</span> <span class="o">%</span>
-              <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]))</span>
+              <span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has differing numbers of direct &amp; refln runs&quot;</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
             <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
 
         <span class="n">ds</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">reduce_stitch</span><span class="p">(</span><span class="n">runs</span><span class="p">,</span> <span class="n">directs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
@@ -372,49 +374,49 @@
 <span class="sd">        show : bool (optional, default=True)</span>
 <span class="sd">            display a summary table of the rows that were reduced</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="s">&#39;A:I&#39;</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="s1">&#39;A:I&#39;</span>
         <span class="n">all_runs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">parse_cols</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
 
-        <span class="c"># Add the row number in the spreadsheet as an extra column</span>
-        <span class="c"># row numbers for the runs will start at 2 not 0</span>
-        <span class="n">all_runs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;source&#39;</span><span class="p">,</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Add the row number in the spreadsheet as an extra column</span>
+        <span class="c1"># row numbers for the runs will start at 2 not 0</span>
+        <span class="n">all_runs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="c"># add in some extra columns to indicate successful reduction</span>
-        <span class="n">all_runs</span><span class="p">[</span><span class="s">&#39;reduced&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_runs</span><span class="p">))</span>
-        <span class="n">all_runs</span><span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_runs</span><span class="p">))</span>
+        <span class="c1"># add in some extra columns to indicate successful reduction</span>
+        <span class="n">all_runs</span><span class="p">[</span><span class="s1">&#39;reduced&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_runs</span><span class="p">))</span>
+        <span class="n">all_runs</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_runs</span><span class="p">))</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">reduce</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
 
-        <span class="c"># iterate through the rows that were marked for reduction</span>
+        <span class="c1"># iterate through the rows that were marked for reduction</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-            <span class="c"># ensure that the name is a string (will be NaN if blank in sheet)</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="c1"># ensure that the name is a string (will be NaN if blank in sheet)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ds</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_row</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="c"># data file not found (normally)</span>
+                <span class="c1"># data file not found (normally)</span>
                 <span class="n">reduction_ok</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Run </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Run </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="bp">None</span>
                 <span class="n">fname</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">reduction_ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">reduction_ok</span><span class="p">:</span>
-                    <span class="c"># store this away to make plotting easier later</span>
+                    <span class="c1"># store this away to make plotting easier later</span>
                     <span class="n">ds</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
-            <span class="c"># record outcomes of reduction in the table</span>
-            <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span>
-            <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s">&#39;reduced&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reduction_ok</span>
+            <span class="c1"># record outcomes of reduction in the table</span>
+            <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span>
+            <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;reduced&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reduction_ok</span>
 
-            <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s">&#39;source&#39;</span><span class="p">],</span>
+            <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">],</span>
                                     <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">reduction_ok</span><span class="p">:</span>
-                <span class="n">scale</span> <span class="o">=</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s">&#39;scale&#39;</span><span class="p">]</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="ow">and</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Applying scale factor </span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">scale</span><span class="p">)</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>   <span class="c"># keep progress updated</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Applying scale factor </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">scale</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>   <span class="c1"># keep progress updated</span>
                     <span class="n">cached</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
@@ -423,16 +425,16 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">print</span><span class="p">(</span><span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span></div>
 
-</div>
+
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; run the reducer as the default action for the BatchReducer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span></div>
 
-</div>
-<span class="k">def</span> <span class="nf">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;refl&#39;</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;refl&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a list of run numbers from a reduction spreadsheet entry</span>
 
@@ -444,19 +446,19 @@
 <span class="sd">        Fetch either the run numbers from the reflectometry experiment</span>
 <span class="sd">        or from the direct beams.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;refl&#39;</span><span class="p">,</span> <span class="s">&#39;directs&#39;</span><span class="p">):</span>
-        <span class="c"># FIXME: crap API</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Unknown mode </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;refl&#39;</span><span class="p">,</span> <span class="s1">&#39;directs&#39;</span><span class="p">):</span>
+        <span class="c1"># FIXME: crap API</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown mode </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mode</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;refl&#39;</span><span class="p">:</span>
-        <span class="n">listed</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;refl1&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;refl2&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;refl3&#39;</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;refl&#39;</span><span class="p">:</span>
+        <span class="n">listed</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;refl1&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;refl2&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;refl3&#39;</span><span class="p">]]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">listed</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;dir1&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;dir2&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;dir3&#39;</span><span class="p">]]</span>
+        <span class="n">listed</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dir1&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dir2&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dir3&#39;</span><span class="p">]]</span>
 
     <span class="n">valid</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">listed</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="s">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
-            <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
@@ -465,10 +467,11 @@
                     <span class="n">valid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                  <span class="s">&quot;Value &#39;</span><span class="si">%s</span><span class="s">&#39; could not be interpreted as a run number&quot;</span> <span class="o">%</span> <span class="n">run</span><span class="p">)</span>
+                  <span class="s2">&quot;Value &#39;</span><span class="si">%s</span><span class="s2">&#39; could not be interpreted as a run number&quot;</span> <span class="o">%</span> <span class="n">run</span><span class="p">)</span>
 
-    <span class="c">#valid = [int(r) for r in l if not np.isnan(r)]</span>
+    <span class="c1">#valid = [int(r) for r in l if not np.isnan(r)]</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">valid</span><span class="p">]</span>
+
 </pre></div>
 
           </div>
@@ -492,9 +495,6 @@
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -505,8 +505,8 @@
       &copy;2015, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
     </div>
 
