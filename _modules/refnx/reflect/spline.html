@@ -1,0 +1,283 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.reflect.spline &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.13.dev0+8d6438f',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.reflect.spline</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">PchipInterpolator</span> <span class="k">as</span> <span class="n">Pchip</span>
+
+<span class="kn">from</span> <span class="nn">refnx.reflect</span> <span class="k">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Component</span>
+<span class="kn">from</span> <span class="nn">refnx.analysis</span> <span class="k">import</span> <span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">,</span>
+                            <span class="n">possibly_create_parameter</span><span class="p">)</span>
+
+
+<span class="n">EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+
+<div class="viewcode-block" id="Spline"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.Spline">[docs]</a><span class="k">class</span> <span class="nc">Spline</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freeform modelling of the real part of an SLD profile using spline</span>
+<span class="sd">    interpolation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">solvent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">interpolator</span><span class="o">=</span><span class="n">Pchip</span><span class="p">,</span> <span class="n">zgrad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">microslab_max_thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        extent : float or Parameter</span>
+<span class="sd">            Total extent of spline region</span>
+<span class="sd">        vs : Sequence of float/Parameter</span>
+<span class="sd">            the real part of the SLD values of each of the knots.</span>
+<span class="sd">        dz : Sequence of float/Parameter</span>
+<span class="sd">            the lateral offset between successive knots.</span>
+<span class="sd">        left : refnx.reflect.Component</span>
+<span class="sd">            The Component to the left of this Spline region.</span>
+<span class="sd">        right : refnx.reflect.Component</span>
+<span class="sd">            The Component to the right of this Spline region.</span>
+<span class="sd">        solvent : refnx.reflect.Slab</span>
+<span class="sd">            A Slab instance representing the solvent</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of component</span>
+<span class="sd">        interpolator : scipy.interpolate Univariate Interpolator, optional</span>
+<span class="sd">            Which scipy.interpolate Univariate Interpolator to use.</span>
+<span class="sd">        zgrad : bool, optional</span>
+<span class="sd">            If true then extra control knots are placed outside this spline</span>
+<span class="sd">            with the same SLD as the materials on the left and right. With a</span>
+<span class="sd">            monotonic interpolator this guarantees that the gradient is zero</span>
+<span class="sd">            at either end of the interval.</span>
+<span class="sd">        microslab_max_thickness : float</span>
+<span class="sd">            Maximum size of the microslabs approximating the spline.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This spline component only generates the real part of the SLD (thereby</span>
+<span class="sd">        assuming that the imaginary part is negligible).</span>
+<span class="sd">        The sequence dz are the lateral offsets of the knots normalised to a</span>
+<span class="sd">        unit interval [0, 1]. The reason for using lateral offsets is</span>
+<span class="sd">        so that the knots are monotonically increasing in location. When each</span>
+<span class="sd">        dz offset is turned into a Parameter it is given bounds in [0, 1].</span>
+<span class="sd">        Thus with an extent of 500, and dz = [0.1, 0.2, 0.2], the knots will be</span>
+<span class="sd">        at [0, 50, 150, 250, 500]. Notice that there are two extra knots for</span>
+<span class="sd">        the start and end of the interval (disregarding the `zgrad` control</span>
+<span class="sd">        knots). If ``np.sum(dz) &gt; 1``, then the knot spacings are normalised to</span>
+<span class="sd">        1. e.g. dz of [0.1, 0.2, 0.9] would result in knots (in the normalised</span>
+<span class="sd">        interval) of [0, 0.0833, 0.25, 1, 1].</span>
+<span class="sd">        If `vs` is monotonic then the output spline will be monotonic. If `vs`</span>
+<span class="sd">        is not monotonic then there may be regions of the spline larger or</span>
+<span class="sd">        smaller than `left` or `right`.</span>
+<span class="sd">        The slab representation of this component are approximated using a</span>
+<span class="sd">        &#39;microslab&#39; representation of spline. The max thickness of each</span>
+<span class="sd">        microslab is `microslab_max_thickness`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left_slab</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_slab</span> <span class="o">=</span> <span class="n">right</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solvent_slab</span> <span class="o">=</span> <span class="n">solvent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">microslab_max_thickness</span> <span class="o">=</span> <span class="n">microslab_max_thickness</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">possibly_create_parameter</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - spline extent&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dz</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;dz - spline&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dz</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">possibly_create_parameter</span><span class="p">(</span>
+                <span class="n">z</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - spline dz[</span><span class="si">%d</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vs</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;vs - spline&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vs</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">possibly_create_parameter</span><span class="p">(</span>
+                <span class="n">v</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - spline vs[</span><span class="si">%d</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dz and vs must have same number of entries&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">zgrad</span> <span class="o">=</span> <span class="n">zgrad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">interpolator</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;zeds&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span>
+                                      <span class="s1">&#39;vs&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span>
+                                      <span class="s1">&#39;interp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                      <span class="s1">&#39;extent&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_interpolator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="p">)</span>
+        <span class="n">zeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span>
+
+        <span class="c1"># if dz&#39;s sum to more than 1, then normalise to unit interval.</span>
+        <span class="k">if</span> <span class="n">zeds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zeds</span> <span class="o">/=</span> <span class="n">zeds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">zeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">zeds</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="p">)</span>
+
+        <span class="n">left_sld</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">overall_sld</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left_slab</span><span class="o">.</span><span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solvent_slab</span><span class="o">.</span><span class="n">slabs</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">right_sld</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">overall_sld</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_slab</span><span class="o">.</span><span class="n">slabs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solvent_slab</span><span class="o">.</span><span class="n">slabs</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zgrad</span><span class="p">:</span>
+            <span class="n">zeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">0</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">],</span> <span class="n">zeds</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">]])</span>
+            <span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">left_sld</span><span class="p">,</span> <span class="n">left_sld</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">right_sld</span><span class="p">,</span> <span class="n">right_sld</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">zeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">],</span> <span class="n">zeds</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">]])</span>
+            <span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">left_sld</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">right_sld</span><span class="p">])</span>
+
+        <span class="c1"># cache the interpolator</span>
+        <span class="n">cache_zeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;zeds&#39;</span><span class="p">]</span>
+        <span class="n">cache_vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;vs&#39;</span><span class="p">]</span>
+        <span class="n">cache_extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;extent&#39;</span><span class="p">]</span>
+
+        <span class="c1"># you don&#39;t need to recreate the interpolator</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">zeds</span><span class="p">,</span> <span class="n">cache_zeds</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">cache_vs</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="n">cache_extent</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;interp&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;zeds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;extent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
+
+        <span class="c1"># TODO make vfp zero for z &gt; self.extent</span>
+        <span class="n">interpolator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span><span class="p">(</span><span class="n">zeds</span><span class="p">,</span> <span class="n">vs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_interpolator</span><span class="p">[</span><span class="s1">&#39;interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolator</span>
+        <span class="k">return</span> <span class="n">interpolator</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the spline value at z</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        z : float</span>
+<span class="sd">            Distance along spline</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sld : float</span>
+<span class="sd">            Real part of SLD</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">interpolator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolator</span><span class="p">()</span>
+        <span class="n">vs</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">vs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">left_slab</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">right_slab</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">solvent_slab</span><span class="o">.</span><span class="n">parameters</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+<div class="viewcode-block" id="Spline.lnprob"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.Spline.lnprob">[docs]</a>    <span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">slabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">num_slabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">microslab_max_thickness</span><span class="p">)</span>
+        <span class="n">slab_thick</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">/</span> <span class="n">num_slabs</span><span class="p">)</span>
+        <span class="n">slabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">num_slabs</span><span class="p">),</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">slabs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">slab_thick</span>
+
+        <span class="c1"># give last slab a miniscule roughness so it doesn&#39;t get contracted</span>
+        <span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">slab_thick</span>
+        <span class="n">slabs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">slabs</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2017, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

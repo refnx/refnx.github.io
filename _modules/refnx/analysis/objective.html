@@ -1,0 +1,987 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.analysis.objective &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.13.dev0+8d6438f',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.analysis.objective</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize._numdiff</span> <span class="k">import</span> <span class="n">approx_derivative</span>
+
+<span class="kn">from</span> <span class="nn">refnx.util</span> <span class="k">import</span> <span class="n">ErrorProp</span> <span class="k">as</span> <span class="n">EP</span>
+<span class="kn">from</span> <span class="nn">refnx._lib</span> <span class="k">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">approx_hess2</span>
+<span class="kn">from</span> <span class="nn">refnx._lib</span> <span class="k">import</span> <span class="n">unique</span> <span class="k">as</span> <span class="n">f_unique</span>
+<span class="kn">from</span> <span class="nn">refnx.dataset</span> <span class="k">import</span> <span class="n">Data1D</span>
+<span class="kn">from</span> <span class="nn">refnx.analysis</span> <span class="k">import</span> <span class="p">(</span><span class="n">is_parameter</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">possibly_create_parameter</span><span class="p">,</span>
+                            <span class="n">is_parameters</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BaseObjective"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective">[docs]</a><span class="k">class</span> <span class="nc">BaseObjective</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Don&#39;t necessarily have to use Parameters, could use np.array&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">lnlike</span><span class="p">,</span> <span class="n">lnprior</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fcn_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">fcn_kwds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nvary</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lnlike</span> <span class="o">=</span> <span class="n">lnlike</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lnprior</span> <span class="o">=</span> <span class="n">lnprior</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fcn_args</span> <span class="o">=</span> <span class="n">fcn_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">fcn_kwds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span> <span class="o">=</span> <span class="n">fcn_kwds</span>
+
+<div class="viewcode-block" id="BaseObjective.setp"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.setp">[docs]</a>    <span class="k">def</span> <span class="nf">setp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the parameters from pvals</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : np.ndarray</span>
+<span class="sd">            Array containing the values to be tested.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pvals</span></div>
+
+<div class="viewcode-block" id="BaseObjective.nll"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.nll">[docs]</a>    <span class="k">def</span> <span class="nf">nll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Negative log-likelihood function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : np.ndarray</span>
+<span class="sd">            Array containing the values to be tested.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        nll : float</span>
+<span class="sd">            negative log-likelihood</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">if</span> <span class="n">pvals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">pvals</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lnlike</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseObjective.lnprior"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.lnprior">[docs]</a>    <span class="k">def</span> <span class="nf">lnprior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log-prior probability function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : np.ndarray</span>
+<span class="sd">            Array containing the values to be tested.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnprior : float</span>
+<span class="sd">            log-prior probability</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">if</span> <span class="n">pvals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">pvals</span>
+
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnprior</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnprior</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">fcn_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="BaseObjective.lnlike"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.lnlike">[docs]</a>    <span class="k">def</span> <span class="nf">lnlike</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log-likelihood probability function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : np.ndarray</span>
+<span class="sd">            Array containing the values to be tested.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnlike : float</span>
+<span class="sd">            log-likelihood probability.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">if</span> <span class="n">pvals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">pvals</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnlike</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">fcn_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseObjective.lnprob"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.lnprob">[docs]</a>    <span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log-probability function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : np.ndarray</span>
+<span class="sd">            Array containing the values to be tested.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnprob : float</span>
+<span class="sd">            log-probability.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The log probability is the sum is the sum of the log-prior and</span>
+<span class="sd">        log-likelihood probabilities. Does not set the parameter attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">if</span> <span class="n">pvals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">pvals</span>
+
+        <span class="n">lnprob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnprior</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lnprob</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">lnprob</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnlike</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lnprob</span></div>
+
+<div class="viewcode-block" id="BaseObjective.varying_parameters"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.varying_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">varying_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        varying_parameters : np.ndarray</span>
+<span class="sd">            The parameters varying in this objective function.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span></div>
+
+<div class="viewcode-block" id="BaseObjective.covar"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.BaseObjective.covar">[docs]</a>    <span class="k">def</span> <span class="nf">covar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        covar : np.ndarray</span>
+<span class="sd">            The covariance matrix for the fitting system</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">())</span>
+        <span class="n">hess</span> <span class="o">=</span> <span class="n">approx_hess2</span><span class="p">(</span><span class="n">_pvals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nll</span><span class="p">)</span>
+        <span class="n">covar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hess</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">_pvals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">covar</span></div></div>
+
+
+<div class="viewcode-block" id="Objective"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective">[docs]</a><span class="k">class</span> <span class="nc">Objective</span><span class="p">(</span><span class="n">BaseObjective</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Objective function for using with curvefitters such as</span>
+<span class="sd">    `refnx.analysis.curvefitter.CurveFitter`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : refnx.analysis.Model</span>
+<span class="sd">        the generative model function. One can also provide an object that</span>
+<span class="sd">        inherits `refnx.analysis.Model`.</span>
+<span class="sd">    data : refnx.dataset.Data1D</span>
+<span class="sd">        data to be analysed.</span>
+<span class="sd">    lnsigma : float or refnx.analysis.Parameter, optional</span>
+<span class="sd">        the experimental uncertainty (`data.y_err`) is multiplied by</span>
+<span class="sd">        `exp(lnsigma)`. Used when the experimental uncertainty is</span>
+<span class="sd">        underestimated.</span>
+<span class="sd">    use_weights : bool</span>
+<span class="sd">        use experimental uncertainty in calculation of residuals and</span>
+<span class="sd">        lnlike, if available. If this is set to False, then you should also</span>
+<span class="sd">        set `self.lnsigma.vary = False`, it will have no effect on the fit.</span>
+<span class="sd">    transform : callable, optional</span>
+<span class="sd">        the model, data and data uncertainty are transformed by this</span>
+<span class="sd">        function before calculating the likelihood/residuals. Has the</span>
+<span class="sd">        signature `transform(data.x, y, y_err=None)`, returning the tuple</span>
+<span class="sd">        (`transformed_y, transformed_y_err`).</span>
+<span class="sd">    lnprob_extra : callable, optional</span>
+<span class="sd">        user specifiable log-probability term. This contribution is in</span>
+<span class="sd">        addition to the log-prior term of the `model` parameters, and</span>
+<span class="sd">        `model.lnprob`, as well as the log-likelihood of the `data`. Has</span>
+<span class="sd">        signature:</span>
+<span class="sd">        `lnprob_extra(model, data)`. The `model` will already possess</span>
+<span class="sd">        updated parameters. Beware of including the same log-probability</span>
+<span class="sd">        terms more than once.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    For parallelisation `lnprob_extra` needs to be picklable.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">lnsigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">use_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lnprob_extra</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># lnsigma is a parameter for underestimated errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="c1"># should be a Data1D instance</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data1D</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_parameter</span><span class="p">(</span><span class="n">lnsigma</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lnsigma</span> <span class="o">=</span> <span class="n">lnsigma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lnsigma</span> <span class="o">=</span> <span class="n">lnsigma</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_weights</span> <span class="o">=</span> <span class="n">use_weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lnprob_extra</span> <span class="o">=</span> <span class="n">lnprob_extra</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{:_&gt;80}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Objective - </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+
+        <span class="c1"># dataset name</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Dataset = </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Dataset = </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;datapoints = </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;chi2 = </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chisqr</span><span class="p">()))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Weighted = </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weighted</span><span class="p">))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Transform = </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weighted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **bool** does the data have weights (`data.y_err`)?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">weighted</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">npoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **int** the number of points in the dataset.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">size</span>
+
+<div class="viewcode-block" id="Objective.varying_parameters"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.varying_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">varying_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        varying_parameters : refnx.analysis.Parameters</span>
+<span class="sd">            The varying Parameter objects allowed to vary during the fit.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># create and return a Parameters object because it has the</span>
+        <span class="c1"># __array__ method, which allows one to quickly get numerical values.</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">f_unique</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">))</span>
+                  <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">vary</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">p</span></div>
+
+    <span class="k">def</span> <span class="nf">_data_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_weights</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">weighted</span>
+
+        <span class="k">if</span> <span class="n">weight</span><span class="p">:</span>
+            <span class="n">y_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">y_err</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnsigma</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y_err</span> <span class="o">=</span> <span class="mf">1.</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">model</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+            <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">weight</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">model</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">model</span>
+
+<div class="viewcode-block" id="Objective.generative"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.generative">[docs]</a>    <span class="k">def</span> <span class="nf">generative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the generative (dependent variable) function associated with</span>
+<span class="sd">        the model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model : np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x_err</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Objective.residuals"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the residuals for a given fitting system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        residuals : np.ndarray</span>
+<span class="sd">            Residuals, `(data.y - model) / y_err`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x_err</span><span class="p">)</span>
+        <span class="c1"># TODO add in varying parameter residuals? (z-scores...)</span>
+
+        <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_transform</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_err</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Objective.chisqr"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.chisqr">[docs]</a>    <span class="k">def</span> <span class="nf">chisqr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the chi-squared value for a given fitting system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        chisqr : np.ndarray</span>
+<span class="sd">            Chi-squared value, `np.sum(residuals**2)`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO reduced chisqr? include z-scores for parameters? DOF?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`refnx.analysis.Parameters`, all the Parameters contained in the</span>
+<span class="sd">        fitting system.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">is_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnsigma</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnsigma</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+
+<div class="viewcode-block" id="Objective.setp"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.setp">[docs]</a>    <span class="k">def</span> <span class="nf">setp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the parameters from pvals</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pvals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># set here rather than delegating to a Parameters</span>
+        <span class="c1"># object, because it may not necessarily be a</span>
+        <span class="c1"># Parameters object</span>
+        <span class="n">_varying_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">_varying_parameters</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_varying_parameters</span><span class="p">):</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">pvals</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">return</span>
+
+        <span class="c1"># values supplied are enough to specify all parameter values</span>
+        <span class="c1"># even those that are repeated</span>
+        <span class="n">flattened_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">flattened_parameters</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flattened_parameters</span><span class="p">):</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">pvals</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">return</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incorrect number of values supplied, supply either&#39;</span>
+                         <span class="s1">&#39; the full number of parameters, or only the varying&#39;</span>
+                         <span class="s1">&#39; parameters.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Objective.lnprior"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.lnprior">[docs]</a>    <span class="k">def</span> <span class="nf">lnprior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the log-prior of the system</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnprior : float</span>
+<span class="sd">            log-prior probability</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The log-prior is calculated as:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            lnprior = np.sum(param.lnprob() for param in</span>
+<span class="sd">                             self.varying_parameters())</span>
+<span class="sd">            lnprior += self.model.lnprob()</span>
+<span class="sd">            lnprior += self.lnprob_extra(self.model, self.data)</span>
+
+<span class="sd">        The major components of the log-prior probability are from the varying</span>
+<span class="sd">        parameters and the Model used to construct the Objective.</span>
+<span class="sd">        `self.model.lnprob` should not include any contributions from</span>
+<span class="sd">        `self.model.parameters` otherwise they&#39;ll be counted more than once.</span>
+<span class="sd">        The same argument applies to the user specifiable `lnprob_extra`</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="n">lnprior</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">lnprob</span><span class="p">()</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lnprior</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="n">lnprior</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lnprob</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lnprior</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnprob_extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lnprior</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnprob_extra</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lnprior</span></div>
+
+<div class="viewcode-block" id="Objective.lnlike"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.lnlike">[docs]</a>    <span class="k">def</span> <span class="nf">lnlike</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the log-likelhood of the system</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnlike : float</span>
+<span class="sd">            log-likelihood probability</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The log-likelihood is calculated as:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            lnlike = -0.5 * np.sum((y - model / y_err)**2 + np.log(y_err**2))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x_err</span><span class="p">)</span>
+
+        <span class="n">lnlike</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_transform</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="c1"># TODO do something sensible if data isn&#39;t weighted</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_weights</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">weighted</span><span class="p">:</span>
+            <span class="c1"># ignoring 2 * pi constant</span>
+            <span class="n">lnlike</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">lnlike</span> <span class="o">+=</span> <span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_err</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="c1"># nans play havoc</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">lnlike</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Objective.lnlike encountered a NaN&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lnlike</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Objective.nll"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.nll">[docs]</a>    <span class="k">def</span> <span class="nf">nll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Negative log-likelihood function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        nll : float</span>
+<span class="sd">            negative log-likelihood</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lnlike</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Objective.lnprob"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.lnprob">[docs]</a>    <span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the log-probability of the curvefitting system</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnprob : float</span>
+<span class="sd">            log-probability</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The overall log-probability is the sum of the log-prior and</span>
+<span class="sd">        log-likelihood. The log-likelihood is not calculated if the log-prior</span>
+<span class="sd">        is impossible (`lnprior == -np.inf`).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+        <span class="n">lnprob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnprior</span><span class="p">()</span>
+
+        <span class="c1"># only calculate the probability if the parameters have finite</span>
+        <span class="c1"># log-prior</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lnprob</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="n">lnprob</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnlike</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">lnprob</span></div>
+
+<div class="viewcode-block" id="Objective.covar"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.covar">[docs]</a>    <span class="k">def</span> <span class="nf">covar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimates the covariance matrix of the curvefitting system.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        covar : np.ndarray</span>
+<span class="sd">            Covariance matrix</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">())</span>
+
+        <span class="c1"># hess = nd.Hessian(self.chisqr)(_pvals)</span>
+
+        <span class="c1"># if the initial attempt with unscaled values fails, than fallover</span>
+        <span class="c1"># to situation where we scale the parameters to 1. The initial attempt</span>
+        <span class="c1"># could fail, for example, if the data is scaled with a log10</span>
+        <span class="c1"># transform. If the nd.MaxStepGenerator makes some points negative then</span>
+        <span class="c1"># the transform will complain because it&#39;s trying to take the log of a</span>
+        <span class="c1"># negative number. By scaling the pvals to 1 in the Jacobian</span>
+        <span class="c1"># calculation we can get around this because the stepper won&#39;t make any</span>
+        <span class="c1"># of the parameter values change sign (step too small).</span>
+        <span class="n">used_residuals_scaler</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">def</span> <span class="nf">residuals_scaler</span><span class="p">(</span><span class="n">vals</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">_pvals</span> <span class="o">*</span> <span class="n">vals</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">):</span>
+                <span class="n">jac</span> <span class="o">=</span> <span class="n">approx_derivative</span><span class="p">(</span><span class="n">residuals_scaler</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">_pvals</span><span class="p">))</span>
+            <span class="n">used_residuals_scaler</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">FloatingPointError</span><span class="p">:</span>
+            <span class="n">jac</span> <span class="o">=</span> <span class="n">approx_derivative</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">,</span> <span class="n">_pvals</span><span class="p">)</span>
+
+        <span class="c1"># if len(_pvals) == 1:</span>
+        <span class="c1">#     jac = jac.T</span>
+
+        <span class="c1"># need to create this because GlobalObjective does not have</span>
+        <span class="c1"># access to all the datapoints being fitted.</span>
+        <span class="n">n_datapoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">jac</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># covar = J.T x J.</span>
+        <span class="c1"># not sure why this is preferred over Hessian</span>
+        <span class="n">covar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">jac</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">jac</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">used_residuals_scaler</span><span class="p">:</span>
+            <span class="c1"># unwind the scaling.</span>
+            <span class="n">covar</span> <span class="o">*=</span> <span class="n">_pvals</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">_pvals</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span>
+
+        <span class="c1"># scale by reduced chi2 if experimental uncertainties weren&#39;t used.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_weights</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weighted</span><span class="p">):</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chisqr</span><span class="p">()</span> <span class="o">/</span>
+                     <span class="p">(</span><span class="n">n_datapoints</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">())))</span>
+
+        <span class="k">return</span> <span class="n">covar</span> <span class="o">*</span> <span class="n">scale</span></div>
+
+<div class="viewcode-block" id="Objective.pgen"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.pgen">[docs]</a>    <span class="k">def</span> <span class="nf">pgen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ngen</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nburn</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nthin</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Yield random parameter vectors (only those varying) from the MCMC</span>
+<span class="sd">        samples. The objective state is not altered.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ngen : int, optional</span>
+<span class="sd">            the number of samples to yield. The actual number of samples</span>
+<span class="sd">            yielded is `min(ngen, chain.size)`</span>
+<span class="sd">        nburn : int, optional</span>
+<span class="sd">            discard this many steps from the start of the chain</span>
+<span class="sd">        nthin : int, optional</span>
+<span class="sd">            only accept every `nthin` samples from the chain</span>
+
+<span class="sd">        Yields</span>
+<span class="sd">        ------</span>
+<span class="sd">        pvec : np.ndarray</span>
+<span class="sd">            A randomly chosen parameter vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">chain</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">nburn</span><span class="p">::</span><span class="n">nthin</span><span class="p">])</span> <span class="k">for</span> <span class="n">param</span>
+                           <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">()</span>
+                           <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chains</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying_parameters</span><span class="p">())</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">chains</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You need to perform sampling on all the varying&quot;</span>
+                             <span class="s2">&quot;parameters first&quot;</span><span class="p">)</span>
+
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">chains</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span>
+                                   <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">ngen</span><span class="p">,</span> <span class="n">samples</span><span class="o">.</span><span class="n">size</span><span class="p">),),</span>
+                                   <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">chains</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">choice</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Objective.plot"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Objective.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the data/model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : np.ndarray, optional</span>
+<span class="sd">            Numeric values for the Parameter&#39;s that are varying</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fig, ax : :class:`matplotlib.Figure`, :class:`matplotlib.Axes`</span>
+<span class="sd">            `matplotlib` figure and axes objects.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+        <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_transform</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generative</span><span class="p">())</span>
+
+        <span class="c1"># add the data (in a transformed fashion)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">y_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_weights</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="c1"># add the fit</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div></div>
+
+
+<div class="viewcode-block" id="GlobalObjective"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.GlobalObjective">[docs]</a><span class="k">class</span> <span class="nc">GlobalObjective</span><span class="p">(</span><span class="n">Objective</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Global Objective function for simultaneous fitting with</span>
+<span class="sd">    `refnx.analysis.CurveFitter`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    objectives : list</span>
+<span class="sd">        list of :class:`refnx.analysis.Objective` objects</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectives</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="n">objectives</span>
+        <span class="n">weighted</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">use_weights</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">objective</span> <span class="ow">in</span> <span class="n">objectives</span><span class="p">:</span>
+            <span class="n">weighted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">weighted</span><span class="p">)</span>
+            <span class="n">use_weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">use_weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weighted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weighted</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">use_weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_weights</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weighted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of the GlobalObjective.objectives wants to &quot;</span>
+                             <span class="s2">&quot;use_weights, but not all the individual &quot;</span>
+                             <span class="s2">&quot;objectives supplied weights&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{:_&gt;80}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)]</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--Global Objective--&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">use_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **bool** is data weighting being used for all the objectives?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_weights</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weighted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **bool** do all the datasets have y_err?</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weighted</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">npoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **int** number of data points in all the objectives.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">npoints</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">objective</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span>
+            <span class="n">npoints</span> <span class="o">+=</span> <span class="n">objective</span><span class="o">.</span><span class="n">npoints</span>
+        <span class="k">return</span> <span class="n">npoints</span>
+
+<div class="viewcode-block" id="GlobalObjective.residuals"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.GlobalObjective.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenated residuals for each of the</span>
+<span class="sd">        :meth:`refnx.analysis.Objective.residuals`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        residuals : np.ndarray</span>
+<span class="sd">            Concatenated :meth:`refnx.analysis.Objective.residuals`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="n">residuals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">objective</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">objective</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
+            <span class="n">residuals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`refnx.analysis.Parameters` associated with all the objectives.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO this is probably going to be slow.</span>
+        <span class="c1"># cache and update strategy?</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;global fitting parameters&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">objective</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">p</span>
+
+<div class="viewcode-block" id="GlobalObjective.lnprior"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.GlobalObjective.lnprior">[docs]</a>    <span class="k">def</span> <span class="nf">lnprior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the log-prior of the system</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters, optional</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnprior : float</span>
+<span class="sd">            log-prior probability</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+
+        <span class="n">lnprior</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">objective</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span>
+            <span class="n">lnprior</span> <span class="o">+=</span> <span class="n">objective</span><span class="o">.</span><span class="n">lnprior</span><span class="p">()</span>
+            <span class="c1"># shortcut if one of the priors is impossible</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lnprior</span><span class="p">):</span>
+                <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="k">return</span> <span class="n">lnprior</span></div>
+
+<div class="viewcode-block" id="GlobalObjective.lnlike"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.GlobalObjective.lnlike">[docs]</a>    <span class="k">def</span> <span class="nf">lnlike</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the log-likelhood of the system</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvals : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            values for the varying or entire set of parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnlike : float</span>
+<span class="sd">            log-likelihood probability</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+        <span class="n">lnlike</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="k">for</span> <span class="n">objective</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">:</span>
+            <span class="n">lnlike</span> <span class="o">+=</span> <span class="n">objective</span><span class="o">.</span><span class="n">lnlike</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">lnlike</span></div></div>
+
+
+<div class="viewcode-block" id="Transform"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.objective.Transform">[docs]</a><span class="k">class</span> <span class="nc">Transform</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mathematical transforms of numeric data</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    form : None or str</span>
+<span class="sd">        One of:</span>
+
+<span class="sd">            - &#39;lin&#39;</span>
+<span class="sd">                No transform is made</span>
+<span class="sd">            - &#39;logY&#39;</span>
+<span class="sd">                log10 transform</span>
+<span class="sd">            - &#39;YX4&#39;</span>
+<span class="sd">                YX**4 transform</span>
+<span class="sd">            - &#39;YX2&#39;</span>
+<span class="sd">                YX**2 transform</span>
+<span class="sd">            - None</span>
+<span class="sd">                No transform is made</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    You ask for a transform to be carried out by calling the Transform object</span>
+<span class="sd">    directly.</span>
+
+<span class="sd">    &gt;&gt;&gt; t = Transform(&#39;logY&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; y, e = t(x, y, y_err)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;lin&#39;</span><span class="p">,</span> <span class="s1">&#39;logY&#39;</span><span class="p">,</span> <span class="s1">&#39;YX4&#39;</span><span class="p">,</span> <span class="s1">&#39;YX2&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The form parameter must be one of [None, &#39;lin&#39;,&quot;</span>
+                             <span class="s2">&quot; &#39;logY&#39;, &#39;YX4&#39;, &#39;YX2&#39;]&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="o">=</span><span class="n">y_err</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform the data passed in</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array-like</span>
+
+<span class="sd">        y : array-like</span>
+
+<span class="sd">        y_err : array-like</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        yt, et : tuple</span>
+<span class="sd">            The transformed data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">y_err</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">etemp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">etemp</span> <span class="o">=</span> <span class="n">y_err</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lin&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+            <span class="n">yt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">et</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">etemp</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;logY&#39;</span><span class="p">:</span>
+            <span class="n">yt</span><span class="p">,</span> <span class="n">et</span> <span class="o">=</span> <span class="n">EP</span><span class="o">.</span><span class="n">EPlog10</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">etemp</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;YX4&#39;</span><span class="p">:</span>
+            <span class="n">yt</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">et</span> <span class="o">=</span> <span class="n">etemp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="s1">&#39;YX2&#39;</span><span class="p">:</span>
+            <span class="n">yt</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">et</span> <span class="o">=</span> <span class="n">etemp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">y_err</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yt</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">yt</span><span class="p">,</span> <span class="n">et</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2017, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

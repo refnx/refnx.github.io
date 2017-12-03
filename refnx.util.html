@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.util package &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.util package &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,24 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -102,8 +105,9 @@
 
 <dl class="function">
 <dt id="refnx.util.ErrorProp.EPpowk">
-<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPpowk</code><span class="sig-paren">(</span><em>k</em>, <em>A * n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpowk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPpowk" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">refnx.util.ErrorProp.</code><code class="descname">EPpowk</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpowk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.ErrorProp.EPpowk" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = pow(k, A * n)</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="refnx.util.ErrorProp.EPsin">
@@ -135,32 +139,19 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
-<blockquote>
-<div><p>opening of first collimation slit</p>
-</div></blockquote>
-<p><strong>d2: float</strong></p>
-<blockquote>
-<div><p>opening of second collimation slit</p>
-</div></blockquote>
-<p><strong>L12: float</strong></p>
-<blockquote>
-<div><p>distance between first and second collimation slits</p>
-</div></blockquote>
-<p><strong>L2S: float</strong></p>
-<blockquote>
-<div><p>distance from second collimation slit to sample</p>
-</div></blockquote>
-<p><strong>angle: float</strong></p>
-<blockquote>
-<div><p>angle of incidence of sample (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of first collimation slit</li>
+<li><strong>d2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of second collimation slit</li>
+<li><strong>L12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between first and second collimation slits</li>
+<li><strong>L2S</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance from second collimation slit to sample</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence of sample (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra_footprint, penumbra_footprint): float, float</p>
-<blockquote class="last">
-<div><p>Footprint of the umbra and penumbra</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>(umbra_footprint, penumbra_footprint)</strong> – Footprint of the umbra and penumbra</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -170,9 +161,25 @@
 <dl class="function">
 <dt id="refnx.util.general.angle">
 <code class="descclassname">refnx.util.general.</code><code class="descname">angle</code><span class="sig-paren">(</span><em>q</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.angle" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate angle given Q and wavelength
-q - wavevector (A^-1)
-wavelength -  wavelength of radiation (Angstrom)</p>
+<dd><p>calculate angle given Q and wavelength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavevector (A**-1)</li>
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavelength of radiation (A)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>angle</strong> – angle of incidence (degrees)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -183,24 +190,17 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>FWHM: float</strong></p>
-<blockquote>
-<div><p>The FWHM of the beam height</p>
-</div></blockquote>
-<p><strong>length: float</strong></p>
-<blockquote>
-<div><p>Length of the sample in mm</p>
-</div></blockquote>
-<p><strong>angle: float</strong></p>
-<blockquote>
-<div><p>Angle that the sample makes w.r.t the beam (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>FWHM</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The FWHM of the beam height</li>
+<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Length of the sample in mm</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Angle that the sample makes w.r.t the beam (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">beamfrac: float</p>
-<blockquote class="last">
-<div><p>The fraction of the beam that intercepts the sample</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>beamfrac</strong> – The fraction of the beam that intercepts the sample</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -215,28 +215,18 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>kernelx: array-like</strong></p>
-<blockquote>
-<div><p>x axis for the probability kernel</p>
-</div></blockquote>
-<p><strong>kernely: array-like</strong></p>
-<blockquote>
-<div><p>probability kernel describing the intensity distribution of the beam</p>
-</div></blockquote>
-<p><strong>length: float</strong></p>
-<blockquote>
-<div><p>length of the sample</p>
-</div></blockquote>
-<p><strong>angle: float</strong></p>
-<blockquote>
-<div><p>angle of incidence (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>kernelx</strong> (<em>array-like</em>) – x axis for the probability kernel</li>
+<li><strong>kernely</strong> (<em>array-like</em>) – probability kernel describing the intensity distribution of the beam</li>
+<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – length of the sample</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">fraction: float</p>
-<blockquote class="last">
-<div><p>The fraction of the beam intercepted by a sample.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fraction</strong> – The fraction of the beam intercepted by a sample.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -251,40 +241,27 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1</strong> : float</p>
-<blockquote>
-<div><p>slit 1 opening</p>
-</div></blockquote>
-<p><strong>d2</strong> : float</p>
-<blockquote>
-<div><p>slit 2 opening</p>
-</div></blockquote>
-<p><strong>L12</strong> : float</p>
-<blockquote>
-<div><p>distance between slits</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – slit 1 opening</li>
+<li><strong>d2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – slit 2 opening</li>
+<li><strong>L12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between slits</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dtheta, alpha, beta</p>
-<blockquote>
-<div><p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>dtheta, alpha, beta</em> – dtheta is the FWHM of the Gaussian approximation to the trapezoidal
 resolution function
 alpha is the angular divergence of the penumbra
-beta is the angular divergence of the umbra</p>
-</div></blockquote>
-<p>When calculating dtheta / theta values for resolution, then dtheta is the</p>
-<p>value you need to use.</p>
-<p>See equations 11-14 in <a class="reference internal" href="#r3" id="id1">[R3]</a>.</p>
-<table class="docutils citation" frame="void" id="r3" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[R3]</a></td><td><p class="first last">de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
-</td></tr>
-</tbody>
-</table>
-<p>Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</p>
-<p>reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</p>
-<p class="last">Research A, 1995, 362, 434-453</p>
+beta is the angular divergence of the umbra</li>
+<li><em>When calculating dtheta / theta values for resolution, then dtheta is the</em></li>
+<li><em>value you need to use.</em></li>
+<li><em>See equations 11-14 in [1]_.</em></li>
+<li><em>.. [1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.;</em></li>
+<li><em>van der Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the</em></li>
+<li><em>neutron reflectometer at IRI Delft Nuclear Instruments and Methods in</em></li>
+<li><em>Physics Research A, 1995, 362, 434-453</em></li>
+</ul>
+</p>
 </td>
 </tr>
 </tbody>
@@ -300,29 +277,19 @@ without getting frame overlap in a chopper spectrometer.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>min_wavelength: float</strong></p>
-<blockquote>
-<div><p>minimum wavelength to be used</p>
-</div></blockquote>
-<p><strong>max_wavelength: float</strong></p>
-<blockquote>
-<div><p>maximum wavelength to be used</p>
-</div></blockquote>
-<p><strong>L: float</strong></p>
-<blockquote>
-<div><p>Flight length of instrument (m)</p>
-</div></blockquote>
-<p><strong>N: float, optional</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>min_wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – minimum wavelength to be used</li>
+<li><strong>max_wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – maximum wavelength to be used</li>
+<li><strong>L</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Flight length of instrument (m)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – number of windows in chopper pair</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">max_freq: float</p>
-<blockquote class="last">
-<div><p>The maximum frequency a double chopper system can use to avoid frame
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>max_freq</strong> – The maximum frequency a double chopper system can use to avoid frame
 overlap.</p>
-</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -337,17 +304,11 @@ overlap.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
-<blockquote>
-<div><p>Energy in meV.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>energy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Energy in meV.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
-<blockquote class="last">
-<div><p>Wavelength in Angstrom.</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>wavelength</strong> – Wavelength in Angstrom.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -357,40 +318,34 @@ overlap.</p>
 <dt id="refnx.util.general.height_of_beam_after_dx">
 <code class="descclassname">refnx.util.general.</code><code class="descname">height_of_beam_after_dx</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>distance</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#height_of_beam_after_dx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.height_of_beam_after_dx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the widths of beam a given distance away from a collimation slit.</p>
-<p>if distance &gt;= 0, then it&#8217;s taken to be the distance after d2.
-if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
+<p>if distance &gt;= 0, then it’s taken to be the distance after d2.
+if distance &lt; 0, then it’s taken to be the distance before d1.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
-<blockquote>
-<div><p>opening of first collimation slit</p>
-</div></blockquote>
-<p><strong>d2: float</strong></p>
-<blockquote>
-<div><p>opening of second collimation slit</p>
-</div></blockquote>
-<p><strong>L12: float</strong></p>
-<blockquote>
-<div><p>distance between first and second collimation slits</p>
-</div></blockquote>
-<p><strong>distance: float</strong></p>
-<blockquote>
-<div><p>distance from first or last slit to a given position</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra, penumbra): float, float</p>
-<blockquote class="last">
-<div><p>height of umbra and penumbra</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>d1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of first collimation slit</li>
+<li><strong>d2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of second collimation slit</li>
+<li><strong>L12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between first and second collimation slits</li>
+<li><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance from first or last slit to a given position</li>
+</ul>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
 <p>Units - equivalent distances (inches, mm, light years)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>(umbra, penumbra)</strong> – height of umbra and penumbra</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -401,17 +356,16 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>qq: float</strong></p>
-<blockquote>
-<div><p>Q values to calculate the penetration depth at</p>
-</div></blockquote>
-<p><strong>rho: float or complex</strong></p>
-<blockquote>
-<div><p>Complex SLD of material</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>qq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Q values to calculate the penetration depth at</li>
+<li><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#complex" title="(in Python v3.6)"><em>complex</em></a>) – Complex SLD of material</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">penetration_depth: float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>penetration_depth</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -426,24 +380,53 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>angle: float</strong></p>
-<blockquote>
-<div><p>angle of incidence (degrees)</p>
-</div></blockquote>
-<p><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength of radiation (Angstrom)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence (degrees)</li>
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength of radiation (Angstrom)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Q: float</p>
-<blockquote class="last">
-<div><p>Momentum transfer (A**-1)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Q</strong> – Momentum transfer (A**-1)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.general.q2">
+<code class="descclassname">refnx.util.general.</code><code class="descname">q2</code><span class="sig-paren">(</span><em>omega</em>, <em>twotheta</em>, <em>phi</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#q2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.q2" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert angles and wavelength (lambda) to Q vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>omega</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence of beam (in xy plane)</li>
+<li><strong>twotheta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle between direct beam and projected reflected beam onto yz plane</li>
+<li><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle between reflected beam and yz plane.</li>
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Qx, Qy, Qz</strong> – Momentum transfer in A**-1.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>coordinate system:
+y - along beam direction (in small angle approximation)
+x - transverse to beam direction, in plane of sample
+z - normal to sample plane.
+the xy plane is equivalent to the sample plane.</p>
+<p>TODO: check</p>
 </dd></dl>
 
 <dl class="function">
@@ -454,20 +437,16 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>SLD1: float</strong></p>
-<blockquote>
-<div><p>SLD of superphase (10^-6 A^-2)</p>
-</div></blockquote>
-<p><strong>SLD2: float</strong></p>
-<blockquote>
-<div><p>SLD of subphase (10^-6 A^-2)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>SLD1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – SLD of superphase (10^-6 A^-2)</li>
+<li><strong>SLD2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – SLD of subphase (10^-6 A^-2)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">qc: float</p>
-<blockquote class="last">
-<div><p>Critical Q vector for a reflectivity system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>qc</strong> – Critical Q vector for a reflectivity system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -482,48 +461,23 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>z0: float</strong></p>
-<blockquote>
-<div><p>distance between chopper pair (m)</p>
-</div></blockquote>
-<p><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote>
-<div><p>height of beam (m)</p>
-</div></blockquote>
-<p><strong>xsi: float</strong></p>
-<blockquote>
-<div><p>phase opening of chopper pair (degrees)</p>
-</div></blockquote>
-<p><strong>L: float</strong></p>
-<blockquote>
-<div><p>Flight length of instrument (m)</p>
-</div></blockquote>
-<p><strong>tau_da</strong> : float</p>
-<blockquote>
-<div><p>Width of timebin (s)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between chopper pair (m)</li>
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper pair</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+<li><strong>xsi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – phase opening of chopper pair (degrees)</li>
+<li><strong>L</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Flight length of instrument (m)</li>
+<li><strong>tau_da</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Width of timebin (s)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">res: float</p>
-<blockquote class="last">
-<div><p>Fractional wavelength resolution of a double chopper system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>res</strong> – Fractional wavelength resolution of a double chopper system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -538,40 +492,21 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote>
-<div><p>height of beam (m)</p>
-</div></blockquote>
-<p><strong>phi: float</strong></p>
-<blockquote>
-<div><p>angular opening of chopper window (degrees)</p>
-</div></blockquote>
-<p><strong>L: float</strong></p>
-<blockquote>
-<div><p>Flight length of instrument (m)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+<li><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angular opening of chopper window (degrees)</li>
+<li><strong>L</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Flight length of instrument (m)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
-<blockquote class="last">
-<div><p>Transmission of a single chopper system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>transmission</strong> – Transmission of a single chopper system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -581,7 +516,8 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <dl class="function">
 <dt id="refnx.util.general.slit_optimiser">
 <code class="descclassname">refnx.util.general.</code><code class="descname">slit_optimiser</code><span class="sig-paren">(</span><em>footprint</em>, <em>resolution</em>, <em>angle=1.0</em>, <em>L12=2859.5</em>, <em>L2S=180</em>, <em>LS3=290.5</em>, <em>LSD=2500</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#slit_optimiser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.general.slit_optimiser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optimise slit settings for a given angular resolution, and a given footprint.</p>
+<dd><p>Optimise slit settings for a given angular resolution, and a given
+footprint.</p>
 <dl class="docutils">
 <dt>footprint: float</dt>
 <dd>maximum footprint onto sample (mm)</dd>
@@ -600,28 +536,18 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>z0: float</strong></p>
-<blockquote>
-<div><p>distance between chopper pair (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>xsi: float</strong></p>
-<blockquote>
-<div><p>phase opening of chopper pair (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between chopper pair (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>xsi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – phase opening of chopper pair (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tauC: float</p>
-<blockquote class="last">
-<div><p>The burst time of a double chopper pair (s)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tauC</strong> – The burst time of a double chopper pair (s)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -642,40 +568,21 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>z0: float</strong></p>
-<blockquote>
-<div><p>distance between chopper pair (m)</p>
-</div></blockquote>
-<p><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote>
-<div><p>height of beam (m)</p>
-</div></blockquote>
-<p><strong>xsi: float</strong></p>
-<blockquote>
-<div><p>phase opening of chopper pair (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between chopper pair (m)</li>
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper pair</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+<li><strong>xsi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – phase opening of chopper pair (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
-<blockquote class="last">
-<div><p>The transmission of a double chopper system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>transmission</strong> – The transmission of a double chopper system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -696,22 +603,12 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>phi: float</strong></p>
-<blockquote>
-<div><p>angular opening of chopper disc (degrees)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote class="last">
-<div><p>height of beam (m)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angular opening of chopper disc (degrees)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper pair</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -732,17 +629,11 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>velocity: float</strong></p>
-<blockquote>
-<div><p>velocity of neutron in m/s</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>velocity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – velocity of neutron in m/s</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">wavelength: float</p>
-<blockquote class="last">
-<div><p>wavelength of neutron in A</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>wavelength</strong> – wavelength of neutron in A</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -756,20 +647,16 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : float</p>
-<blockquote>
-<div><p>Wavevector (A**-1)</p>
-</div></blockquote>
-<p><strong>angle</strong> : float</p>
-<blockquote>
-<div><p>angle of incidence (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavevector (A**-1)</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
-<blockquote class="last">
-<div><p>Wavelength of radiation (A)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> – Wavelength of radiation (A)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -784,17 +671,11 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
-<blockquote>
-<div><p>Wavelength in Angstrom.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavelength in Angstrom.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
-<blockquote class="last">
-<div><p>Energy in meV.</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>energy</strong> – Energy in meV.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -808,17 +689,11 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength of neutron in Angstrom.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength of neutron in Angstrom.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">velocity: float</p>
-<blockquote class="last">
-<div><p>velocity of neutron in ms**-1</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>velocity</strong> – velocity of neutron in ms**-1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -848,39 +723,23 @@ first.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x0: np.ndarray</strong></p>
-<blockquote>
-<div><p>abscissae for the first dataset</p>
-</div></blockquote>
-<p><strong>y0: np.ndarray</strong></p>
-<blockquote>
-<div><p>y values for the first dataset</p>
-</div></blockquote>
-<p><strong>dy0: np.ndarray</strong></p>
-<blockquote>
-<div><p>dy (standard deviation) values for the first dataset</p>
-</div></blockquote>
-<p><strong>x1: np.ndarray</strong></p>
-<blockquote>
-<div><p>abscissae values for the second dataset</p>
-</div></blockquote>
-<p><strong>y1: np.ndarray</strong></p>
-<blockquote>
-<div><p>y values for the second dataset</p>
-</div></blockquote>
-<p><strong>dy1: np.ndarray</strong></p>
-<blockquote>
-<div><p>dy (standard deviation) values for the second dataset</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x0</strong> (<em>np.ndarray</em>) – abscissae for the first dataset</li>
+<li><strong>y0</strong> (<em>np.ndarray</em>) – y values for the first dataset</li>
+<li><strong>dy0</strong> (<em>np.ndarray</em>) – dy (standard deviation) values for the first dataset</li>
+<li><strong>x1</strong> (<em>np.ndarray</em>) – abscissae values for the second dataset</li>
+<li><strong>y1</strong> (<em>np.ndarray</em>) – y values for the second dataset</li>
+<li><strong>dy1</strong> (<em>np.ndarray</em>) – dy (standard deviation) values for the second dataset</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points): float, float, array-like</p>
-<blockquote class="last">
-<div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
-They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>(scale, dscale, overlap_points)</strong> – <cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
+They are <cite>np.nan</cite> if the abscissae ranges don’t overlap.
 <cite>overlap_points</cite> indicates the points in the <em>first</em> dataset that are
 in the overlap region.</p>
-</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, array-like</p>
 </td>
 </tr>
 </tbody>
@@ -898,17 +757,11 @@ in the overlap region.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>datasets</strong> : iterable</p>
-<blockquote>
-<div><p>strings or files identifying the datasets to plot</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datasets</strong> (<em>iterable</em>) – strings or files identifying the datasets to plot</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fig</strong> : matplotlib.figure.Figure</p>
-<blockquote class="last">
-<div><p>The figure. Use fig.show() to display</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>fig</strong> – The figure. Use fig.show() to display</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">matplotlib.figure.Figure</td>
 </tr>
 </tbody>
 </table>
@@ -973,8 +826,9 @@ in the overlap region.</p>
 
 <dl class="function">
 <dt id="refnx.util.EPpowk">
-<code class="descclassname">refnx.util.</code><code class="descname">EPpowk</code><span class="sig-paren">(</span><em>k</em>, <em>A * n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpowk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPpowk" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">refnx.util.</code><code class="descname">EPpowk</code><span class="sig-paren">(</span><em>a</em>, <em>da</em>, <em>k</em>, <em>n=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/ErrorProp.html#EPpowk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.EPpowk" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = pow(k, A * n)</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="refnx.util.EPsin">
@@ -1002,32 +856,19 @@ in the overlap region.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
-<blockquote>
-<div><p>opening of first collimation slit</p>
-</div></blockquote>
-<p><strong>d2: float</strong></p>
-<blockquote>
-<div><p>opening of second collimation slit</p>
-</div></blockquote>
-<p><strong>L12: float</strong></p>
-<blockquote>
-<div><p>distance between first and second collimation slits</p>
-</div></blockquote>
-<p><strong>L2S: float</strong></p>
-<blockquote>
-<div><p>distance from second collimation slit to sample</p>
-</div></blockquote>
-<p><strong>angle: float</strong></p>
-<blockquote>
-<div><p>angle of incidence of sample (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of first collimation slit</li>
+<li><strong>d2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of second collimation slit</li>
+<li><strong>L12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between first and second collimation slits</li>
+<li><strong>L2S</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance from second collimation slit to sample</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence of sample (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra_footprint, penumbra_footprint): float, float</p>
-<blockquote class="last">
-<div><p>Footprint of the umbra and penumbra</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>(umbra_footprint, penumbra_footprint)</strong> – Footprint of the umbra and penumbra</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1037,9 +878,25 @@ in the overlap region.</p>
 <dl class="function">
 <dt id="refnx.util.angle">
 <code class="descclassname">refnx.util.</code><code class="descname">angle</code><span class="sig-paren">(</span><em>q</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.angle" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate angle given Q and wavelength
-q - wavevector (A^-1)
-wavelength -  wavelength of radiation (Angstrom)</p>
+<dd><p>calculate angle given Q and wavelength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavevector (A**-1)</li>
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavelength of radiation (A)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>angle</strong> – angle of incidence (degrees)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -1050,24 +907,17 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>FWHM: float</strong></p>
-<blockquote>
-<div><p>The FWHM of the beam height</p>
-</div></blockquote>
-<p><strong>length: float</strong></p>
-<blockquote>
-<div><p>Length of the sample in mm</p>
-</div></blockquote>
-<p><strong>angle: float</strong></p>
-<blockquote>
-<div><p>Angle that the sample makes w.r.t the beam (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>FWHM</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The FWHM of the beam height</li>
+<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Length of the sample in mm</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Angle that the sample makes w.r.t the beam (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">beamfrac: float</p>
-<blockquote class="last">
-<div><p>The fraction of the beam that intercepts the sample</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>beamfrac</strong> – The fraction of the beam that intercepts the sample</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1082,28 +932,18 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>kernelx: array-like</strong></p>
-<blockquote>
-<div><p>x axis for the probability kernel</p>
-</div></blockquote>
-<p><strong>kernely: array-like</strong></p>
-<blockquote>
-<div><p>probability kernel describing the intensity distribution of the beam</p>
-</div></blockquote>
-<p><strong>length: float</strong></p>
-<blockquote>
-<div><p>length of the sample</p>
-</div></blockquote>
-<p><strong>angle: float</strong></p>
-<blockquote>
-<div><p>angle of incidence (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>kernelx</strong> (<em>array-like</em>) – x axis for the probability kernel</li>
+<li><strong>kernely</strong> (<em>array-like</em>) – probability kernel describing the intensity distribution of the beam</li>
+<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – length of the sample</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">fraction: float</p>
-<blockquote class="last">
-<div><p>The fraction of the beam intercepted by a sample.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fraction</strong> – The fraction of the beam intercepted by a sample.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1118,40 +958,27 @@ wavelength -  wavelength of radiation (Angstrom)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1</strong> : float</p>
-<blockquote>
-<div><p>slit 1 opening</p>
-</div></blockquote>
-<p><strong>d2</strong> : float</p>
-<blockquote>
-<div><p>slit 2 opening</p>
-</div></blockquote>
-<p><strong>L12</strong> : float</p>
-<blockquote>
-<div><p>distance between slits</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – slit 1 opening</li>
+<li><strong>d2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – slit 2 opening</li>
+<li><strong>L12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between slits</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dtheta, alpha, beta</p>
-<blockquote>
-<div><p>dtheta is the FWHM of the Gaussian approximation to the trapezoidal
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>dtheta, alpha, beta</em> – dtheta is the FWHM of the Gaussian approximation to the trapezoidal
 resolution function
 alpha is the angular divergence of the penumbra
-beta is the angular divergence of the umbra</p>
-</div></blockquote>
-<p>When calculating dtheta / theta values for resolution, then dtheta is the</p>
-<p>value you need to use.</p>
-<p>See equations 11-14 in <a class="reference internal" href="#r4" id="id2">[R4]</a>.</p>
-<table class="docutils citation" frame="void" id="r4" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[R4]</a></td><td><p class="first last">de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</p>
-</td></tr>
-</tbody>
-</table>
-<p>Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</p>
-<p>reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</p>
-<p class="last">Research A, 1995, 362, 434-453</p>
+beta is the angular divergence of the umbra</li>
+<li><em>When calculating dtheta / theta values for resolution, then dtheta is the</em></li>
+<li><em>value you need to use.</em></li>
+<li><em>See equations 11-14 in [1]_.</em></li>
+<li><em>.. [1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.;</em></li>
+<li><em>van der Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the</em></li>
+<li><em>neutron reflectometer at IRI Delft Nuclear Instruments and Methods in</em></li>
+<li><em>Physics Research A, 1995, 362, 434-453</em></li>
+</ul>
+</p>
 </td>
 </tr>
 </tbody>
@@ -1167,29 +994,19 @@ without getting frame overlap in a chopper spectrometer.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>min_wavelength: float</strong></p>
-<blockquote>
-<div><p>minimum wavelength to be used</p>
-</div></blockquote>
-<p><strong>max_wavelength: float</strong></p>
-<blockquote>
-<div><p>maximum wavelength to be used</p>
-</div></blockquote>
-<p><strong>L: float</strong></p>
-<blockquote>
-<div><p>Flight length of instrument (m)</p>
-</div></blockquote>
-<p><strong>N: float, optional</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>min_wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – minimum wavelength to be used</li>
+<li><strong>max_wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – maximum wavelength to be used</li>
+<li><strong>L</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Flight length of instrument (m)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – number of windows in chopper pair</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">max_freq: float</p>
-<blockquote class="last">
-<div><p>The maximum frequency a double chopper system can use to avoid frame
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>max_freq</strong> – The maximum frequency a double chopper system can use to avoid frame
 overlap.</p>
-</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1204,17 +1021,11 @@ overlap.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
-<blockquote>
-<div><p>Energy in meV.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>energy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Energy in meV.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
-<blockquote class="last">
-<div><p>Wavelength in Angstrom.</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>wavelength</strong> – Wavelength in Angstrom.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -1229,39 +1040,23 @@ first.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x0: np.ndarray</strong></p>
-<blockquote>
-<div><p>abscissae for the first dataset</p>
-</div></blockquote>
-<p><strong>y0: np.ndarray</strong></p>
-<blockquote>
-<div><p>y values for the first dataset</p>
-</div></blockquote>
-<p><strong>dy0: np.ndarray</strong></p>
-<blockquote>
-<div><p>dy (standard deviation) values for the first dataset</p>
-</div></blockquote>
-<p><strong>x1: np.ndarray</strong></p>
-<blockquote>
-<div><p>abscissae values for the second dataset</p>
-</div></blockquote>
-<p><strong>y1: np.ndarray</strong></p>
-<blockquote>
-<div><p>y values for the second dataset</p>
-</div></blockquote>
-<p><strong>dy1: np.ndarray</strong></p>
-<blockquote>
-<div><p>dy (standard deviation) values for the second dataset</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x0</strong> (<em>np.ndarray</em>) – abscissae for the first dataset</li>
+<li><strong>y0</strong> (<em>np.ndarray</em>) – y values for the first dataset</li>
+<li><strong>dy0</strong> (<em>np.ndarray</em>) – dy (standard deviation) values for the first dataset</li>
+<li><strong>x1</strong> (<em>np.ndarray</em>) – abscissae values for the second dataset</li>
+<li><strong>y1</strong> (<em>np.ndarray</em>) – y values for the second dataset</li>
+<li><strong>dy1</strong> (<em>np.ndarray</em>) – dy (standard deviation) values for the second dataset</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(scale, dscale, overlap_points): float, float, array-like</p>
-<blockquote class="last">
-<div><p><cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
-They are <cite>np.nan</cite> if the abscissae ranges don&#8217;t overlap.
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>(scale, dscale, overlap_points)</strong> – <cite>scale</cite> and <cite>dscale</cite> are the scaling and uncertainty in scaling factor.
+They are <cite>np.nan</cite> if the abscissae ranges don’t overlap.
 <cite>overlap_points</cite> indicates the points in the <em>first</em> dataset that are
 in the overlap region.</p>
-</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, array-like</p>
 </td>
 </tr>
 </tbody>
@@ -1272,40 +1067,34 @@ in the overlap region.</p>
 <dt id="refnx.util.height_of_beam_after_dx">
 <code class="descclassname">refnx.util.</code><code class="descname">height_of_beam_after_dx</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>L12</em>, <em>distance</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#height_of_beam_after_dx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.height_of_beam_after_dx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the widths of beam a given distance away from a collimation slit.</p>
-<p>if distance &gt;= 0, then it&#8217;s taken to be the distance after d2.
-if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
+<p>if distance &gt;= 0, then it’s taken to be the distance after d2.
+if distance &lt; 0, then it’s taken to be the distance before d1.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1: float</strong></p>
-<blockquote>
-<div><p>opening of first collimation slit</p>
-</div></blockquote>
-<p><strong>d2: float</strong></p>
-<blockquote>
-<div><p>opening of second collimation slit</p>
-</div></blockquote>
-<p><strong>L12: float</strong></p>
-<blockquote>
-<div><p>distance between first and second collimation slits</p>
-</div></blockquote>
-<p><strong>distance: float</strong></p>
-<blockquote>
-<div><p>distance from first or last slit to a given position</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(umbra, penumbra): float, float</p>
-<blockquote class="last">
-<div><p>height of umbra and penumbra</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>d1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of first collimation slit</li>
+<li><strong>d2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – opening of second collimation slit</li>
+<li><strong>L12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between first and second collimation slits</li>
+<li><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance from first or last slit to a given position</li>
+</ul>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
 <p>Units - equivalent distances (inches, mm, light years)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>(umbra, penumbra)</strong> – height of umbra and penumbra</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -1316,17 +1105,16 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>qq: float</strong></p>
-<blockquote>
-<div><p>Q values to calculate the penetration depth at</p>
-</div></blockquote>
-<p><strong>rho: float or complex</strong></p>
-<blockquote>
-<div><p>Complex SLD of material</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>qq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Q values to calculate the penetration depth at</li>
+<li><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#complex" title="(in Python v3.6)"><em>complex</em></a>) – Complex SLD of material</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">penetration_depth: float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>penetration_depth</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1341,24 +1129,53 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>angle: float</strong></p>
-<blockquote>
-<div><p>angle of incidence (degrees)</p>
-</div></blockquote>
-<p><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength of radiation (Angstrom)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence (degrees)</li>
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength of radiation (Angstrom)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Q: float</p>
-<blockquote class="last">
-<div><p>Momentum transfer (A**-1)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Q</strong> – Momentum transfer (A**-1)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="refnx.util.q2">
+<code class="descclassname">refnx.util.</code><code class="descname">q2</code><span class="sig-paren">(</span><em>omega</em>, <em>twotheta</em>, <em>phi</em>, <em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#q2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.q2" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert angles and wavelength (lambda) to Q vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>omega</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence of beam (in xy plane)</li>
+<li><strong>twotheta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle between direct beam and projected reflected beam onto yz plane</li>
+<li><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle between reflected beam and yz plane.</li>
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Qx, Qy, Qz</strong> – Momentum transfer in A**-1.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>coordinate system:
+y - along beam direction (in small angle approximation)
+x - transverse to beam direction, in plane of sample
+z - normal to sample plane.
+the xy plane is equivalent to the sample plane.</p>
+<p>TODO: check</p>
 </dd></dl>
 
 <dl class="function">
@@ -1369,20 +1186,16 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>SLD1: float</strong></p>
-<blockquote>
-<div><p>SLD of superphase (10^-6 A^-2)</p>
-</div></blockquote>
-<p><strong>SLD2: float</strong></p>
-<blockquote>
-<div><p>SLD of subphase (10^-6 A^-2)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>SLD1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – SLD of superphase (10^-6 A^-2)</li>
+<li><strong>SLD2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – SLD of subphase (10^-6 A^-2)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">qc: float</p>
-<blockquote class="last">
-<div><p>Critical Q vector for a reflectivity system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>qc</strong> – Critical Q vector for a reflectivity system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1397,48 +1210,23 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>z0: float</strong></p>
-<blockquote>
-<div><p>distance between chopper pair (m)</p>
-</div></blockquote>
-<p><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote>
-<div><p>height of beam (m)</p>
-</div></blockquote>
-<p><strong>xsi: float</strong></p>
-<blockquote>
-<div><p>phase opening of chopper pair (degrees)</p>
-</div></blockquote>
-<p><strong>L: float</strong></p>
-<blockquote>
-<div><p>Flight length of instrument (m)</p>
-</div></blockquote>
-<p><strong>tau_da</strong> : float</p>
-<blockquote>
-<div><p>Width of timebin (s)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between chopper pair (m)</li>
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper pair</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+<li><strong>xsi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – phase opening of chopper pair (degrees)</li>
+<li><strong>L</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Flight length of instrument (m)</li>
+<li><strong>tau_da</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Width of timebin (s)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">res: float</p>
-<blockquote class="last">
-<div><p>Fractional wavelength resolution of a double chopper system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>res</strong> – Fractional wavelength resolution of a double chopper system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1453,40 +1241,21 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote>
-<div><p>height of beam (m)</p>
-</div></blockquote>
-<p><strong>phi: float</strong></p>
-<blockquote>
-<div><p>angular opening of chopper window (degrees)</p>
-</div></blockquote>
-<p><strong>L: float</strong></p>
-<blockquote>
-<div><p>Flight length of instrument (m)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+<li><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angular opening of chopper window (degrees)</li>
+<li><strong>L</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Flight length of instrument (m)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
-<blockquote class="last">
-<div><p>Transmission of a single chopper system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>transmission</strong> – Transmission of a single chopper system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1496,7 +1265,8 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <dl class="function">
 <dt id="refnx.util.slit_optimiser">
 <code class="descclassname">refnx.util.</code><code class="descname">slit_optimiser</code><span class="sig-paren">(</span><em>footprint</em>, <em>resolution</em>, <em>angle=1.0</em>, <em>L12=2859.5</em>, <em>L2S=180</em>, <em>LS3=290.5</em>, <em>LSD=2500</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/util/general.html#slit_optimiser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.util.slit_optimiser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optimise slit settings for a given angular resolution, and a given footprint.</p>
+<dd><p>Optimise slit settings for a given angular resolution, and a given
+footprint.</p>
 <dl class="docutils">
 <dt>footprint: float</dt>
 <dd>maximum footprint onto sample (mm)</dd>
@@ -1515,28 +1285,18 @@ if distance &lt; 0, then it&#8217;s taken to be the distance before d1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>z0: float</strong></p>
-<blockquote>
-<div><p>distance between chopper pair (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>xsi: float</strong></p>
-<blockquote>
-<div><p>phase opening of chopper pair (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between chopper pair (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>xsi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – phase opening of chopper pair (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tauC: float</p>
-<blockquote class="last">
-<div><p>The burst time of a double chopper pair (s)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tauC</strong> – The burst time of a double chopper pair (s)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1557,40 +1317,21 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength in Angstroms</p>
-</div></blockquote>
-<p><strong>z0: float</strong></p>
-<blockquote>
-<div><p>distance between chopper pair (m)</p>
-</div></blockquote>
-<p><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>freq: float</strong></p>
-<blockquote>
-<div><p>rotation frequency of choppers (Hz)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote>
-<div><p>height of beam (m)</p>
-</div></blockquote>
-<p><strong>xsi: float</strong></p>
-<blockquote>
-<div><p>phase opening of chopper pair (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength in Angstroms</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – distance between chopper pair (m)</li>
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>freq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – rotation frequency of choppers (Hz)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper pair</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+<li><strong>xsi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – phase opening of chopper pair (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">transmission: float</p>
-<blockquote class="last">
-<div><p>The transmission of a double chopper system.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>transmission</strong> – The transmission of a double chopper system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1611,22 +1352,12 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>R: float</strong></p>
-<blockquote>
-<div><p>radius of chopper discs (m)</p>
-</div></blockquote>
-<p><strong>phi: float</strong></p>
-<blockquote>
-<div><p>angular opening of chopper disc (degrees)</p>
-</div></blockquote>
-<p><strong>N: float</strong></p>
-<blockquote>
-<div><p>number of windows in chopper pair</p>
-</div></blockquote>
-<p><strong>H: float</strong></p>
-<blockquote class="last">
-<div><p>height of beam (m)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>R</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – radius of chopper discs (m)</li>
+<li><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angular opening of chopper disc (degrees)</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – number of windows in chopper pair</li>
+<li><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – height of beam (m)</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -1647,17 +1378,11 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>velocity: float</strong></p>
-<blockquote>
-<div><p>velocity of neutron in m/s</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>velocity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – velocity of neutron in m/s</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">wavelength: float</p>
-<blockquote class="last">
-<div><p>wavelength of neutron in A</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>wavelength</strong> – wavelength of neutron in A</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -1671,20 +1396,16 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : float</p>
-<blockquote>
-<div><p>Wavevector (A**-1)</p>
-</div></blockquote>
-<p><strong>angle</strong> : float</p>
-<blockquote>
-<div><p>angle of incidence (degrees)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavevector (A**-1)</li>
+<li><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – angle of incidence (degrees)</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
-<blockquote class="last">
-<div><p>Wavelength of radiation (A)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wavelength</strong> – Wavelength of radiation (A)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </td>
 </tr>
 </tbody>
@@ -1699,17 +1420,11 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength</strong> : float</p>
-<blockquote>
-<div><p>Wavelength in Angstrom.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Wavelength in Angstrom.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>energy</strong> : float</p>
-<blockquote class="last">
-<div><p>Energy in meV.</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>energy</strong> – Energy in meV.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -1723,17 +1438,11 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavelength: float</strong></p>
-<blockquote>
-<div><p>wavelength of neutron in Angstrom.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – wavelength of neutron in Angstrom.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">velocity: float</p>
-<blockquote class="last">
-<div><p>velocity of neutron in ms**-1</p>
-</div></blockquote>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>velocity</strong> – velocity of neutron in ms**-1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)">float</a></td>
 </tr>
 </tbody>
 </table>
@@ -1782,15 +1491,15 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/refnx.util.txt"
+      <li><a href="_sources/refnx.util.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -1801,14 +1510,14 @@ kernel for time-of-flight neutron reflectometers, J. Appl. Cryst. (2013)
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="_sources/refnx.util.txt"
+      <a href="_sources/refnx.util.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

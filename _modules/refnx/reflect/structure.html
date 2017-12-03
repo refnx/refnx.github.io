@@ -1,0 +1,783 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.reflect.structure &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.13.dev0+8d6438f',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.reflect.structure</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">UserList</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">erf</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">refnx.reflect</span> <span class="k">import</span> <span class="n">_creflect</span> <span class="k">as</span> <span class="n">refcalc</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING, Using slow reflectivity calculation&#39;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">refnx.reflect</span> <span class="k">import</span> <span class="n">_reflect</span> <span class="k">as</span> <span class="n">refcalc</span>
+<span class="kn">from</span> <span class="nn">refnx.analysis</span> <span class="k">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">possibly_create_parameter</span>
+
+
+<div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="n">UserList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the interfacial Structure of a reflectometry sample.</span>
+<span class="sd">    Successive Components are added to the Structure to construct the</span>
+<span class="sd">    interface.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of this structure</span>
+<span class="sd">    solvent : str</span>
+<span class="sd">        Specifies whether the &#39;backing&#39; or &#39;fronting&#39; semi-infinite medium</span>
+<span class="sd">        is used to solvate components. You would typically use &#39;backing&#39;</span>
+<span class="sd">        for neutron reflectometry, with solvation by the material in</span>
+<span class="sd">        Structure[-1]. X-ray reflectometry would typically be solvated by</span>
+<span class="sd">        the &#39;fronting&#39; material in Structure[0].</span>
+<span class="sd">    reverse_structure : bool</span>
+<span class="sd">        If `Structure.reverse_structure` is `True` then the slab</span>
+<span class="sd">        representation produced by `Structure.slabs` is reversed. The sld</span>
+<span class="sd">        profile and calculated reflectivity will correspond to this</span>
+<span class="sd">        reversed structure.</span>
+<span class="sd">    contract : float</span>
+<span class="sd">        If contract &gt; 0 then an attempt to contract/shrink the slab</span>
+<span class="sd">        representation is made. Use larger values for coarser</span>
+<span class="sd">        profiles (and vice versa). A typical starting value to try might</span>
+<span class="sd">        be 1.0.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If `Structure.reverse_structure is True` then the slab representation</span>
+<span class="sd">    order is reversed. The slab order is reversed before the solvation</span>
+<span class="sd">    calculation is done. I.e. if `Structure.solvent == &#39;backing&#39;` and</span>
+<span class="sd">    `Structure.reverse_structure is True` then the material that solvates</span>
+<span class="sd">    the system is the component in `Structure[0]`, which corresponds to</span>
+<span class="sd">    `Structure.slab[-1]`.</span>
+<span class="sd">    The profile contraction specified by the `contract` keyword can improve</span>
+<span class="sd">    calculation time for Structures created with microslicing (such as</span>
+<span class="sd">    analytical profiles). If you use this option it is recommended to check</span>
+<span class="sd">    the reflectivity signal with and without contraction to ensure they are</span>
+<span class="sd">    comparable.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">solvent</span><span class="o">=</span><span class="s1">&#39;backing&#39;</span><span class="p">,</span> <span class="n">reverse_structure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">contract</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">solvent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;backing&#39;</span><span class="p">,</span> <span class="s1">&#39;fronting&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;solvent must either be the fronting or backing&quot;</span>
+                             <span class="s2">&quot; medium&quot;</span><span class="p">)</span>
+
+        <span class="c1">#: **str** specifies whether `backing` or `fronting` semi-infinite</span>
+        <span class="c1">#: medium is used to solvate components.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solvent</span> <span class="o">=</span> <span class="n">solvent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reverse_structure</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">reverse_structure</span><span class="p">)</span>
+        <span class="c1">#: **float** if contract &gt; 0 then an attempt to contract/shrink the</span>
+        <span class="c1">#: slab representation is made. Use larger values for coarser profiles</span>
+        <span class="c1">#: (and vice versa). A typical starting value to try might be 1.0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contract</span> <span class="o">=</span> <span class="n">contract</span>
+        <span class="c1"># self._parameters = Parameters(name=name)</span>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">solvent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solvent</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="c1"># self.update()</span>
+
+<div class="viewcode-block" id="Structure.append"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Structure.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">SLD</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">())</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Component</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You can only add Component objects to a&quot;</span>
+                             <span class="s2">&quot; structure&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reverse_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **bool**  if `True` then the slab representation produced by</span>
+<span class="sd">        :meth:`Structure.slabs` is reversed. The sld profile and calculated</span>
+<span class="sd">        reflectivity will correspond to this reversed structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reverse_structure</span><span class="p">)</span>
+
+    <span class="nd">@reverse_structure</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">reverse_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reverse_structure</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reverse_structure</span> <span class="o">=</span> <span class="n">reverse_structure</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">slabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`np.ndarray` - slab representation of this structure.</span>
+<span class="sd">        Has shape (N, 5).</span>
+
+<span class="sd">        - slab[N, 0]</span>
+<span class="sd">           thickness of layer N</span>
+<span class="sd">        - slab[N, 1]</span>
+<span class="sd">           overall SLD.real of layer N (material AND solvent)</span>
+<span class="sd">        - slab[N, 2]</span>
+<span class="sd">           overall SLD.imag of layer N (material AND solvent)</span>
+<span class="sd">        - slab[N, 3]</span>
+<span class="sd">           roughness between layer N and N-1</span>
+<span class="sd">        - slab[N, 4]</span>
+<span class="sd">           volume fraction of solvent in layer N.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If `Structure.reversed is True` then the slab representation order is</span>
+<span class="sd">        reversed. The slab order is reversed before the solvation calculation</span>
+<span class="sd">        is done. I.e. if `Structure.solvent == &#39;backing&#39;` and</span>
+<span class="sd">        `Structure.reversed is True` then the material that solvates the system</span>
+<span class="sd">        is the component in `Structure[0]`, which corresponds to</span>
+<span class="sd">        `Structure.slab[-1]`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># could possibly speed up by allocating a larger array, filling,</span>
+        <span class="c1"># then trimming</span>
+        <span class="n">growth_size</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="n">slabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">growth_size</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+            <span class="n">additional_slabs</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">slabs</span>
+            <span class="n">new_slabs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">additional_slabs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">new_slabs</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">slabs</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">:</span>
+                <span class="n">new_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">slabs</span><span class="p">)</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="n">growth_size</span><span class="p">,</span> <span class="n">new_slabs</span><span class="p">)</span>
+                <span class="n">slabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">slabs</span><span class="p">,</span> <span class="p">(</span><span class="n">new_rows</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                <span class="n">slabs</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">slabs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">new_slabs</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_slabs</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">new_slabs</span>
+
+        <span class="n">slabs</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># if the slab representation needs to be reversed.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse_structure</span><span class="p">:</span>
+            <span class="n">roughnesses</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">slabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">slabs</span><span class="p">)</span>
+            <span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">roughnesses</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">slabs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvent</span> <span class="o">==</span> <span class="s1">&#39;backing&#39;</span><span class="p">:</span>
+                <span class="n">solvent_slab</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvent</span> <span class="o">==</span> <span class="s1">&#39;fronting&#39;</span><span class="p">:</span>
+                <span class="n">solvent_slab</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># overall SLD is a weighted average</span>
+            <span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">overall_sld</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">solvent_slab</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">contract</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_contract_by_area</span><span class="p">(</span><span class="n">slabs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">contract</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">slabs</span>
+
+<div class="viewcode-block" id="Structure.overall_sld"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Structure.overall_sld">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">overall_sld</span><span class="p">(</span><span class="n">slabs</span><span class="p">,</span> <span class="n">solvent_slab</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a volume fraction weighted average of the material SLD in a</span>
+<span class="sd">        layer and the solvent in a layer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        slabs : np.ndarray</span>
+<span class="sd">            Slab representation of the layers to be averaged.</span>
+<span class="sd">        solvent_slab: np.ndarray</span>
+<span class="sd">            Slab representation of the solvent layer</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        averaged_slabs : np.ndarray</span>
+<span class="sd">            the averaged slabs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+        <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+        <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">solvent_slab</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">solvent_slab</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">slabs</span></div>
+
+<div class="viewcode-block" id="Structure.reflectivity"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Structure.reflectivity">[docs]</a>    <span class="k">def</span> <span class="nf">reflectivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate theoretical reflectivity of this structure</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        q : array-like</span>
+<span class="sd">            Q values (Angstrom**-1) for evaluation</span>
+<span class="sd">        threads : int, optional</span>
+<span class="sd">            Specifies the number of threads for parallel calculation. This</span>
+<span class="sd">            option is only applicable if you are using the ``_creflect``</span>
+<span class="sd">            module. The option is ignored if using the pure python calculator,</span>
+<span class="sd">            ``_reflect``. If `threads == 0` then all available processors are</span>
+<span class="sd">            used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">refcalc</span><span class="o">.</span><span class="n">abeles</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slabs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">threads</span><span class="o">=</span><span class="n">threads</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Structure.sld_profile"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Structure.sld_profile">[docs]</a>    <span class="k">def</span> <span class="nf">sld_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates an SLD profile, as a function of distance through the</span>
+<span class="sd">        interface.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        z : float</span>
+<span class="sd">            Interfacial distance (Angstrom) measured from interface between the</span>
+<span class="sd">            fronting medium and the first layer.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sld : float</span>
+<span class="sd">            Scattering length density / 1e-6 $\AA^-2$</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This can be called in vectorised fashion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slabs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slabs</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">slabs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">slabs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Slab</span><span class="p">))</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Slab</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Structure requires fronting and backing&quot;</span>
+                             <span class="s2">&quot; Slabs in order to calculate.&quot;</span><span class="p">)</span>
+
+        <span class="n">nlayers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">slabs</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nlayers</span><span class="p">:</span>
+                <span class="n">zstart</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                <span class="n">zend</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">zstart</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                <span class="n">sum_thick</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+                <span class="n">zend</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">sum_thick</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+            <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">sld_z</span><span class="p">(</span><span class="n">zed</span><span class="p">):</span>
+            <span class="n">sld</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">zed</span><span class="p">)</span>
+
+            <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">thick</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nlayers</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">ii</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nlayers</span><span class="p">:</span>
+                        <span class="n">deltarho</span> <span class="o">=</span> <span class="o">-</span><span class="n">slabs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                        <span class="n">thick</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                        <span class="n">deltarho</span> <span class="o">=</span> <span class="o">-</span><span class="n">slabs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">ii</span> <span class="o">==</span> <span class="n">nlayers</span><span class="p">:</span>
+                    <span class="n">sld1</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">deltarho</span> <span class="o">=</span> <span class="o">-</span><span class="n">sld1</span> <span class="o">+</span> <span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">thick</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sld1</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">sld2</span> <span class="o">=</span> <span class="n">slabs</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">deltarho</span> <span class="o">=</span> <span class="o">-</span><span class="n">sld1</span> <span class="o">+</span> <span class="n">sld2</span>
+                    <span class="n">thick</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">slabs</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+                <span class="n">dist</span> <span class="o">+=</span> <span class="n">thick</span>
+
+                <span class="c1"># if sigma=0 then the computer goes haywire (division by zero),</span>
+                <span class="c1"># so say it&#39;s vanishingly small</span>
+                <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">+=</span> <span class="mf">1e-3</span>
+
+                <span class="c1"># summ += deltarho * (norm.cdf((zed - dist)/sigma))</span>
+                <span class="n">sld</span> <span class="o">+=</span> <span class="p">(</span><span class="n">deltarho</span> <span class="o">*</span>
+                        <span class="p">(</span><span class="mf">0.5</span> <span class="o">+</span>
+                         <span class="mf">0.5</span> <span class="o">*</span>
+                         <span class="n">erf</span><span class="p">((</span><span class="n">zed</span> <span class="o">-</span> <span class="n">dist</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)))))</span>
+
+            <span class="k">return</span> <span class="n">sld</span>
+
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">sld_z</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">slabs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">__ior__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c1"># self |= other</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Component</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Structure</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">SLD</span><span class="p">):</span>
+            <span class="n">slab</span> <span class="o">=</span> <span class="n">other</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slab</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c1"># c = self | other</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">|=</span> <span class="bp">self</span>
+        <span class="n">p</span> <span class="o">|=</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`refnx.analysis.Parameters`, all the parameters associated with</span>
+<span class="sd">        this structure.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Structure - </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">component</span><span class="o">.</span><span class="n">parameters</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+<div class="viewcode-block" id="Structure.lnprob"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Structure.lnprob">[docs]</a>    <span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        log-probability for the interfacial structure. Note that if a given</span>
+<span class="sd">        component is present more than once in a Structure then it&#39;s log-prob</span>
+<span class="sd">        will be counted twice.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lnprob : float</span>
+<span class="sd">            log-prior for the Structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lnprob</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+            <span class="n">lnprob</span> <span class="o">+=</span> <span class="n">component</span><span class="o">.</span><span class="n">lnprob</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">lnprob</span></div></div>
+
+
+<div class="viewcode-block" id="SLD"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.SLD">[docs]</a><span class="k">class</span> <span class="nc">SLD</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object representing freely varying SLD of a material</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    value : float or complex</span>
+<span class="sd">        Scattering length density of a material.</span>
+<span class="sd">        Units (10**-6 Angstrom**-2)</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Name of material.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    An SLD object can be used to create a Slab:</span>
+
+<span class="sd">    &gt;&gt;&gt; # an SLD object representing Silicon Dioxide</span>
+<span class="sd">    &gt;&gt;&gt; sio2 = SLD(3.47, name=&#39;SiO2&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; # create a Slab of SiO2 20 A in thickness, with a 3 A roughness</span>
+<span class="sd">    &gt;&gt;&gt; sio2_layer = SLD(20, 3)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">complex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">real</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - sld&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imag</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - isld&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">SLD</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">real</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">real</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imag</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">imag</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">real</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - sld&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imag</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - isld&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imag</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rough</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Slab</span><span class="p">(</span><span class="n">thick</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">rough</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c1"># c = self | other</span>
+        <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">slab</span> <span class="o">|</span> <span class="n">other</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`refnx.analysis.Parameters` associated with this component</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span></div>
+        <span class="c1"># p = Parameters(name=self.name)</span>
+        <span class="c1"># p.extend([self.real, self.imag])</span>
+        <span class="c1"># return p</span>
+
+
+<div class="viewcode-block" id="Component"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Component">[docs]</a><span class="k">class</span> <span class="nc">Component</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c1"># c = self | other</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">|=</span> <span class="bp">self</span>
+        <span class="n">p</span> <span class="o">|=</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`refnx.analysis.Parameters` associated with this component</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;A component should override the parameters &quot;</span>
+                                  <span class="s2">&quot;property&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">slabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The slab representation of this component</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;A component should override the slabs &quot;</span>
+                                  <span class="s2">&quot;property&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Component.lnprob"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Component.lnprob">[docs]</a>    <span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="Slab"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.Slab">[docs]</a><span class="k">class</span> <span class="nc">Slab</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A slab component has uniform SLD over its thickness.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    thick : refnx.analysis.Parameter or float</span>
+<span class="sd">        thickness of slab (Angstrom)</span>
+<span class="sd">    sld : refnx.reflect.SLD, complex, or float</span>
+<span class="sd">        (complex) SLD of film (/1e-6 Angstrom**2)</span>
+<span class="sd">    rough : float</span>
+<span class="sd">        roughness on top of this slab (Angstrom)</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of this slab</span>
+<span class="sd">    vfsolv : refnx.analysis.Parameter or float</span>
+<span class="sd">        Volume fraction of solvent [0, 1]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thick</span><span class="p">,</span> <span class="n">sld</span><span class="p">,</span> <span class="n">rough</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">vfsolv</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Slab</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thick</span> <span class="o">=</span> <span class="n">possibly_create_parameter</span><span class="p">(</span><span class="n">thick</span><span class="p">,</span>
+                                               <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - thick&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sld</span><span class="p">,</span> <span class="n">SLD</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sld</span> <span class="o">=</span> <span class="n">sld</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sld</span> <span class="o">=</span> <span class="n">SLD</span><span class="p">(</span><span class="n">sld</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rough</span> <span class="o">=</span> <span class="n">possibly_create_parameter</span><span class="p">(</span><span class="n">rough</span><span class="p">,</span>
+                                               <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - rough&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vfsolv</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">possibly_create_parameter</span><span class="p">(</span><span class="n">vfsolv</span><span class="p">,</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - volfrac solvent&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">rough</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vfsolv</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">p</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :class:`refnx.analysis.Parameters` associated with this component</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">slabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        slab representation of this component. See :class:`Structure.slabs`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">imag</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">rough</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">vfsolv</span><span class="o">.</span><span class="n">value</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="CompositeComponent"><a class="viewcode-back" href="../../../refnx.reflect.html#refnx.reflect.structure.CompositeComponent">[docs]</a><span class="k">class</span> <span class="nc">CompositeComponent</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A series of components to be considered as one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<span class="k">def</span> <span class="nf">_profile_slicer</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">sld_profile</span><span class="p">,</span> <span class="n">slice_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a scattering length density profile into a Structure by</span>
+<span class="sd">    approximating with Slabs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    z : array-like</span>
+<span class="sd">        Distance (Angstrom) through the interface at which the SLD profile is</span>
+<span class="sd">        given.</span>
+<span class="sd">    sld_profile : array-like</span>
+<span class="sd">        Scattering length density (10**-6 Angstrom**-2) at a given distance</span>
+<span class="sd">        through the interface. Both the real and imaginary terms of the SLD can</span>
+<span class="sd">        be provided - either by making `sld_profile` a complex array, by</span>
+<span class="sd">        supplying an array with two columns (representing the real and</span>
+<span class="sd">        imaginary parts).</span>
+<span class="sd">    slice_size : None, float, optional</span>
+<span class="sd">        if `slice_size is None` then `np.min(np.ediff1d(z))/4` is used to</span>
+<span class="sd">        determine the rough size of the created slabs. Otherwise</span>
+<span class="sd">        `float(slice_size)` is used.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    structure : Structure</span>
+<span class="sd">        A Structure representation of the sld profile</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    `sld_profile` is quadratically interpolated to obtain equally spaced</span>
+<span class="sd">    points. In testing the round trip structure-&gt;sld_profile-&gt;structure the</span>
+<span class="sd">    maximum relative difference in reflectivity profiles from the original and</span>
+<span class="sd">    final structures is on the order of fractions of a percent, with the</span>
+<span class="sd">    largest difference around the critical edge.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sld</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">sld_profile</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sld</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sld</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">sld</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span> <span class="o">=</span> <span class="n">sld</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">sld</span> <span class="o">=</span> <span class="n">sld</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">real_interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">sld</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;quadratic&#39;</span><span class="p">)</span>
+    <span class="n">imag_interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">sld</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;quadratic&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">slice_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">slice_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">slice_size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">slice_size</span><span class="p">)</span>
+
+    <span class="c1"># figure out the z values to calculate the slabs at</span>
+    <span class="n">z_min</span><span class="p">,</span> <span class="n">z_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">n_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">z_max</span> <span class="o">-</span> <span class="n">z_min</span><span class="p">)</span> <span class="o">/</span> <span class="n">slice_size</span><span class="p">)</span>
+    <span class="n">zeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">z_min</span><span class="p">,</span> <span class="n">z_max</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># this is the true thickness of the slab</span>
+    <span class="n">slice_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">zeds</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">zeds</span> <span class="o">-=</span> <span class="n">slice_size</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">zeds</span> <span class="o">=</span> <span class="n">zeds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">reals</span> <span class="o">=</span> <span class="n">real_interp</span><span class="p">(</span><span class="n">zeds</span><span class="p">)</span>
+    <span class="n">imags</span> <span class="o">=</span> <span class="n">imag_interp</span><span class="p">(</span><span class="n">zeds</span><span class="p">)</span>
+
+    <span class="n">slabs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Slab</span><span class="p">(</span><span class="n">slice_size</span><span class="p">,</span> <span class="nb">complex</span><span class="p">(</span><span class="n">real</span><span class="p">,</span> <span class="n">imag</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span>
+             <span class="n">real</span><span class="p">,</span> <span class="n">imag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reals</span><span class="p">,</span> <span class="n">imags</span><span class="p">)]</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sliced sld profile&#39;</span><span class="p">)</span>
+    <span class="n">structure</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">slabs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">structure</span>
+
+
+<span class="c1"># The following slab contraction code was translated from C code in</span>
+<span class="c1"># the refl1d project.</span>
+<span class="k">def</span> <span class="nf">_contract_by_area</span><span class="p">(</span><span class="n">slabs</span><span class="p">,</span> <span class="n">dA</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shrinks a slab representation to a reduced number of layers. This can</span>
+<span class="sd">    reduced calculation times.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    slabs : array</span>
+<span class="sd">        Has shape (N, 5).</span>
+
+<span class="sd">            slab[N, 0] - thickness of layer N</span>
+<span class="sd">            slab[N, 1] - overall SLD.real of layer N (material AND solvent)</span>
+<span class="sd">            slab[N, 2] - overall SLD.imag of layer N (material AND solvent)</span>
+<span class="sd">            slab[N, 3] - roughness between layer N and N-1</span>
+<span class="sd">            slab[N, 4] - volume fraction of solvent in layer N.</span>
+<span class="sd">                         (1 - solvent_volfrac = material_volfrac)</span>
+
+<span class="sd">    dA : float</span>
+<span class="sd">        Larger values coarsen the profile to a greater extent, and vice versa.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    contract_slab : array</span>
+<span class="sd">        Contracted slab representation.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The reflectivity profiles from both contracted and uncontracted profiles</span>
+<span class="sd">    should be compared to check for accuracy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># In refl1d the first slab is the substrate, the orded is reversed here.</span>
+    <span class="c1"># In the following code the slabs are traversed from the backing towards</span>
+    <span class="c1"># the fronting.</span>
+    <span class="n">newslabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">slabs</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">newslabs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">newslabs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">irho</span> <span class="o">=</span> <span class="n">newslabs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">newslabs</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">vfsolv</span> <span class="o">=</span> <span class="n">newslabs</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">newi</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Skip the substrate</span>
+
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="c1"># Get ready for the next layer</span>
+        <span class="c1"># Accumulation of the first row happens in the inner loop</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="n">rhoarea</span> <span class="o">=</span> <span class="n">irhoarea</span> <span class="o">=</span> <span class="n">vfsolvarea</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">rholo</span> <span class="o">=</span> <span class="n">rhohi</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">irholo</span> <span class="o">=</span> <span class="n">irhohi</span> <span class="o">=</span> <span class="n">irho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Accumulate slices into layer</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Accumulate next slice</span>
+            <span class="n">dz</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">rhoarea</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">irhoarea</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">irho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vfsolvarea</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vfsolv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># If no more slices or sigma != 0, break immediately</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">or</span> <span class="n">sigma</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># If next slice won&#39;t fit, break</span>
+            <span class="k">if</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">rholo</span><span class="p">:</span>
+                <span class="n">rholo</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">rhohi</span><span class="p">:</span>
+                <span class="n">rhohi</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">rhohi</span> <span class="o">-</span> <span class="n">rholo</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">dz</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">dA</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">irho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">irholo</span><span class="p">:</span>
+                <span class="n">irholo</span> <span class="o">=</span> <span class="n">irho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">irho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">irhohi</span><span class="p">:</span>
+                <span class="n">irhohi</span> <span class="o">=</span> <span class="n">irho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">irhohi</span> <span class="o">-</span> <span class="n">irholo</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">dz</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">dA</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Save the layer</span>
+        <span class="n">d</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">dz</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+            <span class="c1"># printf(&quot;contract: adding final sld at %d\n&quot;,newi)</span>
+            <span class="c1"># Last layer uses surface values</span>
+            <span class="n">rho</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">irho</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">irho</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">vfsolv</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">vfsolv</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Middle layers uses average values</span>
+            <span class="n">rho</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoarea</span> <span class="o">/</span> <span class="n">dz</span>
+            <span class="n">irho</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">irhoarea</span> <span class="o">/</span> <span class="n">dz</span>
+            <span class="n">sigma</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">vfsolv</span><span class="p">[</span><span class="n">newi</span><span class="p">]</span> <span class="o">=</span> <span class="n">vfsolvarea</span> <span class="o">/</span> <span class="n">dz</span>
+        <span class="c1"># First layer uses substrate values</span>
+        <span class="n">newi</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">newslabs</span><span class="p">[:</span><span class="n">newi</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2017, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

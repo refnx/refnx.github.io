@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.dataset package &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.dataset package &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,24 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -46,20 +49,18 @@
 </div>
 <div class="section" id="module-refnx.dataset.data1d">
 <span id="refnx-dataset-data1d-module"></span><h2>refnx.dataset.data1d module<a class="headerlink" href="#module-refnx.dataset.data1d" title="Permalink to this headline">¶</a></h2>
-<p>&#8221;
+<p>”
 A basic representation of a 1D dataset</p>
 <dl class="class">
 <dt id="refnx.dataset.data1d.Data1D">
-<em class="property">class </em><code class="descclassname">refnx.dataset.data1d.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.data1d.Data1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://docs.python.org/3/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">refnx.dataset.data1d.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.data1d.Data1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>A basic representation of a 1D dataset.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : str, file-like or tuple of np.ndarray, optional</p>
-<blockquote class="last">
-<div><p><cite>data</cite> can be a string or file-like object referring to a File to load
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>file-like</em><em> or </em><em>tuple of np.ndarray</em><em>, </em><em>optional</em>) – <p><cite>data</cite> can be a string or file-like object referring to a File to load
 the dataset from.</p>
 <p>Alternatively it is a tuple containing the data from which the dataset
 will be constructed. The tuple should have between 2 and 4 members.</p>
@@ -68,56 +69,71 @@ will be constructed. The tuple should have between 2 and 4 members.</p>
 <li>data[0] - x</li>
 <li>data[1] - y</li>
 <li>data[2] - uncertainties on y, y_err</li>
-<li>data[3] - uncertainties of x, x_err</li>
+<li>data[3] - uncertainties on x, x_err</li>
 </ul>
 </div></blockquote>
 <p><cite>data</cite> must be at least two long, <cite>x</cite> and <cite>y</cite>.
 If the tuple is at least 3 long then the third member is <cite>y_err</cite>.
 If the tuple is 4 long then the fourth member is <cite>x_err</cite>.
 All arrays must have the same shape.</p>
-</div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#refnx.dataset.data1d.Data1D.npoints" title="refnx.dataset.data1d.Data1D.npoints"><code class="xref py py-obj docutils literal"><span class="pre">npoints</span></code></a></td>
-<td>the number of points in the dataset.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#refnx.dataset.data1d.Data1D.data" title="refnx.dataset.data1d.Data1D.data"><code class="xref py py-obj docutils literal"><span class="pre">data</span></code></a></td>
-<td>4-tuple containing the (x, y, y_err, x_err) data</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#refnx.dataset.data1d.Data1D.finite_data" title="refnx.dataset.data1d.Data1D.finite_data"><code class="xref py py-obj docutils literal"><span class="pre">finite_data</span></code></a></td>
-<td>4-tuple containing the (x, y, y_err, x_err) datapoints that are</td>
-</tr>
-</tbody>
-</table>
-<table border="1" class="docutils">
-<colgroup>
-<col width="15%" />
-<col width="85%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>x</td>
-<td>(x data)</td>
-</tr>
-<tr class="row-even"><td>y</td>
-<td>(y data)</td>
-</tr>
-<tr class="row-odd"><td>y_err</td>
-<td>(uncertainties on the y data)</td>
-</tr>
-<tr class="row-even"><td>x_err</td>
-<td>(uncertainties on the x data)</td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.data">
+<code class="descname">data</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple of np.ndarray</em> – The data, (x, y, y_err, x_err)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.finite_data">
+<code class="descname">finite_data</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.finite_data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple of np.ndarray</em> – Data points that are finite</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.x">
+<code class="descname">x</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.x" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – x data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.y">
+<code class="descname">y</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.y" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – y data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.y_err">
+<code class="descname">y_err</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.y_err" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – uncertainties on the y data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.x_err">
+<code class="descname">x_err</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.x_err" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – uncertainties on the x data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.filename">
+<code class="descname">filename</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.filename" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str or None</em> – The file the data was read from</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.weighted">
+<code class="descname">weighted</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.weighted" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Whether the y data has uncertainties</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.data1d.Data1D.metadata">
+<code class="descname">metadata</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Information that should be retained with the dataset.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="refnx.dataset.data1d.Data1D.add_data">
 <code class="descname">add_data</code><span class="sig-paren">(</span><em>data_tuple</em>, <em>requires_splice=False</em>, <em>trim_trailing=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.add_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.data1d.Data1D.add_data" title="Permalink to this definition">¶</a></dt>
@@ -126,39 +142,35 @@ All arrays must have the same shape.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data_tuple</strong> : tuple</p>
-<blockquote>
-<div><p>2 to 4 member tuple containing the (x, y, y_err, x_err) data to add
-to the dataset. <cite>y_err</cite> and <cite>x_err</cite> are optional.</p>
-</div></blockquote>
-<p><strong>requires_splice</strong> : bool, optional</p>
-<blockquote>
-<div><p>When the new data is added to the dataset do you want to scale it
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data_tuple</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a>) – 2 to 4 member tuple containing the (x, y, y_err, x_err) data to add
+to the dataset. <cite>y_err</cite> and <cite>x_err</cite> are optional.</li>
+<li><strong>requires_splice</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a><em>, </em><em>optional</em>) – When the new data is added to the dataset do you want to scale it
 vertically so that it overlaps with the existing data? <cite>y</cite> and
-<cite>y_err</cite> in <cite>data_tuple</cite> are both multiplied by the scaling factor.</p>
-</div></blockquote>
-<p><strong>trim_trailing</strong> : bool, optional</p>
-<blockquote class="last">
-<div><p>When the new data is concatenated do you want to remove points from
+<cite>y_err</cite> in <cite>data_tuple</cite> are both multiplied by the scaling factor.</li>
+<li><strong>trim_trailing</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a><em>, </em><em>optional</em>) – When the new data is concatenated do you want to remove points from
 the existing data that are in the overlap region? This might be
 done because the datapoints in the <cite>data_tuple</cite> you are adding have
-have lower <cite>y_err</cite> than the preceding data.</p>
-</div></blockquote>
+have lower <cite>y_err</cite> than the preceding data.</li>
+</ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>Raises <cite>ValueError</cite> if there are no points in the overlap region and
+<cite>requires_splice</cite> was True.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="refnx.dataset.data1d.Data1D.data">
-<code class="descname">data</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.data" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">data</code></dt>
 <dd><p>4-tuple containing the (x, y, y_err, x_err) data</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="refnx.dataset.data1d.Data1D.finite_data">
-<code class="descname">finite_data</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.finite_data" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">finite_data</code></dt>
 <dd><p>4-tuple containing the (x, y, y_err, x_err) datapoints that are
 finite.</p>
 </dd></dl>
@@ -171,20 +183,10 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-handle or string</p>
-<blockquote class="last">
-<div><p>File to load the dataset from.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>file-handle</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.6)"><em>string</em></a>) – File to load the dataset from.</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="refnx.dataset.data1d.Data1D.npoints">
-<code class="descname">npoints</code><a class="headerlink" href="#refnx.dataset.data1d.Data1D.npoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>the number of points in the dataset.</p>
 </dd></dl>
 
 <dl class="method">
@@ -201,20 +203,11 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-handle or string</p>
-<blockquote class="last">
-<div><p>File to save the dataset to.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>file-handle</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.6)"><em>string</em></a>) – File to save the dataset to.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
-
-<dl class="method">
-<dt id="refnx.dataset.data1d.Data1D.save_fit">
-<code class="descname">save_fit</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.save_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.data1d.Data1D.save_fit" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="refnx.dataset.data1d.Data1D.scale">
@@ -224,11 +217,7 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scalefactor</strong> : float</p>
-<blockquote class="last">
-<div><p>The scalefactor to divide by.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The scalefactor to divide by.</td>
 </tr>
 </tbody>
 </table>
@@ -258,12 +247,8 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
-<blockquote class="last">
-<div><p>The file to load the spectrum from, or a str that specifies the file
-name</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>file-like</em>) – The file to load the spectrum from, or a str that specifies the
+file name</td>
 </tr>
 </tbody>
 </table>
@@ -277,15 +262,11 @@ name</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
-<blockquote>
-<div><p>The file to write the spectrum to, or a str that specifies the file
-name</p>
-</div></blockquote>
-<p><strong>start_time: int, optional</strong></p>
-<blockquote class="last">
-<div><p>Epoch time specifying when the sample started</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>file-like</em>) – The file to write the spectrum to, or a str that specifies the file
+name</li>
+<li><strong>start_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Epoch time specifying when the sample started</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -299,16 +280,14 @@ name</p>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-refnx.dataset" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="refnx.dataset.Data1D">
-<em class="property">class </em><code class="descclassname">refnx.dataset.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.Data1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://docs.python.org/3/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">refnx.dataset.</code><code class="descname">Data1D</code><span class="sig-paren">(</span><em>data=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.Data1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>A basic representation of a 1D dataset.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : str, file-like or tuple of np.ndarray, optional</p>
-<blockquote class="last">
-<div><p><cite>data</cite> can be a string or file-like object referring to a File to load
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>file-like</em><em> or </em><em>tuple of np.ndarray</em><em>, </em><em>optional</em>) – <p><cite>data</cite> can be a string or file-like object referring to a File to load
 the dataset from.</p>
 <p>Alternatively it is a tuple containing the data from which the dataset
 will be constructed. The tuple should have between 2 and 4 members.</p>
@@ -317,56 +296,71 @@ will be constructed. The tuple should have between 2 and 4 members.</p>
 <li>data[0] - x</li>
 <li>data[1] - y</li>
 <li>data[2] - uncertainties on y, y_err</li>
-<li>data[3] - uncertainties of x, x_err</li>
+<li>data[3] - uncertainties on x, x_err</li>
 </ul>
 </div></blockquote>
 <p><cite>data</cite> must be at least two long, <cite>x</cite> and <cite>y</cite>.
 If the tuple is at least 3 long then the third member is <cite>y_err</cite>.
 If the tuple is 4 long then the fourth member is <cite>x_err</cite>.
 All arrays must have the same shape.</p>
-</div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#refnx.dataset.Data1D.npoints" title="refnx.dataset.Data1D.npoints"><code class="xref py py-obj docutils literal"><span class="pre">npoints</span></code></a></td>
-<td>the number of points in the dataset.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#refnx.dataset.Data1D.data" title="refnx.dataset.Data1D.data"><code class="xref py py-obj docutils literal"><span class="pre">data</span></code></a></td>
-<td>4-tuple containing the (x, y, y_err, x_err) data</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#refnx.dataset.Data1D.finite_data" title="refnx.dataset.Data1D.finite_data"><code class="xref py py-obj docutils literal"><span class="pre">finite_data</span></code></a></td>
-<td>4-tuple containing the (x, y, y_err, x_err) datapoints that are</td>
-</tr>
-</tbody>
-</table>
-<table border="1" class="docutils">
-<colgroup>
-<col width="15%" />
-<col width="85%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>x</td>
-<td>(x data)</td>
-</tr>
-<tr class="row-even"><td>y</td>
-<td>(y data)</td>
-</tr>
-<tr class="row-odd"><td>y_err</td>
-<td>(uncertainties on the y data)</td>
-</tr>
-<tr class="row-even"><td>x_err</td>
-<td>(uncertainties on the x data)</td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.data">
+<code class="descname">data</code><a class="headerlink" href="#refnx.dataset.Data1D.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple of np.ndarray</em> – The data, (x, y, y_err, x_err)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.finite_data">
+<code class="descname">finite_data</code><a class="headerlink" href="#refnx.dataset.Data1D.finite_data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>tuple of np.ndarray</em> – Data points that are finite</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.x">
+<code class="descname">x</code><a class="headerlink" href="#refnx.dataset.Data1D.x" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – x data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.y">
+<code class="descname">y</code><a class="headerlink" href="#refnx.dataset.Data1D.y" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – y data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.y_err">
+<code class="descname">y_err</code><a class="headerlink" href="#refnx.dataset.Data1D.y_err" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – uncertainties on the y data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.x_err">
+<code class="descname">x_err</code><a class="headerlink" href="#refnx.dataset.Data1D.x_err" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>np.ndarray</em> – uncertainties on the x data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.filename">
+<code class="descname">filename</code><a class="headerlink" href="#refnx.dataset.Data1D.filename" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str or None</em> – The file the data was read from</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.weighted">
+<code class="descname">weighted</code><a class="headerlink" href="#refnx.dataset.Data1D.weighted" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – Whether the y data has uncertainties</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="refnx.dataset.Data1D.metadata">
+<code class="descname">metadata</code><a class="headerlink" href="#refnx.dataset.Data1D.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Information that should be retained with the dataset.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="refnx.dataset.Data1D.add_data">
 <code class="descname">add_data</code><span class="sig-paren">(</span><em>data_tuple</em>, <em>requires_splice=False</em>, <em>trim_trailing=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.add_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.Data1D.add_data" title="Permalink to this definition">¶</a></dt>
@@ -375,39 +369,35 @@ All arrays must have the same shape.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data_tuple</strong> : tuple</p>
-<blockquote>
-<div><p>2 to 4 member tuple containing the (x, y, y_err, x_err) data to add
-to the dataset. <cite>y_err</cite> and <cite>x_err</cite> are optional.</p>
-</div></blockquote>
-<p><strong>requires_splice</strong> : bool, optional</p>
-<blockquote>
-<div><p>When the new data is added to the dataset do you want to scale it
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data_tuple</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a>) – 2 to 4 member tuple containing the (x, y, y_err, x_err) data to add
+to the dataset. <cite>y_err</cite> and <cite>x_err</cite> are optional.</li>
+<li><strong>requires_splice</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a><em>, </em><em>optional</em>) – When the new data is added to the dataset do you want to scale it
 vertically so that it overlaps with the existing data? <cite>y</cite> and
-<cite>y_err</cite> in <cite>data_tuple</cite> are both multiplied by the scaling factor.</p>
-</div></blockquote>
-<p><strong>trim_trailing</strong> : bool, optional</p>
-<blockquote class="last">
-<div><p>When the new data is concatenated do you want to remove points from
+<cite>y_err</cite> in <cite>data_tuple</cite> are both multiplied by the scaling factor.</li>
+<li><strong>trim_trailing</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a><em>, </em><em>optional</em>) – When the new data is concatenated do you want to remove points from
 the existing data that are in the overlap region? This might be
 done because the datapoints in the <cite>data_tuple</cite> you are adding have
-have lower <cite>y_err</cite> than the preceding data.</p>
-</div></blockquote>
+have lower <cite>y_err</cite> than the preceding data.</li>
+</ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>Raises <cite>ValueError</cite> if there are no points in the overlap region and
+<cite>requires_splice</cite> was True.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="refnx.dataset.Data1D.data">
-<code class="descname">data</code><a class="headerlink" href="#refnx.dataset.Data1D.data" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">data</code></dt>
 <dd><p>4-tuple containing the (x, y, y_err, x_err) data</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="refnx.dataset.Data1D.finite_data">
-<code class="descname">finite_data</code><a class="headerlink" href="#refnx.dataset.Data1D.finite_data" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">finite_data</code></dt>
 <dd><p>4-tuple containing the (x, y, y_err, x_err) datapoints that are
 finite.</p>
 </dd></dl>
@@ -420,20 +410,10 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-handle or string</p>
-<blockquote class="last">
-<div><p>File to load the dataset from.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>file-handle</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.6)"><em>string</em></a>) – File to load the dataset from.</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="refnx.dataset.Data1D.npoints">
-<code class="descname">npoints</code><a class="headerlink" href="#refnx.dataset.Data1D.npoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>the number of points in the dataset.</p>
 </dd></dl>
 
 <dl class="method">
@@ -450,20 +430,11 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : file-handle or string</p>
-<blockquote class="last">
-<div><p>File to save the dataset to.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>file-handle</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.6)"><em>string</em></a>) – File to save the dataset to.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
-
-<dl class="method">
-<dt id="refnx.dataset.Data1D.save_fit">
-<code class="descname">save_fit</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/dataset/data1d.html#Data1D.save_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.dataset.Data1D.save_fit" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="refnx.dataset.Data1D.scale">
@@ -473,11 +444,7 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scalefactor</strong> : float</p>
-<blockquote class="last">
-<div><p>The scalefactor to divide by.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The scalefactor to divide by.</td>
 </tr>
 </tbody>
 </table>
@@ -504,12 +471,8 @@ finite.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
-<blockquote class="last">
-<div><p>The file to load the spectrum from, or a str that specifies the file
-name</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>file-like</em>) – The file to load the spectrum from, or a str that specifies the
+file name</td>
 </tr>
 </tbody>
 </table>
@@ -523,15 +486,11 @@ name</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : str or file-like</p>
-<blockquote>
-<div><p>The file to write the spectrum to, or a str that specifies the file
-name</p>
-</div></blockquote>
-<p><strong>start_time: int, optional</strong></p>
-<blockquote class="last">
-<div><p>Epoch time specifying when the sample started</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>file-like</em>) – The file to write the spectrum to, or a str that specifies the file
+name</li>
+<li><strong>start_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Epoch time specifying when the sample started</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -569,15 +528,15 @@ name</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/refnx.dataset.txt"
+      <li><a href="_sources/refnx.dataset.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -588,14 +547,14 @@ name</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="_sources/refnx.dataset.txt"
+      <a href="_sources/refnx.dataset.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

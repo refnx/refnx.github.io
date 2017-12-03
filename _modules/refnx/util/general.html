@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.util.general &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.util.general &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,25 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -45,16 +47,16 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions for various calculations related to reflectometry</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span><span class="p">,</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">constants</span><span class="p">,</span> <span class="n">optimize</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span><span class="p">,</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">constants</span><span class="p">,</span> <span class="n">optimize</span>
 
-<span class="c1">#h / m = 3956</span>
+<span class="c1"># h / m = 3956</span>
 <span class="n">K</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">h</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">m_n</span> <span class="o">*</span> <span class="mf">1.e10</span>
 
 
-<div class="viewcode-block" id="div"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.div">[docs]</a><span class="k">def</span> <span class="nf">div</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span> <span class="o">=</span> <span class="mi">2859</span><span class="p">):</span>
+<div class="viewcode-block" id="div"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.div">[docs]</a><span class="k">def</span> <span class="nf">div</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span><span class="o">=</span><span class="mi">2859</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the angular resolution for a set of collimation conditions</span>
 
@@ -79,10 +81,10 @@
 <span class="sd">    value you need to use.</span>
 <span class="sd">    See equations 11-14 in [1]_.</span>
 
-<span class="sd">    .. [1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.; van der</span>
-<span class="sd">    Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the neutron</span>
-<span class="sd">    reflectometer at IRI Delft Nuclear Instruments and Methods in Physics</span>
-<span class="sd">    Research A, 1995, 362, 434-453</span>
+<span class="sd">    .. [1] de Haan, V.-O.; de Blois, J.; van der Ende, P.; Fredrikze, H.;</span>
+<span class="sd">    van der Graaf, A.; Schipper, M.; van Well, A. A. &amp; J., v. d. Z. ROG, the</span>
+<span class="sd">    neutron reflectometer at IRI Delft Nuclear Instruments and Methods in</span>
+<span class="sd">    Physics Research A, 1995, 362, 434-453</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">divergence</span> <span class="o">=</span> <span class="mf">0.68</span> <span class="o">*</span> <span class="mf">0.68</span> <span class="o">*</span> <span class="p">(</span><span class="n">d1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">d2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">L12</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span><span class="n">d1</span> <span class="o">+</span> <span class="n">d2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">/</span> <span class="n">L12</span>
@@ -109,8 +111,7 @@
     <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">))</span> <span class="o">/</span> <span class="n">wavelength</span></div>
 
 
-<span class="nd">@np.vectorize</span>
-<span class="k">def</span> <span class="nf">q2</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">twotheta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">):</span>
+<div class="viewcode-block" id="q2"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.q2">[docs]</a><span class="k">def</span> <span class="nf">q2</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">twotheta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    convert angles and wavelength (lambda) to Q vector.</span>
 
@@ -144,11 +145,11 @@
     <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
 
     <span class="n">qx</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">twotheta</span> <span class="o">-</span> <span class="n">omega</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
-    <span class="n">qy</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">twotheta</span> <span class="o">-</span> <span class="n">omega</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
-          <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega</span><span class="p">)))</span>
+    <span class="n">qy</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">twotheta</span> <span class="o">-</span> <span class="n">omega</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">-</span>
+          <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega</span><span class="p">)))</span>
     <span class="n">qz</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">twotheta</span> <span class="o">-</span> <span class="n">omega</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span>
+    <span class="k">return</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span></div>
 
 
 <div class="viewcode-block" id="wavelength"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.wavelength">[docs]</a><span class="k">def</span> <span class="nf">wavelength</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
@@ -167,16 +168,26 @@
 <span class="sd">    wavelength : float</span>
 <span class="sd">        Wavelength of radiation (A)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span><span class="p">)</span><span class="o">/</span><span class="n">q</span></div>
+    <span class="k">return</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">/</span> <span class="n">q</span></div>
 
 
 <div class="viewcode-block" id="angle"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.angle">[docs]</a><span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    calculate angle given Q and wavelength</span>
-<span class="sd">    q - wavevector (A^-1)</span>
-<span class="sd">    wavelength -  wavelength of radiation (Angstrom)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : float</span>
+<span class="sd">        Wavevector (A**-1)</span>
+<span class="sd">    wavelength : float</span>
+<span class="sd">        Wavelength of radiation (A)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    angle : float</span>
+<span class="sd">        angle of incidence (degrees)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span>  <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">q</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">((</span><span class="n">q</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
 
 
 <div class="viewcode-block" id="qcrit"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.qcrit">[docs]</a><span class="k">def</span> <span class="nf">qcrit</span><span class="p">(</span><span class="n">SLD1</span><span class="p">,</span> <span class="n">SLD2</span><span class="p">):</span>
@@ -233,7 +244,7 @@
 
 
 <div class="viewcode-block" id="wavelength_velocity"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.wavelength_velocity">[docs]</a><span class="k">def</span> <span class="nf">wavelength_velocity</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts wavelength to neutron velocity</span>
 
 <span class="sd">    Parameters</span>
@@ -250,7 +261,7 @@
 
 
 <div class="viewcode-block" id="velocity_wavelength"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.velocity_wavelength">[docs]</a><span class="k">def</span> <span class="nf">velocity_wavelength</span><span class="p">(</span><span class="n">velocity</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts neutron velocity to wavelength</span>
 
 <span class="sd">    Parameters</span>
@@ -267,7 +278,7 @@
 
 
 <div class="viewcode-block" id="wavelength_energy"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.wavelength_energy">[docs]</a><span class="k">def</span> <span class="nf">wavelength_energy</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts wavelength to energy in meV</span>
 
 <span class="sd">    Parameters</span>
@@ -286,7 +297,7 @@
 
 
 <div class="viewcode-block" id="energy_wavelength"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.energy_wavelength">[docs]</a><span class="k">def</span> <span class="nf">energy_wavelength</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts wavelength to energy in meV</span>
 
 <span class="sd">    Parameters</span>
@@ -304,7 +315,7 @@
 
 
 <div class="viewcode-block" id="double_chopper_frequency"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.double_chopper_frequency">[docs]</a><span class="k">def</span> <span class="nf">double_chopper_frequency</span><span class="p">(</span><span class="n">min_wavelength</span><span class="p">,</span> <span class="n">max_wavelength</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the maximum frequency available for a given wavelength band</span>
 <span class="sd">    without getting frame overlap in a chopper spectrometer.</span>
 
@@ -468,14 +479,14 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    convert energy (keV) to wavelength (angstrom)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">12.398</span><span class="o">/</span> <span class="n">energy</span></div>
+    <span class="k">return</span> <span class="mf">12.398</span> <span class="o">/</span> <span class="n">energy</span></div>
 
 
 <div class="viewcode-block" id="xray_energy"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.xray_energy">[docs]</a><span class="k">def</span> <span class="nf">xray_energy</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    convert energy (keV) to wavelength (angstrom)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">12.398</span><span class="o">/</span> <span class="n">wavelength</span></div>
+    <span class="k">return</span> <span class="mf">12.398</span> <span class="o">/</span> <span class="n">wavelength</span></div>
 
 
 <div class="viewcode-block" id="penetration_depth"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.penetration_depth">[docs]</a><span class="k">def</span> <span class="nf">penetration_depth</span><span class="p">(</span><span class="n">qq</span><span class="p">,</span> <span class="n">rho</span><span class="p">):</span>
@@ -495,7 +506,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">kk</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">qq</span> <span class="o">**</span> <span class="mf">2.</span>
     <span class="n">kk</span> <span class="o">-=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">rho</span>
-    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">0j</span><span class="p">)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">0</span><span class="n">j</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">temp</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span></div>
 
 
@@ -587,7 +598,8 @@
     <span class="k">if</span> <span class="n">distance</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">distance</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">d2</span><span class="p">,</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">distance</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">d2</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">d1</span><span class="p">,</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">d1</span></div>
+        <span class="k">return</span> <span class="p">((</span><span class="n">beta</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">d1</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">d1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="actual_footprint"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.actual_footprint">[docs]</a><span class="k">def</span> <span class="nf">actual_footprint</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span><span class="p">,</span> <span class="n">L2S</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
@@ -614,19 +626,20 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">umbra</span><span class="p">,</span> <span class="n">penumbra</span> <span class="o">=</span> <span class="n">height_of_beam_after_dx</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span><span class="p">,</span> <span class="n">L2S</span><span class="p">)</span>
-    <span class="k">return</span>  <span class="n">umbra</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">penumbra</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">umbra</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">penumbra</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="slit_optimiser"><a class="viewcode-back" href="../../../refnx.util.html#refnx.util.general.slit_optimiser">[docs]</a><span class="k">def</span> <span class="nf">slit_optimiser</span><span class="p">(</span><span class="n">footprint</span><span class="p">,</span>
-                  <span class="n">resolution</span><span class="p">,</span>
-                  <span class="n">angle</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
-                  <span class="n">L12</span> <span class="o">=</span> <span class="mf">2859.5</span><span class="p">,</span>
-                  <span class="n">L2S</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span>
-                  <span class="n">LS3</span> <span class="o">=</span> <span class="mf">290.5</span><span class="p">,</span>
-                  <span class="n">LSD</span> <span class="o">=</span> <span class="mi">2500</span><span class="p">,</span>
-                  <span class="n">verbose</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+                   <span class="n">resolution</span><span class="p">,</span>
+                   <span class="n">angle</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
+                   <span class="n">L12</span><span class="o">=</span><span class="mf">2859.5</span><span class="p">,</span>
+                   <span class="n">L2S</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+                   <span class="n">LS3</span><span class="o">=</span><span class="mf">290.5</span><span class="p">,</span>
+                   <span class="n">LSD</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span>
+                   <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Optimise slit settings for a given angular resolution, and a given footprint.</span>
+<span class="sd">    Optimise slit settings for a given angular resolution, and a given</span>
+<span class="sd">    footprint.</span>
 
 <span class="sd">    footprint: float</span>
 <span class="sd">        maximum footprint onto sample (mm)</span>
@@ -636,30 +649,35 @@
 <span class="sd">        angle of incidence in degrees</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;_____________________________________________&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;FOOTPRINT calculator - Andrew Nelson 2013&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;INPUT&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;footprint:&#39;</span><span class="p">,</span> <span class="n">footprint</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;fractional angular resolution (FWHM):&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;theta:&#39;</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="s1">&#39;degrees&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;_____________________________________________&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;FOOTPRINT calculator - Andrew Nelson 2013&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;INPUT&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;footprint:&#39;</span><span class="p">,</span> <span class="n">footprint</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fractional angular resolution (FWHM):&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;theta:&#39;</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="s1">&#39;degrees&#39;</span><span class="p">)</span>
 
-    <span class="n">d1star</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d2star</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">d2star</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="n">L1star</span> <span class="o">=</span> <span class="mf">0.68</span> <span class="o">*</span> <span class="n">footprint</span><span class="o">/</span><span class="n">L12</span><span class="o">/</span><span class="n">resolution</span>
+    <span class="k">def</span> <span class="nf">d1star</span><span class="p">(</span><span class="n">d2star</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">d2star</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
-    <span class="n">gseekfun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d2star</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">d2star</span> <span class="o">+</span> <span class="n">L2S</span> <span class="o">/</span> <span class="n">L12</span> <span class="o">*</span> <span class="p">(</span><span class="n">d2star</span> <span class="o">+</span> <span class="n">d1star</span><span class="p">(</span><span class="n">d2star</span><span class="p">)))</span> <span class="o">-</span> <span class="n">L1star</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">L1star</span> <span class="o">=</span> <span class="mf">0.68</span> <span class="o">*</span> <span class="n">footprint</span> <span class="o">/</span> <span class="n">L12</span> <span class="o">/</span> <span class="n">resolution</span>
+
+    <span class="k">def</span> <span class="nf">gseekfun</span><span class="p">(</span><span class="n">d2star</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">d2star</span> <span class="o">+</span> <span class="n">L2S</span> <span class="o">/</span> <span class="n">L12</span> <span class="o">*</span> <span class="p">(</span><span class="n">d2star</span> <span class="o">+</span> <span class="n">d1star</span><span class="p">(</span><span class="n">d2star</span><span class="p">)))</span> <span class="o">-</span>
+                        <span class="n">L1star</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">minimize_scalar</span><span class="p">(</span><span class="n">gseekfun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bounded&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;ERROR: Couldnt find optimal solution, sorry&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR: Couldnt find optimal solution, sorry&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">optimal_d2star</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
     <span class="n">optimal_d1star</span> <span class="o">=</span> <span class="n">d1star</span><span class="p">(</span><span class="n">optimal_d2star</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">optimal_d2star</span> <span class="o">&gt;</span> <span class="n">optimal_d1star</span><span class="p">:</span>
-        <span class="c1"># you found a minimum, but this may not be the optimum size of the slits.</span>
+        <span class="c1"># you found a minimum, but this may not be the optimum size of the</span>
+        <span class="c1"># slits.</span>
         <span class="n">multfactor</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">optimal_d2star</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">optimal_d1star</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">optimal_d2star</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">optimal_d1star</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">multfactor</span> <span class="o">=</span> <span class="n">optimal_d2star</span> <span class="o">/</span> <span class="n">optimal_d1star</span>
 
@@ -671,20 +689,60 @@
     <span class="n">tmp</span><span class="p">,</span> <span class="n">_actual_footprint</span> <span class="o">=</span> <span class="n">actual_footprint</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">L12</span><span class="p">,</span> <span class="n">L2S</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">multfactor</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Your desired resolution results in a smaller footprint than the sample supports.&#39;</span><span class="p">)</span>
-            <span class="n">suggested_resolution</span> <span class="o">=</span>  <span class="n">resolution</span> <span class="o">*</span> <span class="n">footprint</span> <span class="o">/</span> <span class="n">_actual_footprint</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;You can increase flux using a resolution of&#39;</span><span class="p">,</span> <span class="n">suggested_resolution</span><span class="p">,</span> <span class="s1">&#39;and still keep the same footprint.&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;d1&#39;</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;d2&#39;</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;footprint:&#39;</span><span class="p">,</span> <span class="n">_actual_footprint</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;height at S4:&#39;</span><span class="p">,</span> <span class="n">height_at_S4</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;height at detector:&#39;</span><span class="p">,</span> <span class="n">height_at_detector</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;[d2star&#39;</span><span class="p">,</span> <span class="n">optimal_d2star</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;_____________________________________________&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Your desired resolution results in a smaller footprint than&#39;</span>
+                  <span class="s1">&#39; the sample supports.&#39;</span><span class="p">)</span>
+            <span class="n">suggested_resolution</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="n">footprint</span> <span class="o">/</span> <span class="n">_actual_footprint</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;You can increase flux using a resolution of&#39;</span><span class="p">,</span>
+                  <span class="n">suggested_resolution</span><span class="p">,</span> <span class="s1">&#39;and still keep the same footprint.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;d1&#39;</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;d2&#39;</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;footprint:&#39;</span><span class="p">,</span> <span class="n">_actual_footprint</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;height at S4:&#39;</span><span class="p">,</span> <span class="n">height_at_S4</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;height at detector:&#39;</span><span class="p">,</span> <span class="n">height_at_detector</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[d2star&#39;</span><span class="p">,</span> <span class="n">optimal_d2star</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;_____________________________________________&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span></div>
+
+
+<span class="k">def</span> <span class="nf">_dict_compare</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rudimentary check to see if two dict are the same. This won&#39;t do recursive</span>
+<span class="sd">    checking (e.g. if items in d1 or d2 are dicts)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d1 : dict</span>
+<span class="sd">    d2 : dict</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    truth : bool</span>
+<span class="sd">        Are two dicts the same</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">d1_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">d2_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">intersect_keys</span> <span class="o">=</span> <span class="n">d1_keys</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">d2_keys</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersect_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">intersect_keys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="c1"># both numpy arrays</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">d2</span><span class="p">[</span><span class="n">o</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">d2</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="ow">or</span> <span class="n">d1</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d2</span><span class="p">[</span><span class="n">o</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
 </pre></div>
 
           </div>
@@ -703,8 +761,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -715,11 +773,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
 

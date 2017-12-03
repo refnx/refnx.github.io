@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.parabolic_motion &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.reduce.parabolic_motion &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,25 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -41,13 +43,13 @@
           <div class="body" role="main">
             
   <h1>Source code for refnx.reduce.parabolic_motion</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="kn">import</span> <span class="n">Polynomial</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">newton</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="k">import</span> <span class="n">Polynomial</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span>
 
-<span class="nd">@np.vectorize</span>
+
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
 <span class="k">def</span> <span class="nf">y_deflection</span><span class="p">(</span><span class="n">initial_trajectory</span><span class="p">,</span> <span class="n">speed</span><span class="p">,</span> <span class="n">flight_length</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The vertical displacement of an object moving in a parabolic path.</span>
@@ -72,7 +74,7 @@
     <span class="k">return</span> <span class="n">eqn</span><span class="p">(</span><span class="n">flight_length</span><span class="p">)</span>
 
 
-<span class="nd">@np.vectorize</span>
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
 <span class="k">def</span> <span class="nf">elevation</span><span class="p">(</span><span class="n">initial_trajectory</span><span class="p">,</span> <span class="n">speed</span><span class="p">,</span> <span class="n">flight_length</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Angle between x-axis and tangent of flight path at a given horizontal</span>
@@ -101,12 +103,12 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">dydx</span><span class="p">(</span><span class="n">flight_length</span><span class="p">)))</span>
 
 
-<span class="nd">@np.vectorize</span>
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
 <span class="k">def</span> <span class="nf">find_trajectory</span><span class="p">(</span><span class="n">flight_length</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find the initial trajectory of an object that has to pass through a certain</span>
-<span class="sd">    point on a parabolic path.  This point is specified by the horizontal distance</span>
-<span class="sd">    component and an angle (polar coordinates).</span>
+<span class="sd">    point on a parabolic path.  This point is specified by the horizontal</span>
+<span class="sd">    distance component and an angle (polar coordinates).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -128,13 +130,28 @@
     <span class="n">theta_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
     <span class="n">vertical_deflection_vertex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">flight_length</span>
 
-    <span class="c1"># now find trajectory that will put object through defined point</span>
-    <span class="k">def</span> <span class="nf">traj</span><span class="p">(</span><span class="n">trajectory</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">vertical_deflection_vertex</span>
-                <span class="o">-</span> <span class="n">y_deflection</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">speed</span><span class="p">,</span> <span class="n">flight_length</span><span class="p">))</span>
+    <span class="c1"># # now find trajectory that will put object through defined point</span>
+    <span class="c1"># def traj(trajectory):</span>
+    <span class="c1">#     return (vertical_deflection_vertex -</span>
+    <span class="c1">#             y_deflection(trajectory, speed, flight_length))</span>
+    <span class="c1">#</span>
+    <span class="c1"># trajectory = newton(traj, 0)</span>
+    <span class="c1"># return trajectory</span>
 
-    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">newton</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">trajectory</span>
+    <span class="c1"># https://en.wikipedia.org/wiki/Trajectory_of_a_projectile</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">flight_length</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">vertical_deflection_vertex</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">speed</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">g</span>
+
+    <span class="c1"># num0 = (v ** 2 + np.sqrt(v ** 4 - g * (g * x ** 2 + 2 * y * v ** 2)))</span>
+    <span class="n">num1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">-</span> <span class="n">g</span> <span class="o">*</span> <span class="p">(</span><span class="n">g</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span> <span class="o">*</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="c1"># there are two trajectories that could hit the target</span>
+    <span class="c1"># we only need one branch.</span>
+    <span class="c1"># alpha1 = np.arctan2(num0, g * x)</span>
+    <span class="n">alpha2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">num1</span><span class="p">,</span> <span class="n">g</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">alpha2</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="parabola"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.parabolic_motion.parabola">[docs]</a><span class="k">def</span> <span class="nf">parabola</span><span class="p">(</span><span class="n">initial_trajectory</span><span class="p">,</span> <span class="n">speed</span><span class="p">):</span>
@@ -161,8 +178,9 @@
     <span class="k">return</span> <span class="n">eqn</span></div>
 
 
-<span class="nd">@np.vectorize</span>
-<span class="k">def</span> <span class="nf">parabola_line_intersection_point</span><span class="p">(</span><span class="n">flight_length</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">initial_trajectory</span><span class="p">,</span> <span class="n">speed</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
+<span class="k">def</span> <span class="nf">parabola_line_intersection_point</span><span class="p">(</span><span class="n">flight_length</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">initial_trajectory</span><span class="p">,</span>
+                                     <span class="n">speed</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find the intersection point of the parabolic motion path and a line.</span>
 <span class="sd">    The line is specified by an angle and a point through which the line</span>
@@ -201,8 +219,8 @@
     <span class="n">line_gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">omega_prime</span><span class="p">)</span>
 
     <span class="c1"># equation of line</span>
-    <span class="n">line_eqn</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="p">([(</span><span class="n">flight_length</span>
-                            <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span> <span class="o">-</span> <span class="n">line_gradient</span><span class="p">)),</span>
+    <span class="n">line_eqn</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="p">([(</span><span class="n">flight_length</span> <span class="o">*</span>
+                            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span> <span class="o">-</span> <span class="n">line_gradient</span><span class="p">)),</span>
                            <span class="n">line_gradient</span><span class="p">])</span>
 
     <span class="c1"># equation of parabola</span>
@@ -216,8 +234,8 @@
     <span class="n">intersection_y</span> <span class="o">=</span> <span class="n">line_eqn</span><span class="p">(</span><span class="n">intersection_x</span><span class="p">)</span>
 
     <span class="c1"># distance between parabola-line intersection and &#39;point on line&#39;</span>
-    <span class="n">distance</span> <span class="o">=</span> <span class="p">((</span><span class="n">intersection_x</span> <span class="o">-</span> <span class="n">flight_length</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-                <span class="o">+</span> <span class="p">(</span><span class="n">intersection_y</span> <span class="o">-</span> <span class="n">flight_length</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="p">((</span><span class="n">intersection_x</span> <span class="o">-</span> <span class="n">flight_length</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                <span class="p">(</span><span class="n">intersection_y</span> <span class="o">-</span> <span class="n">flight_length</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">x_prime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
 
     <span class="c1"># calculate the elevation</span>
@@ -242,8 +260,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -254,11 +272,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
 

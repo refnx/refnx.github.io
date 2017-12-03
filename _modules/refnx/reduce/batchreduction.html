@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.batchreduction &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.reduce.batchreduction &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,25 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -47,23 +49,24 @@
 <span class="sd">Batch reduction of reflectometry data based on a spreadsheet</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">IPython.display</span>
-    <span class="n">_have_ipython</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">_have_ipython</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">_have_ipython</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">_have_ipython</span> <span class="o">=</span> <span class="kc">False</span>
 
-<span class="kn">from</span> <span class="nn">refnx.reduce</span> <span class="kn">import</span> <span class="n">reduce_stitch</span>
+<span class="kn">from</span> <span class="nn">refnx.reduce</span> <span class="k">import</span> <span class="n">reduce_stitch</span>
 
 
 <span class="n">ReductionEntryTuple</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ReductionEntry&#39;</span><span class="p">,</span>
@@ -71,12 +74,12 @@
                                               <span class="s1">&#39;ds&#39;</span><span class="p">,</span>
                                               <span class="s1">&#39;name&#39;</span><span class="p">,</span>
                                               <span class="s1">&#39;fname&#39;</span><span class="p">,</span>
-                                              <span class="s1">&#39;entry&#39;</span><span class="p">,])</span>
+                                              <span class="s1">&#39;entry&#39;</span><span class="p">,</span> <span class="p">])</span>
 
 
 <span class="k">class</span> <span class="nc">ReductionEntry</span><span class="p">(</span><span class="n">ReductionEntryTuple</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">rescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">rescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
@@ -109,16 +112,31 @@
 <span class="sd">    &gt;&gt;&gt; data.name_startswith(&#39;W&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; plot_data_sets(data.name_search(&#39;^W&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">_default_persistent_cache</span> <span class="o">=</span> <span class="s2">&quot;_reduction_cache.pickle&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">persistent</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new reduction cache</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        persistent : bool or str, optional</span>
+<span class="sd">            Reduction cache should be stored on disk to allow the reducer to</span>
+<span class="sd">            be restarted without having to rereduce the data. If a str is</span>
+<span class="sd">            given, it is used as the filename for the persistent cache,</span>
+<span class="sd">            otherwise, a default value is used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ReductionCache</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReductionCache</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name_cache</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_cache</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span> <span class="o">=</span> <span class="n">persistent</span>
 
-    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">entry</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_cache</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">entry</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add (or update) a data set in the reduction cache</span>
 
@@ -158,7 +176,32 @@
         <span class="n">runs</span> <span class="o">=</span> <span class="n">run_list</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">run_cache</span><span class="p">[</span><span class="n">run</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_cache</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">delete_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_numbers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Delete a row from the reduction cache</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        row_numbers: list of int</span>
+<span class="sd">            row numbers (from the reduction spreadsheet) that should be</span>
+<span class="sd">            deleted from the cache</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">row_numbers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not deleting unknown row </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">row</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span><span class="p">[</span><span class="n">row</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Deleted row </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">row</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_cache</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_number</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; select a single data set by run number</span>
@@ -178,7 +221,7 @@
 <span class="sd">        run_numbers : iterable</span>
 <span class="sd">            run numbers to find</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">run_cache</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">run_numbers</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">run_cache</span><span class="p">[</span><span class="n">r</span><span class="p">]]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">run_numbers</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_number</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; select a single data set by spreadsheet row number</span>
@@ -198,7 +241,8 @@
 <span class="sd">        row_numbers : iterable</span>
 <span class="sd">            row numbers to find</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">row</span> <span class="ow">in</span> <span class="n">row_numbers</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span>
+                <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">row</span> <span class="ow">in</span> <span class="n">row_numbers</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; select a single data set by sample name</span>
@@ -218,7 +262,8 @@
 <span class="sd">        name : str</span>
 <span class="sd">            fragment that must be at the start of the sample name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span>
+                   <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">matches</span>
 
     <span class="k">def</span> <span class="nf">name_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
@@ -247,7 +292,8 @@
             <span class="n">name_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">name_re</span> <span class="o">=</span> <span class="n">search</span>
-        <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">name_re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span>
+                   <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name_re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">matches</span>
 
     <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -259,19 +305,80 @@
         <span class="k">if</span> <span class="n">_have_ipython</span><span class="p">:</span>
             <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_summary_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; construct a summary table of the data in the cache</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entry</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">entry</span>
+            <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">entry</span>
         <span class="k">return</span> <span class="n">df</span>
+
+    <span class="k">def</span> <span class="nf">write_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; write a persistent cache of reduced data to disk</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str, optional</span>
+<span class="sd">            filename to which the cache should be written; if not specified</span>
+<span class="sd">            or `None`, the default filename is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">drop_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; delete the persistent cache of reduced data from disk</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str, optional</span>
+<span class="sd">            filename of the cache to be deleted; if not specified or `None`,</span>
+<span class="sd">            the default filename is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">load_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; load a persistent cache of reduced data from disk</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str, optional</span>
+<span class="sd">            filename from which the cache should be loaded; if not specified</span>
+<span class="sd">            or `None`, the default filename is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;On-disk cache empty&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                <span class="n">cached</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name_cache</span> <span class="o">=</span> <span class="n">cached</span><span class="o">.</span><span class="n">name_cache</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_cache</span> <span class="o">=</span> <span class="n">cached</span><span class="o">.</span><span class="n">run_cache</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">row_cache</span> <span class="o">=</span> <span class="n">cached</span><span class="o">.</span><span class="n">row_cache</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cached</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;On-disk cache loaded&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>  <span class="c1"># (FileNotFoundError is Python 3 only)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;On-disk cache not found&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_cache_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return the filename for the persistent cache if it is in use &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filename</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">persistent</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_persistent_cache</span>
 
     <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_dataframe</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;b&gt;Summary of reduced data&lt;/b&gt;&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;b&gt;Summary of reduced data&lt;/b&gt;&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_dataframe</span><span class="p">()</span>
@@ -294,10 +401,12 @@
 
 <span class="sd">        reduce name scale refl1 refl2 refl3 dir1 dir2 dir3</span>
 
-<span class="sd">    Only rows where the value of the `reduce` column is 1 will be processed.</span>
+<span class="sd">    Only rows where the value of the `reduce` column is 1 and where the sample</span>
+<span class="sd">    name is set will be processed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">data_folder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">data_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">persistent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a batch reducer using metadata from a spreadsheet</span>
 
@@ -311,15 +420,18 @@
 <span class="sd">            then the current working directory is used.</span>
 <span class="sd">        verbose : bool, optional</span>
 <span class="sd">            Prints status information during batch reduction.</span>
+<span class="sd">        persistent : bool, optional</span>
+<span class="sd">            Reduction cache should be stored on disk to allow the reducer to</span>
+<span class="sd">            be restarted without having to rereduce the data.</span>
 <span class="sd">        kwds : dict, optional</span>
 <span class="sd">            Options passed directly to `refnx.reduce.reduce_stitch`. Look at</span>
 <span class="sd">            that docstring for complete specification of options.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">ReductionCache</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">ReductionCache</span><span class="p">(</span><span class="n">persistent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">data_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span> <span class="o">=</span> <span class="n">kwds</span>
@@ -341,41 +453,44 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;Reducing </span><span class="si">%s</span><span class="s2"> [</span><span class="si">%s</span><span class="s2">]/[</span><span class="si">%s</span><span class="s2">]&quot;</span>
 
-            <span class="k">print</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
-                  <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">),</span>
-                  <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">directs</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                         <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">),</span>
+                         <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">directs</span><span class="p">)))</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>   <span class="c1"># keep progress updated</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">runs</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has no reflection runs&quot;</span> <span class="o">%</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has no reflection runs. Skipped.&quot;</span> <span class="o">%</span>
                           <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
-            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">directs</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has no direct beam runs&quot;</span> <span class="o">%</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has no direct beam runs. Skipped.&quot;</span> <span class="o">%</span>
                           <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
-            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">directs</span><span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-              <span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has differing numbers of direct &amp; refln runs&quot;</span> <span class="o">%</span>
-              <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
-            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">directs</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Row </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) has differing numbers of&quot;</span>
+                          <span class="s2">&quot; direct &amp; reflection runs. Skipped.&quot;</span> <span class="o">%</span>
+                          <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
         <span class="n">ds</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">reduce_stitch</span><span class="p">(</span><span class="n">runs</span><span class="p">,</span> <span class="n">directs</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ds</span><span class="p">,</span> <span class="n">fname</span>
 
-<div class="viewcode-block" id="BatchReducer.reduce"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.BatchReducer.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Batch reduce data based on metadata from a spreadsheet</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        show : bool (optional, default=True)</span>
-<span class="sd">            display a summary table of the rows that were reduced</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BatchReducer.load_runs"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.BatchReducer.load_runs">[docs]</a>    <span class="k">def</span> <span class="nf">load_runs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="s1">&#39;A:I&#39;</span>
-        <span class="n">all_runs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">parse_cols</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
+        <span class="n">all_runs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">usecols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+            <span class="n">converters</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;refl1&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="s1">&#39;refl2&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="s1">&#39;refl3&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="s1">&#39;dir1&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="s1">&#39;dir2&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="s1">&#39;dir3&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
 
         <span class="c1"># Add the row number in the spreadsheet as an extra column</span>
         <span class="c1"># row numbers for the runs will start at 2 not 0</span>
@@ -384,24 +499,40 @@
         <span class="c1"># add in some extra columns to indicate successful reduction</span>
         <span class="n">all_runs</span><span class="p">[</span><span class="s1">&#39;reduced&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_runs</span><span class="p">))</span>
         <span class="n">all_runs</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_runs</span><span class="p">))</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">reduce</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">all_runs</span></div>
+
+<div class="viewcode-block" id="BatchReducer.select_runs"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.BatchReducer.select_runs">[docs]</a>    <span class="k">def</span> <span class="nf">select_runs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_runs</span><span class="p">):</span>
+        <span class="c1"># skip samples not marked for reduction or with no sample name</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">reduce</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">isnull</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+<div class="viewcode-block" id="BatchReducer.reduce"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.BatchReducer.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch reduce data based on metadata from a spreadsheet</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        show : bool (optional, default=True)</span>
+<span class="sd">            display a summary table of the rows that were reduced</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_runs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_runs</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_runs</span><span class="p">(</span><span class="n">all_runs</span><span class="p">)</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
 
         <span class="c1"># iterate through the rows that were marked for reduction</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-            <span class="c1"># ensure that the name is a string (will be NaN if blank in sheet)</span>
             <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ds</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_row</span><span class="p">(</span><span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
-            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="c1"># data file not found (normally)</span>
                 <span class="n">reduction_ok</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Run </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
-                <span class="n">ds</span> <span class="o">=</span> <span class="bp">None</span>
-                <span class="n">fname</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">reduction_ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="n">reduction_ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">reduction_ok</span><span class="p">:</span>
                     <span class="c1"># store this away to make plotting easier later</span>
                     <span class="n">ds</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -415,18 +546,17 @@
             <span class="k">if</span> <span class="n">reduction_ok</span><span class="p">:</span>
                 <span class="n">scale</span> <span class="o">=</span> <span class="n">all_runs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="ow">and</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Applying scale factor </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">scale</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Applying scale factor </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">scale</span><span class="p">)</span>
                     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>   <span class="c1"># keep progress updated</span>
                     <span class="n">cached</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">_have_ipython</span><span class="p">:</span>
-                <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+                <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">print</span><span class="p">(</span><span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">all_runs</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span></div>
-
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; run the reducer as the default action for the BatchReducer</span>
@@ -466,12 +596,11 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">run</span><span class="p">):</span>
                     <span class="n">valid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                  <span class="s2">&quot;Value &#39;</span><span class="si">%s</span><span class="s2">&#39; could not be interpreted as a run number&quot;</span> <span class="o">%</span> <span class="n">run</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Value &#39;</span><span class="si">%s</span><span class="s2">&#39; could not be interpreted as a run&quot;</span>
+                                 <span class="s2">&quot; number&quot;</span> <span class="o">%</span> <span class="n">run</span><span class="p">)</span>
 
-    <span class="c1">#valid = [int(r) for r in l if not np.isnan(r)]</span>
+    <span class="c1"># valid = [int(r) for r in l if not np.isnan(r)]</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">valid</span><span class="p">]</span>
-
 </pre></div>
 
           </div>
@@ -490,8 +619,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -502,11 +631,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
 

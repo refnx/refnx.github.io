@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to refnx’s documentation! &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx - Neutron and X-ray reflectometry analysis in Python &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,24 +14,28 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="#" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -39,16 +43,49 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-refnx-s-documentation">
-<h1>Welcome to refnx&#8217;s documentation!<a class="headerlink" href="#welcome-to-refnx-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+  <div class="section" id="refnx-neutron-and-x-ray-reflectometry-analysis-in-python">
+<h1>refnx - Neutron and X-ray reflectometry analysis in Python<a class="headerlink" href="#refnx-neutron-and-x-ray-reflectometry-analysis-in-python" title="Permalink to this headline">¶</a></h1>
+<p><em>refnx</em> is a flexible, powerful, Python package for generalised curvefitting
+analysis, specifically neutron and X-ray reflectometry data.</p>
+<p>It uses several <a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a> algorithms for fitting data, and estimating
+parameter uncertainties. As well as the scipy algorithms <em>refnx</em> uses the
+<a class="reference external" href="http://emcee.readthedocs.io/en/stable/">emcee</a> Affine Invariant Markov chain Monte Carlo (MCMC) Ensemble sampler for
+Bayesian parameter estimation.</p>
+<p>Reflectometry analysis uses a modular and object oriented approach to model
+parameterisation. Models are made up by sequences of components, frequently
+slabs of uniform scattering length density, but other components are available,
+including splines for freeform modelling of a scattering length density profile.
+These components allow the parameterisation of a model in terms of physically
+relevant parameters. The Bayesian nature of the package allows the
+specification of prior probabilities for the model, so parameter bounds can be
+described in terms of probability distribution functions. These priors not only
+applicable to any parameter, but can apply to any other user-definable knowledge
+about the system (such as adsorbed amount).
+Co-refinement of multiple contrast datasets is straightforward, with sharing of
+joint parameters across each model.</p>
+<p>The refnx package is free software, using a BSD licence. The
+software and this document are works in progress.  If you are interested in
+participating in this effort please use the <a class="reference external" href="http://github.com/refnx/refnx">refnx github repository</a>.</p>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-into-a-conda-environment">Installation into a <em>conda</em> environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#creating-a-conda-environment">Creating a conda environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-from-source">Installing from source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-into-a-conda-environment-from-a-released-version">Installing into a conda environment from a released version</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gettingstarted.html#fitting-a-neutron-reflectometry-dataset">Fitting a neutron reflectometry dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-s-the-best-way-to-ask-for-help-or-submit-a-bug-report">What’s the best way to ask for help or submit a bug report?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-should-i-cite-refnx">How should I cite refnx?</a></li>
+</ul>
+</li>
 </ul>
 </div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
@@ -61,31 +98,26 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Welcome to refnx&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
-</ul>
-<div class="relations">
+        <div class="sphinxsidebarwrapper"><div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="installation.html" title="next chapter">Installation</a></li>
   </ul></li>
 </ul>
 </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
+      <li><a href="_sources/index.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -96,14 +128,14 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="_sources/index.txt"
+      <a href="_sources/index.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

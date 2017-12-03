@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.dataset.data1d &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.dataset.data1d &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,25 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -44,16 +46,19 @@
 <span></span><span class="sd">&quot;&quot;&quot;&quot;</span>
 <span class="sd">A basic representation of a 1D dataset</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">refnx.util.nsplice</span> <span class="kn">import</span> <span class="n">get_scaling_in_overlap</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">refnx.util.nsplice</span> <span class="k">import</span> <span class="n">get_scaling_in_overlap</span>
+<span class="kn">from</span> <span class="nn">refnx._lib</span> <span class="k">import</span> <span class="n">possibly_open_file</span>
 
 
 <div class="viewcode-block" id="Data1D"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D">[docs]</a><span class="k">class</span> <span class="nc">Data1D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A basic representation of a 1D dataset.</span>
 
 <span class="sd">    Parameters</span>
@@ -68,7 +73,7 @@
 <span class="sd">            - data[0] - x</span>
 <span class="sd">            - data[1] - y</span>
 <span class="sd">            - data[2] - uncertainties on y, y_err</span>
-<span class="sd">            - data[3] - uncertainties of x, x_err</span>
+<span class="sd">            - data[3] - uncertainties on x, x_err</span>
 
 <span class="sd">        `data` must be at least two long, `x` and `y`.</span>
 <span class="sd">        If the tuple is at least 3 long then the third member is `y_err`.</span>
@@ -77,42 +82,54 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    npoints : the number of points in the dataset</span>
-<span class="sd">    data : the data, (x, y, y_err, x_err)</span>
-<span class="sd">    finite_data : the data with mask applied</span>
-<span class="sd">    x : x data</span>
-<span class="sd">    y : y data</span>
-<span class="sd">    y_err : uncertainties on the y data</span>
-<span class="sd">    x_err : uncertainties on the x data</span>
+<span class="sd">    data : tuple of np.ndarray</span>
+<span class="sd">        The data, (x, y, y_err, x_err)</span>
+<span class="sd">    finite_data : tuple of np.ndarray</span>
+<span class="sd">        Data points that are finite</span>
+<span class="sd">    x : np.ndarray</span>
+<span class="sd">        x data</span>
+<span class="sd">    y : np.ndarray</span>
+<span class="sd">        y data</span>
+<span class="sd">    y_err : np.ndarray</span>
+<span class="sd">        uncertainties on the y data</span>
+<span class="sd">    x_err : np.ndarray</span>
+<span class="sd">        uncertainties on the x data</span>
+<span class="sd">    filename : str or None</span>
+<span class="sd">        The file the data was read from</span>
+<span class="sd">    weighted : bool</span>
+<span class="sd">        Whether the y data has uncertainties</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Information that should be retained with the dataset.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chisqr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">kwds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weighted</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># if it&#39;s a file then open and load the file.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weighted</span> <span class="o">=</span> <span class="kc">True</span>
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">npoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        the number of points in the dataset.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">size</span>
 
@@ -120,6 +137,7 @@
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        4-tuple containing the (x, y, y_err, x_err) data</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span>
 
@@ -128,6 +146,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        4-tuple containing the (x, y, y_err, x_err) datapoints that are</span>
 <span class="sd">        finite.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">finite_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">finite_loc</span><span class="p">],</span>
@@ -135,7 +154,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span><span class="p">[</span><span class="n">finite_loc</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span><span class="p">[</span><span class="n">finite_loc</span><span class="p">])</span>
 
-    <span class="nd">@data.setter</span>
+    <span class="nd">@data</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_tuple</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the data for this object from supplied data.</span>
@@ -145,19 +164,21 @@
 <span class="sd">        data_tuple : tuple</span>
 <span class="sd">            2 to 4 member tuple containing the (x, y, y_err, x_err) data to</span>
 <span class="sd">            specify the dataset. `y_err` and `x_err` are optional.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weighted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">data_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weighted</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">data_tuple</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Data1D.scale"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.scale">[docs]</a>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
@@ -168,11 +189,12 @@
 <span class="sd">        ----------</span>
 <span class="sd">        scalefactor : float</span>
 <span class="sd">            The scalefactor to divide by.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">/=</span> <span class="n">scalefactor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">/=</span> <span class="n">scalefactor</span></div>
 
-<div class="viewcode-block" id="Data1D.add_data"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_tuple</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Data1D.add_data"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_tuple</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds more data to the dataset</span>
 
@@ -190,48 +212,81 @@
 <span class="sd">            the existing data that are in the overlap region? This might be</span>
 <span class="sd">            done because the datapoints in the `data_tuple` you are adding have</span>
 <span class="sd">            have lower `y_err` than the preceding data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xdata</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">ydata_sd</span><span class="p">,</span> <span class="n">xdata_sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="n">axdata</span><span class="p">,</span> <span class="n">aydata</span> <span class="o">=</span> <span class="n">data_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Raises `ValueError` if there are no points in the overlap region and</span>
+<span class="sd">        `requires_splice` was True.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="n">x_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># dataset has no points, can just initialise with the tuple</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_tuple</span>
+            <span class="k">return</span>
+
+        <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span> <span class="o">=</span> <span class="n">data_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># if ((len(data_tuple) &gt; 2 and self.y_err is None) or</span>
+        <span class="c1">#         (len(data_tuple) == 2 and self.y_err is not None)):</span>
+        <span class="c1">#     raise ValueError(&quot;Both the existing Data1D and the data you&#39;re&quot;</span>
+        <span class="c1">#                      &quot; trying to add need to have y_err&quot;)</span>
+        <span class="c1">#</span>
+        <span class="c1"># if ((len(data_tuple) &gt; 3 and self.x_err is None) or</span>
+        <span class="c1">#         (len(data_tuple) == 3 and self.x_err is not None)):</span>
+        <span class="c1">#     raise ValueError(&quot;Both the existing Data1D and the data you&#39;re&quot;</span>
+        <span class="c1">#                      &quot; trying to add need to have x_err&quot;)</span>
+
+        <span class="n">ay_err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ax_err</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">aydata_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">aydata_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">aydata</span><span class="p">)</span>
+            <span class="n">ay_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">axdata_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">axdata_sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">axdata</span><span class="p">))</span>
-
-        <span class="n">qq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">xdata</span><span class="p">]</span>
-        <span class="n">rr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ydata</span><span class="p">]</span>
-        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ydata_sd</span><span class="p">]</span>
-        <span class="n">dq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">xdata_sd</span><span class="p">]</span>
+            <span class="n">ax_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuple</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="c1"># which values in the first dataset overlap with the second</span>
-        <span class="n">overlap_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">qq</span><span class="p">,</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">overlap_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span>
 
         <span class="c1"># go through and stitch them together.</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span>
         <span class="n">dscale</span> <span class="o">=</span> <span class="mf">0.</span>
-        <span class="k">if</span> <span class="n">requires_splice</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">requires_splice</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">scale</span><span class="p">,</span> <span class="n">dscale</span><span class="p">,</span> <span class="n">overlap_points</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">get_scaling_in_overlap</span><span class="p">(</span><span class="n">qq</span><span class="p">,</span>
-                                       <span class="n">rr</span><span class="p">,</span>
-                                       <span class="n">dr</span><span class="p">,</span>
-                                       <span class="n">axdata</span><span class="p">,</span>
-                                       <span class="n">aydata</span><span class="p">,</span>
-                                       <span class="n">aydata_sd</span><span class="p">))</span>
+                <span class="n">get_scaling_in_overlap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
+                                       <span class="n">y</span><span class="p">,</span>
+                                       <span class="n">y_err</span><span class="p">,</span>
+                                       <span class="n">ax</span><span class="p">,</span>
+                                       <span class="n">ay</span><span class="p">,</span>
+                                       <span class="n">ay_err</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="p">((</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">scale</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">dscale</span><span class="p">))</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">overlap_points</span><span class="p">,</span> <span class="mi">0</span><span class="p">))):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No points in overlap region&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">trim_trailing</span><span class="p">:</span>
-            <span class="n">overlap_points</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">overlap_points</span><span class="p">[:]</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">qq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">qq</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">axdata</span><span class="p">]</span>
-        <span class="n">dq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dq</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">axdata_sd</span><span class="p">]</span>
+        <span class="n">qq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">ax</span><span class="p">]</span>
+        <span class="n">rr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">ay</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
 
-        <span class="n">rr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">rr</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">aydata</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
-        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dr</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">aydata_sd</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">y_err</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">ay_err</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ay_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both the existing Data1D and the data you&#39;re&quot;</span>
+                                 <span class="s2">&quot; trying to add need to have y_err&quot;</span><span class="p">)</span>
+            <span class="n">dr</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x_err</span><span class="p">[</span><span class="o">~</span><span class="n">overlap_points</span><span class="p">],</span> <span class="n">ax_err</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ax_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">x_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both the existing Data1D and the data you&#39;re&quot;</span>
+                                 <span class="s2">&quot; trying to add need to have x_err&quot;</span><span class="p">)</span>
+            <span class="n">dq</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">qq</span><span class="p">,</span> <span class="n">rr</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="n">dq</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span></div>
@@ -243,8 +298,10 @@
         <span class="nb">sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="nb">sorted</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="nb">sorted</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span><span class="p">[</span><span class="nb">sorted</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span><span class="p">[</span><span class="nb">sorted</span><span class="p">]</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span><span class="p">[</span><span class="nb">sorted</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span><span class="p">[</span><span class="nb">sorted</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Data1D.save"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -254,17 +311,13 @@
 <span class="sd">        ----------</span>
 <span class="sd">        f : file-handle or string</span>
 <span class="sd">            File to save the dataset to.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span><span class="p">,</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span><span class="p">)))</span></div>
-
-<div class="viewcode-block" id="Data1D.save_fit"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.save_fit">[docs]</a>    <span class="k">def</span> <span class="nf">save_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-                                           <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="Data1D.load"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -274,25 +327,38 @@
 <span class="sd">        ----------</span>
 <span class="sd">        f : file-handle or string</span>
 <span class="sd">            File to load the dataset from.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="c1"># see if there are header rows</span>
+        <span class="k">with</span> <span class="n">possibly_open_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+            <span class="n">header_lines</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span>
+                            <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;\s|,&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">header_lines</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="n">header_lines</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">):</span>
             <span class="n">fname</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fname</span> <span class="o">=</span> <span class="n">f</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">fname</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">array</span><span class="p">[:,</span> <span class="n">col</span><span class="p">])</span>
-                     <span class="k">for</span> <span class="n">col</span>
-                     <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">1</span><span class="p">))]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Data1D.refresh"><a class="viewcode-back" href="../../../refnx.dataset.html#refnx.dataset.data1d.Data1D.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Refreshes a previously loaded dataset.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
@@ -300,25 +366,28 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds two datasets together. Splices the data and trims data in the</span>
 <span class="sd">        overlap region.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        radd of two datasets. Splices the data and trims data in the</span>
 <span class="sd">        overlap region.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        iadd of two datasets. Splices the data and trims data in the</span>
 <span class="sd">        overlap region.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_splice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trim_trailing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 </pre></div>
 
@@ -338,8 +407,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -350,11 +419,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
 

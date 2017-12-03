@@ -1,0 +1,239 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>refnx.analysis.model &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.13.dev0+8d6438f',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for refnx.analysis.model</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+
+<span class="kn">from</span> <span class="nn">refnx._lib.util</span> <span class="k">import</span> <span class="n">getargspec</span>
+
+
+<div class="viewcode-block" id="fitfunc"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.model.fitfunc">[docs]</a><span class="k">def</span> <span class="nf">fitfunc</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A decorator that can be used to say if something is a fitfunc.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">fitfuncwraps</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates a generative model (dependent variable), given parameters</span>
+<span class="sd">    and independent variables.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : array or refnx.analysis.Parameters</span>
+<span class="sd">        Parameters to calculate the model with</span>
+<span class="sd">    fitfunc : callable, optional</span>
+<span class="sd">        A function that calculates the generative model. Should have the</span>
+<span class="sd">        signature ``fitfunc(x, parameters, *fcn_args, **fcn__kwds)`` where `x`</span>
+<span class="sd">        is an array-like specifying the independent variables, and</span>
+<span class="sd">        `parameters` are the parameters required to calculate the model.</span>
+<span class="sd">        `fcn_args` and `fcn_kwds` can be used to supply additional arguments to</span>
+<span class="sd">        to `fitfunc`.</span>
+<span class="sd">    fcn_args : sequence, optional</span>
+<span class="sd">        Supplies extra arguments to `fitfunc`</span>
+<span class="sd">    fcn_kwds : dict, optional</span>
+<span class="sd">        Supplies keyword arguments to `fitfunc`</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    It is not necessary to supply `fitfunc` to create a `Model` *iff* you are</span>
+<span class="sd">    inheriting `Model` and are also overriding `Model.model`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fitfunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fcn_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">fcn_kwds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc_has_xerr</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunc</span> <span class="o">=</span> <span class="n">fitfunc</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fcn_args</span> <span class="o">=</span> <span class="n">fcn_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">fcn_kwds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span> <span class="o">=</span> <span class="n">fcn_kwds</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates a generative model(dependent variable), given parameters and</span>
+<span class="sd">        independent variables.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array-like</span>
+<span class="sd">            Independent variable.</span>
+<span class="sd">        p : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            Parameters to supply to the generative function.</span>
+<span class="sd">        x_err : optional</span>
+<span class="sd">            Uncertainty in `x`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        generative : array-like or float</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The interpretation of `x`, `p`, and `x_err` is up to the `fitfunc`</span>
+<span class="sd">        supplied during construction of this object (or the overridden `model`</span>
+<span class="sd">        method of this object).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="n">x_err</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.model"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.model.Model.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates a generative model(dependent variable), given parameters and</span>
+<span class="sd">        independent variables.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array-like</span>
+<span class="sd">            Independent variable.</span>
+<span class="sd">        p : array-like or refnx.analysis.Parameters</span>
+<span class="sd">            Parameters to supply to the generative function.</span>
+<span class="sd">        x_err : optional</span>
+<span class="sd">            Uncertainty in `x`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        generative : array-like or float</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The interpretation of `x`, `p`, and `x_err` is up to the `fitfunc`</span>
+<span class="sd">        supplied during construction of this object (or the overridden `model`</span>
+<span class="sd">        method of this object).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.fitfunc or this method has to understand the structure of</span>
+        <span class="c1"># self.params.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwds</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fcn_kwds</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc_has_xerr</span><span class="p">:</span>
+                <span class="c1"># fitfunc has resolution</span>
+                <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;x_err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_err</span>
+
+            <span class="n">_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_params</span> <span class="o">=</span> <span class="n">p</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_params</span><span class="p">,</span>
+                                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">fcn_args</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Overide Model.model() or provide a fitfunc to&quot;</span>
+                               <span class="s2">&quot; the constructor&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Model.lnprob"><a class="viewcode-back" href="../../../refnx.analysis.html#refnx.analysis.model.Model.lnprob">[docs]</a>    <span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The model can add additional terms to it&#39;s log-probability. However,</span>
+<span class="sd">        it should _not_ include lnprob from any of the parameters. That is</span>
+<span class="sd">        calculated by objective.lnprior.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fitfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc</span>
+
+    <span class="nd">@fitfunc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fitfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitfunc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc</span> <span class="o">=</span> <span class="n">fitfunc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc_has_xerr</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;x_err&#39;</span> <span class="ow">in</span> <span class="n">getargspec</span><span class="p">(</span><span class="n">fitfunc</span><span class="p">)</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunc_has_xerr</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># override this if model adds more parameters than just</span>
+        <span class="c1"># self._parameters</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2017, Andrew Nelson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

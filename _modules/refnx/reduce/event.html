@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.event &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.reduce.event &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,25 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -45,76 +47,127 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Unpack event files</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="n">HAVE_CEVENTS</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">HAVE_CEVENTS</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">refnx.reduce._cevent</span> <span class="kn">import</span> <span class="n">_cevents</span>
-    <span class="n">HAVE_CEVENTS</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="kn">from</span> <span class="nn">refnx.reduce._cevent</span> <span class="k">import</span> <span class="n">_cevents</span>
+    <span class="n">HAVE_CEVENTS</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="process_event_stream"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.event.process_event_stream">[docs]</a><span class="k">def</span> <span class="nf">process_event_stream</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">frame_bins</span><span class="p">,</span> <span class="n">t_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">):</span>
+<div class="viewcode-block" id="process_event_stream"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.event.process_event_stream">[docs]</a><span class="k">def</span> <span class="nf">process_event_stream</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">t_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Processes the event mode dataset into a histogram.</span>
+<span class="sd">    Processes the event mode dataset into a histogrammed detector image.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    events : tuple(np.ndarray, np.ndarray, np.ndarray, np.ndarray)</span>
 <span class="sd">        the 4-tuple of events (F, T, Y, X)</span>
-<span class="sd">    frame_bins : array_like</span>
-<span class="sd">        specifies the frame bins required in the image.</span>
+<span class="sd">    frames : sequence of array-like</span>
+<span class="sd">        each array in the sequence specifies which frames should be included</span>
 <span class="sd">    t_bins : array_like</span>
 <span class="sd">        specifies the time bins required in the image</span>
 <span class="sd">    y_bins : array_like</span>
 <span class="sd">        specifies the y bins required in the image</span>
 <span class="sd">    x_bins : array_like</span>
 <span class="sd">        specifies the x bins required in the image</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    detector, frame_bins : np.ndarray, np.ndarray</span>
-<span class="sd">        The new detector image and the amended frame bins.</span>
+<span class="sd">    detector, frame_count : np.ndarray, np.ndarray</span>
+<span class="sd">        The new detector images and the number of frames within each image.</span>
+<span class="sd">        `detector` has shape</span>
+<span class="sd">        `(len(frames), len(t_bins) - 1, len(y_bins) - 1, len(x_bins) - 1)`.</span>
+<span class="sd">        `frame_count` says how many frames went into making each frame in the</span>
+<span class="sd">        detector image</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    The frame bins that are supplied to this function are truncated to 0 and</span>
-<span class="sd">    the maximum frame bin in the events. Thus, if</span>
-<span class="sd">    frame_bins = [-20, -10, 5, 10, 20, 30] and the maximum frame bin is 25 then</span>
-<span class="sd">    the amended frame_bins is calculated as [0, 5, 10, 20, 25], i.e. 4 bins are</span>
-<span class="sd">    returned instead of 5.</span>
+<span class="sd">    Every entry in `frames` is clipped to 0 and the maximum frame number in the</span>
+<span class="sd">    events. Thus, if</span>
+<span class="sd">    frames = [[-2, -1, 0, 1, 2, 3]], and the maximum frame number is 2, then</span>
+<span class="sd">    only the 0, 1, 2 frames are included.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">max_frame</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">frame_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">)</span>
 
-    <span class="c1"># truncate the limits of frame bins</span>
-    <span class="n">frame_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_frame</span><span class="p">))</span>
+    <span class="n">t_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
     <span class="n">localxbins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_bins</span><span class="p">)</span>
     <span class="n">localybins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_bins</span><span class="p">)</span>
     <span class="n">localtbins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t_bins</span><span class="p">))</span>
-    <span class="n">localframe_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">)</span>
-    <span class="n">reversed_x</span><span class="p">,</span> <span class="n">reversed_y</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span>
+    <span class="n">reversed_x</span><span class="p">,</span> <span class="n">reversed_y</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">localxbins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">localxbins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">localxbins</span> <span class="o">=</span> <span class="n">localxbins</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">reversed_x</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">reversed_x</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">localybins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">localybins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">localybins</span> <span class="o">=</span> <span class="n">localybins</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">reversed_y</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">reversed_y</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">detector</span><span class="p">,</span> <span class="n">edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogramdd</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">(</span><span class="n">localframe_bins</span><span class="p">,</span>
-                                                  <span class="n">localtbins</span><span class="p">,</span>
-                                                  <span class="n">localybins</span><span class="p">,</span>
-                                                  <span class="n">localxbins</span><span class="p">))</span>
+    <span class="c1"># create an (N, T, Y, X) detector image</span>
+    <span class="n">detector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">),</span>
+                         <span class="nb">len</span><span class="p">(</span><span class="n">t_bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                         <span class="nb">len</span><span class="p">(</span><span class="n">y_bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                         <span class="nb">len</span><span class="p">(</span><span class="n">x_bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">frame_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">frame</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
+        <span class="n">frame_numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frame</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_frame</span><span class="p">))</span>
+        <span class="n">frame_count</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_numbers</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="n">frames_with_events</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">frame_numbers</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">t_events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">frame_numbers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="c1"># special case for all contiguous frames</span>
+            <span class="c1"># this is required otherwise &quot;normal timeslicing&quot;</span>
+            <span class="c1"># takes forever</span>
+            <span class="c1"># find first frame</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">min</span><span class="p">(</span><span class="n">frames_with_events</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">frames_with_events</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># not contiguous frames</span>
+            <span class="c1"># filter out the frames for which we have neutrons</span>
+            <span class="n">frame_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">frames_with_events</span><span class="p">)</span>
+            <span class="n">frame_numbers</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="c1"># get the frame indexes</span>
+            <span class="n">idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">frame_numbers</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">idxs</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span>
+
+        <span class="n">filtered_events</span> <span class="o">=</span> <span class="n">t_events</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span>
+
+        <span class="n">detector</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogramdd</span><span class="p">(</span><span class="n">filtered_events</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span>
+                                           <span class="n">bins</span><span class="o">=</span><span class="p">(</span><span class="n">localtbins</span><span class="p">,</span>
+                                                 <span class="n">localybins</span><span class="p">,</span>
+                                                 <span class="n">localxbins</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">reversed_x</span><span class="p">:</span>
         <span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">reversed_y</span><span class="p">:</span>
         <span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
 
-    <span class="k">return</span> <span class="n">detector</span><span class="p">,</span> <span class="n">localframe_bins</span></div>
+    <span class="k">return</span> <span class="n">detector</span><span class="p">,</span> <span class="n">frame_count</span></div>
+
+
+<div class="viewcode-block" id="framebins_to_frames"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.event.framebins_to_frames">[docs]</a><span class="k">def</span> <span class="nf">framebins_to_frames</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">frame_bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">t_frame_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frame_bins</span><span class="p">)</span>
+
+    <span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t_frame_bins</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">t_frame_bins</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                <span class="n">t_frame_bins</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">frames</span></div>
 
 
 <div class="viewcode-block" id="events"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.event.events">[docs]</a><span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">end_last_event</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="n">max_frames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
@@ -147,17 +200,17 @@
                         <span class="n">max_frames</span><span class="o">=</span><span class="n">max_frames</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_events</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">end_last_event</span><span class="o">=</span><span class="n">end_last_event</span><span class="p">,</span>
-                        <span class="n">max_frames</span><span class="o">=</span><span class="n">max_frames</span><span class="p">)</span></div>
+                       <span class="n">max_frames</span><span class="o">=</span><span class="n">max_frames</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_events</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">end_last_event</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="n">max_frames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unpacks event data from packedbinary format for the ANSTO Platypus</span>
 <span class="sd">    instrument</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    </span>
+
 <span class="sd">    f : file-like or str</span>
 <span class="sd">        The file to read the data from. If `f` is not file-like then f is</span>
 <span class="sd">        assumed to be a path pointing to the event file.</span>
@@ -166,7 +219,7 @@
 <span class="sd">        of 127 corresponds to a file header that is 128 bytes long.</span>
 <span class="sd">    max_frames : int</span>
 <span class="sd">        Stop reading the event file when have read this many frames.</span>
-<span class="sd">        </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    (f_events, t_events, y_events, x_events), end_last_event:</span>
@@ -176,7 +229,7 @@
 <span class="sd">        events from the same file at a future date.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fi</span> <span class="o">=</span> <span class="n">f</span>
-    <span class="n">auto_f</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">auto_f</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fi</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">):</span>
         <span class="n">auto_f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
         <span class="n">fi</span> <span class="o">=</span> <span class="n">auto_f</span>
@@ -194,7 +247,7 @@
 
     <span class="n">bufsize</span> <span class="o">=</span> <span class="mi">32768</span>
 
-    <span class="k">while</span> <span class="bp">True</span> <span class="ow">and</span> <span class="n">frame_number</span> <span class="o">&lt;</span> <span class="n">max_frames</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">frame_number</span> <span class="o">&lt;</span> <span class="n">max_frames</span><span class="p">:</span>
         <span class="n">x_neutrons</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">y_neutrons</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">t_neutrons</span> <span class="o">=</span> <span class="p">[]</span>
@@ -240,7 +293,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">event_ended</span><span class="p">:</span>
                     <span class="n">state</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># print &quot;got to state&quot;, state, event_ended, x, y, frame_number, t, dt</span>
+                    <span class="c1"># &quot;state&quot;, state, event_ended, x, y, frame_number, t, dt</span>
                     <span class="n">state</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="n">end_last_event</span> <span class="o">=</span> <span class="n">filepos</span> <span class="o">+</span> <span class="n">i</span>
                     <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">dt</span> <span class="o">==</span> <span class="mh">0xFFFFFFFF</span><span class="p">:</span>
@@ -251,18 +304,18 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span>
                         <span class="k">if</span> <span class="n">frame_number</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                            <span class="k">return</span> <span class="bp">None</span>
+                            <span class="k">return</span> <span class="kc">None</span>
                         <span class="n">x_neutrons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
                         <span class="n">y_neutrons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
                         <span class="n">t_neutrons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
                         <span class="n">f_neutrons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame_number</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_neutrons</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x_neutrons</span><span class="p">:</span>
             <span class="n">x_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_events</span><span class="p">,</span> <span class="n">x_neutrons</span><span class="p">)</span>
             <span class="n">y_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_events</span><span class="p">,</span> <span class="n">y_neutrons</span><span class="p">)</span>
             <span class="n">t_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t_events</span><span class="p">,</span> <span class="n">t_neutrons</span><span class="p">)</span>
             <span class="n">f_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_events</span><span class="p">,</span> <span class="n">f_neutrons</span><span class="p">)</span>
-    
+
     <span class="n">t_events</span> <span class="o">//=</span> <span class="mi">1000</span>
 
     <span class="k">if</span> <span class="n">auto_f</span><span class="p">:</span>
@@ -287,8 +340,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -299,11 +352,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
 

@@ -1,12 +1,12 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>refnx.reduce.xray &mdash; refnx 0.0.5.dev0+ad01c85 documentation</title>
+    <title>refnx.reduce.xray &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,25 +14,27 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.0.5.dev0+ad01c85',
+        VERSION:     '0.0.13.dev0+8d6438f',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="refnx 0.0.5.dev0+ad01c85 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -41,18 +43,18 @@
           <div class="body" role="main">
             
   <h1>Source code for refnx.reduce.xray</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">refnx.util.general</span> <span class="kn">as</span> <span class="nn">general</span>
-<span class="kn">import</span> <span class="nn">refnx.util.ErrorProp</span> <span class="kn">as</span> <span class="nn">EP</span>
-<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">as</span> <span class="nn">et</span>
-<span class="kn">from</span> <span class="nn">refnx.dataset</span> <span class="kn">import</span> <span class="n">reflectdataset</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">refnx.util.general</span> <span class="k">as</span> <span class="nn">general</span>
+<span class="kn">import</span> <span class="nn">refnx.util.ErrorProp</span> <span class="k">as</span> <span class="nn">EP</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">et</span>
+<span class="c1"># from refnx.dataset import reflectdataset</span>
+
+<span class="c1"># mm</span>
+<span class="n">XRR_BEAMWIDTH_SD</span> <span class="o">=</span> <span class="mf">0.019449</span>
 
 
-<span class="n">XRR_BEAMWIDTH_SD</span> <span class="o">=</span> <span class="mf">0.019449</span> <span class="c1"># mm</span>
-
-
-<div class="viewcode-block" id="reduce_xrdml"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.xray.reduce_xrdml">[docs]</a><span class="k">def</span> <span class="nf">reduce_xrdml</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sample_length</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="reduce_xrdml"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.xray.reduce_xrdml">[docs]</a><span class="k">def</span> <span class="nf">reduce_xrdml</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sample_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduces a Panalytical XRDML file</span>
 
@@ -83,7 +85,7 @@
     <span class="n">reflectivity_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">reflectivity</span><span class="p">)</span> <span class="o">/</span> <span class="n">spec</span><span class="p">[</span><span class="s1">&#39;count_time&#39;</span><span class="p">]</span>
 
     <span class="c1"># do the background subtraction</span>
-    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">bkgds</span> <span class="o">=</span> <span class="p">[</span><span class="n">parse_xrdml_file</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span> <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">bkg</span><span class="p">]</span>
 
         <span class="n">bkgd_refs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[[</span><span class="n">bkgd</span><span class="p">[</span><span class="s1">&#39;intensities&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">bkgd</span> <span class="ow">in</span> <span class="n">bkgds</span><span class="p">]]</span>
@@ -109,8 +111,9 @@
                             <span class="n">spec</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">])</span>
 
     <span class="c1"># do a footprint correction</span>
-    <span class="k">if</span> <span class="n">sample_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">footprint_correction</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">beamfrac</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">XRR_BEAMWIDTH_SD</span><span class="p">])</span> <span class="o">*</span> <span class="mf">2.35</span><span class="p">,</span>
+    <span class="k">if</span> <span class="n">sample_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">footprint_correction</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">beamfrac</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">XRR_BEAMWIDTH_SD</span><span class="p">])</span> <span class="o">*</span>
+                                                <span class="mf">2.35</span><span class="p">,</span>
                                                 <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sample_length</span><span class="p">]),</span>
                                                 <span class="n">spec</span><span class="p">[</span><span class="s1">&#39;omega&#39;</span><span class="p">])</span>
         <span class="n">reflectivity</span> <span class="o">/=</span> <span class="n">footprint_correction</span>
@@ -191,6 +194,80 @@
     <span class="n">d</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavelength</span>
 
     <span class="k">return</span> <span class="n">d</span></div>
+
+
+<div class="viewcode-block" id="process_offspec"><a class="viewcode-back" href="../../../refnx.reduce.html#refnx.reduce.xray.process_offspec">[docs]</a><span class="k">def</span> <span class="nf">process_offspec</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process a 2D XRDML file and return qy, qz, intensity, dintensity</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f: str or file-like</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    qy, qz, intensity, dintensity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">et</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+    <span class="n">ns</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xrdml&#39;</span><span class="p">:</span> <span class="s1">&#39;http://www.xrdml.com/XRDMeasurement/1.0&#39;</span><span class="p">}</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;intensities&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:intensities&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;twotheta_start&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:positions[@axis=</span><span class="se">\&#39;</span><span class="s1">2Theta</span><span class="se">\&#39;</span><span class="s1">]&#39;</span>
+                               <span class="s1">&#39;/xrdml:startPosition&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;twotheta_end&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:positions[@axis=</span><span class="se">\&#39;</span><span class="s1">2Theta</span><span class="se">\&#39;</span><span class="s1">]&#39;</span>
+                             <span class="s1">&#39;/xrdml:endPosition&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;omega_start&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:positions[@axis=</span><span class="se">\&#39;</span><span class="s1">Omega</span><span class="se">\&#39;</span><span class="s1">]&#39;</span>
+                            <span class="s1">&#39;/xrdml:startPosition&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;omega_end&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:positions[@axis=</span><span class="se">\&#39;</span><span class="s1">Omega</span><span class="se">\&#39;</span><span class="s1">]&#39;</span>
+                          <span class="s1">&#39;/xrdml:endPosition&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;cnt_time&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:commonCountingTime&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;kAlpha1&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:kAlpha1&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;kAlpha2&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:kAlpha2&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;ratio&#39;</span><span class="p">:</span> <span class="s1">&#39;.//xrdml:ratioKAlpha2KAlpha1&#39;</span><span class="p">}</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="n">kAlpha1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;kAlpha1&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">kAlpha2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;kAlpha2&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ratio&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">wavelength</span> <span class="o">=</span> <span class="p">(</span><span class="n">kAlpha1</span> <span class="o">+</span> <span class="n">ratio</span> <span class="o">*</span> <span class="n">kAlpha2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">ratio</span><span class="p">)</span>
+
+    <span class="n">intensity</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ints</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span>
+                 <span class="n">ints</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;intensities&#39;</span><span class="p">]]</span>
+    <span class="n">twotheta_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ints</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span>
+                                <span class="n">ints</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;twotheta_start&#39;</span><span class="p">]])</span>
+    <span class="n">twotheta_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ints</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span>
+                              <span class="n">ints</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;twotheta_end&#39;</span><span class="p">]])</span>
+    <span class="n">omega_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ints</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span>
+                             <span class="n">ints</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;omega_start&#39;</span><span class="p">]])</span>
+    <span class="n">omega_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ints</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span>
+                           <span class="n">ints</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;omega_end&#39;</span><span class="p">]])</span>
+    <span class="n">cnt_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ints</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span>
+                         <span class="n">ints</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;cnt_time&#39;</span><span class="p">]])</span>
+
+    <span class="n">intensity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">intensity</span><span class="p">)</span>
+    <span class="n">dintensity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">intensity</span><span class="p">)</span> <span class="o">/</span> <span class="n">cnt_time</span>
+    <span class="n">intensity</span> <span class="o">/=</span> <span class="n">cnt_time</span>
+
+    <span class="n">omegas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">two_thetas</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intensity</span><span class="p">)):</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">omega_starts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                            <span class="n">omega_ends</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">intensity</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">omegas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="n">two_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">twotheta_starts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                <span class="n">twotheta_ends</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">intensity</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">two_thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">two_theta</span><span class="p">)</span>
+
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">omegas</span><span class="p">)</span>
+    <span class="n">twotheta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">two_thetas</span><span class="p">)</span>
+    <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">general</span><span class="o">.</span><span class="n">q2</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">twotheta</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span><span class="p">,</span> <span class="n">intensity</span><span class="p">,</span> <span class="n">dintensity</span></div>
 </pre></div>
 
           </div>
@@ -209,8 +286,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -221,11 +298,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Andrew Nelson.
+      &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
 
