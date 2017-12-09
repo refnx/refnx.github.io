@@ -5,16 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>refnx.analysis package &#8212; refnx 0.0.13.dev0+8d6438f documentation</title>
-    
+    <title>refnx.analysis package &#8212; refnx 0.0.13.dev0+ documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.13.dev0+8d6438f',
+        VERSION:     '0.0.13.dev0+',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -117,7 +114,7 @@ are ignored here. Specification of parallel threading is done with the
 
 <dl class="method">
 <dt id="refnx.analysis.curvefitter.CurveFitter.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>method=’L-BFGS-B’</em>, <em>**kws</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.fit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fit</code><span class="sig-paren">(</span><em>method='L-BFGS-B'</em>, <em>**kws</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtain the maximum log-likelihood estimate (mode) of the objective. For
 a least-squares objective this would correspond to lowest chi2.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -161,7 +158,7 @@ on the fit parameter.</p>
 
 <dl class="method">
 <dt id="refnx.analysis.curvefitter.CurveFitter.initialise">
-<code class="descname">initialise</code><span class="sig-paren">(</span><em>pos=’covar’</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.initialise" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>pos='covar'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.curvefitter.CurveFitter.initialise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialise the emcee walkers.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -611,7 +608,7 @@ log-likelihood probabilities. Does not set the parameter attribute.</p>
 
 <dl class="class">
 <dt id="refnx.analysis.objective.Objective">
-<em class="property">class </em><code class="descclassname">refnx.analysis.objective.</code><code class="descname">Objective</code><span class="sig-paren">(</span><em>model</em>, <em>data</em>, <em>lnsigma=0</em>, <em>use_weights=True</em>, <em>transform=None</em>, <em>lnprob_extra=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/objective.html#Objective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.objective.Objective" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.analysis.objective.</code><code class="descname">Objective</code><span class="sig-paren">(</span><em>model</em>, <em>data</em>, <em>lnsigma=None</em>, <em>use_weights=True</em>, <em>transform=None</em>, <em>lnprob_extra=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/objective.html#Objective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.objective.Objective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refnx.analysis.objective.BaseObjective" title="refnx.analysis.objective.BaseObjective"><code class="xref py py-class docutils literal"><span class="pre">refnx.analysis.objective.BaseObjective</span></code></a></p>
 <p>Objective function for using with curvefitters such as
 <cite>refnx.analysis.curvefitter.CurveFitter</cite>.</p>
@@ -623,9 +620,12 @@ log-likelihood probabilities. Does not set the parameter attribute.</p>
 <li><strong>model</strong> (<a class="reference internal" href="#refnx.analysis.Model" title="refnx.analysis.Model"><em>refnx.analysis.Model</em></a>) – the generative model function. One can also provide an object that
 inherits <cite>refnx.analysis.Model</cite>.</li>
 <li><strong>data</strong> (<a class="reference internal" href="refnx.dataset.html#refnx.dataset.Data1D" title="refnx.dataset.Data1D"><em>refnx.dataset.Data1D</em></a>) – data to be analysed.</li>
-<li><strong>lnsigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em> or </em><a class="reference internal" href="#refnx.analysis.Parameter" title="refnx.analysis.Parameter"><em>refnx.analysis.Parameter</em></a><em>, </em><em>optional</em>) – the experimental uncertainty (<cite>data.y_err</cite>) is multiplied by
-<cite>exp(lnsigma)</cite>. Used when the experimental uncertainty is
-underestimated.</li>
+<li><strong>lnsigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em> or </em><a class="reference internal" href="#refnx.analysis.Parameter" title="refnx.analysis.Parameter"><em>refnx.analysis.Parameter</em></a><em>, </em><em>optional</em>) – <p>Used if the  experimental uncertainty (<cite>data.y_err</cite>) underestimated by
+a constant fractional amount. The experimental uncertainty is modified
+as:</p>
+<p><cite>s_n**2 = y_err**2 + exp(lnsigma * 2) * model**2</cite></p>
+<p>See <cite>Objective.lnlike</cite> for more details.</p>
+</li>
 <li><strong>use_weights</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – use experimental uncertainty in calculation of residuals and
 lnlike, if available. If this is set to False, then you should also
 set <cite>self.lnsigma.vary = False</cite>, it will have no effect on the fit.</li>
@@ -718,7 +718,11 @@ the model.</p>
 </table>
 <p class="rubric">Notes</p>
 <p>The log-likelihood is calculated as:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">lnlike</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span> <span class="o">/</span> <span class="n">y_err</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">lnlike</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span> <span class="o">/</span> <span class="n">s_n</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">s_n</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>where</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">s_n</span><span class="o">**</span><span class="mi">2</span> <span class="o">=</span> <span class="n">y_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lnsigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">**</span><span class="mi">2</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1245,7 +1249,7 @@ method of this object).</p>
 
 <dl class="function">
 <dt id="refnx.analysis.parameter.possibly_create_parameter">
-<code class="descclassname">refnx.analysis.parameter.</code><code class="descname">possibly_create_parameter</code><span class="sig-paren">(</span><em>value</em>, <em>name=”</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/parameter.html#possibly_create_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.parameter.possibly_create_parameter" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">refnx.analysis.parameter.</code><code class="descname">possibly_create_parameter</code><span class="sig-paren">(</span><em>value</em>, <em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/parameter.html#possibly_create_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.parameter.possibly_create_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>If supplied with a Parameter return it. If supplied with float, wrap it in
 a Parameter instance.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1608,7 +1612,7 @@ are ignored here. Specification of parallel threading is done with the
 
 <dl class="method">
 <dt id="refnx.analysis.CurveFitter.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>method=’L-BFGS-B’</em>, <em>**kws</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.fit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fit</code><span class="sig-paren">(</span><em>method='L-BFGS-B'</em>, <em>**kws</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtain the maximum log-likelihood estimate (mode) of the objective. For
 a least-squares objective this would correspond to lowest chi2.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1652,7 +1656,7 @@ on the fit parameter.</p>
 
 <dl class="method">
 <dt id="refnx.analysis.CurveFitter.initialise">
-<code class="descname">initialise</code><span class="sig-paren">(</span><em>pos=’covar’</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.initialise" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>pos='covar'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/curvefitter.html#CurveFitter.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.CurveFitter.initialise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialise the emcee walkers.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2018,7 +2022,7 @@ method of this object).</p>
 
 <dl class="class">
 <dt id="refnx.analysis.Objective">
-<em class="property">class </em><code class="descclassname">refnx.analysis.</code><code class="descname">Objective</code><span class="sig-paren">(</span><em>model</em>, <em>data</em>, <em>lnsigma=0</em>, <em>use_weights=True</em>, <em>transform=None</em>, <em>lnprob_extra=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/objective.html#Objective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Objective" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">refnx.analysis.</code><code class="descname">Objective</code><span class="sig-paren">(</span><em>model</em>, <em>data</em>, <em>lnsigma=None</em>, <em>use_weights=True</em>, <em>transform=None</em>, <em>lnprob_extra=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/objective.html#Objective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.Objective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refnx.analysis.objective.BaseObjective" title="refnx.analysis.objective.BaseObjective"><code class="xref py py-class docutils literal"><span class="pre">refnx.analysis.objective.BaseObjective</span></code></a></p>
 <p>Objective function for using with curvefitters such as
 <cite>refnx.analysis.curvefitter.CurveFitter</cite>.</p>
@@ -2030,9 +2034,12 @@ method of this object).</p>
 <li><strong>model</strong> (<a class="reference internal" href="#refnx.analysis.Model" title="refnx.analysis.Model"><em>refnx.analysis.Model</em></a>) – the generative model function. One can also provide an object that
 inherits <cite>refnx.analysis.Model</cite>.</li>
 <li><strong>data</strong> (<a class="reference internal" href="refnx.dataset.html#refnx.dataset.Data1D" title="refnx.dataset.Data1D"><em>refnx.dataset.Data1D</em></a>) – data to be analysed.</li>
-<li><strong>lnsigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em> or </em><a class="reference internal" href="#refnx.analysis.Parameter" title="refnx.analysis.Parameter"><em>refnx.analysis.Parameter</em></a><em>, </em><em>optional</em>) – the experimental uncertainty (<cite>data.y_err</cite>) is multiplied by
-<cite>exp(lnsigma)</cite>. Used when the experimental uncertainty is
-underestimated.</li>
+<li><strong>lnsigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em> or </em><a class="reference internal" href="#refnx.analysis.Parameter" title="refnx.analysis.Parameter"><em>refnx.analysis.Parameter</em></a><em>, </em><em>optional</em>) – <p>Used if the  experimental uncertainty (<cite>data.y_err</cite>) underestimated by
+a constant fractional amount. The experimental uncertainty is modified
+as:</p>
+<p><cite>s_n**2 = y_err**2 + exp(lnsigma * 2) * model**2</cite></p>
+<p>See <cite>Objective.lnlike</cite> for more details.</p>
+</li>
 <li><strong>use_weights</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – use experimental uncertainty in calculation of residuals and
 lnlike, if available. If this is set to False, then you should also
 set <cite>self.lnsigma.vary = False</cite>, it will have no effect on the fit.</li>
@@ -2125,7 +2132,11 @@ the model.</p>
 </table>
 <p class="rubric">Notes</p>
 <p>The log-likelihood is calculated as:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">lnlike</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span> <span class="o">/</span> <span class="n">y_err</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">lnlike</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span> <span class="o">/</span> <span class="n">s_n</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">s_n</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>where</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">s_n</span><span class="o">**</span><span class="mi">2</span> <span class="o">=</span> <span class="n">y_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lnsigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">**</span><span class="mi">2</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -2563,7 +2574,7 @@ object.</p>
 
 <dl class="function">
 <dt id="refnx.analysis.possibly_create_parameter">
-<code class="descclassname">refnx.analysis.</code><code class="descname">possibly_create_parameter</code><span class="sig-paren">(</span><em>value</em>, <em>name=”</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/parameter.html#possibly_create_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.possibly_create_parameter" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">refnx.analysis.</code><code class="descname">possibly_create_parameter</code><span class="sig-paren">(</span><em>value</em>, <em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/refnx/analysis/parameter.html#possibly_create_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#refnx.analysis.possibly_create_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>If supplied with a Parameter return it. If supplied with float, wrap it in
 a Parameter instance.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -2681,7 +2692,7 @@ This function has the effect of setting the parameter stderr’s.</p>
       &copy;2015-2017, Andrew Nelson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
